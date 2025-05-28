@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
+import { ThemeProvider } from '@/components/theme/theme-provider';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -27,12 +28,19 @@ export default function RootLayout({
         "min-h-screen font-sans antialiased",
         inter.variable
       )}>
-        <div className="relative flex min-h-screen flex-col bg-background">
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
-        <Toaster />
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+        >
+          <div className="relative flex min-h-screen flex-col bg-background">
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
