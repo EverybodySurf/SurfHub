@@ -20,7 +20,7 @@ body {
     --secondary-foreground: 210 40% 15%;
     --muted: 207 60% 92%; /* Very light blue */
     --muted-foreground: 207 40% 45%;
-    --accent: oklch(66.14% 0.21 353.77); /* Vibrant Pink-500 like */
+    --accent: oklch(66% 0.21 354); /* Pink-500 */
     --accent-foreground: oklch(100% 0 0); /* White */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
@@ -39,7 +39,7 @@ body {
     --sidebar-foreground: 210 40% 15%;
     --sidebar-primary: 207 89% 68%; /* Same as main primary */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: oklch(66.14% 0.21 353.77); /* Vibrant Pink-500 like */
+    --sidebar-accent: oklch(66% 0.21 354); /* Pink-500 */
     --sidebar-accent-foreground: oklch(100% 0 0); /* White */
     --sidebar-border: 207 50% 75%; /* Slightly darker border for sidebar */
     --sidebar-ring: 207 89% 68%;
@@ -58,7 +58,7 @@ body {
     --secondary-foreground: 207 82% 90%;
     --muted: 210 20% 20%; /* Very dark blue */
     --muted-foreground: 207 50% 65%;
-    --accent: oklch(70% 0.22 353.77); /* Vibrant Pink-500 like for dark mode */
+    --accent: oklch(66% 0.21 354); /* Pink-500 */
     --accent-foreground: oklch(100% 0 0); /* White */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
@@ -76,7 +76,7 @@ body {
     --sidebar-foreground: 207 82% 90%;
     --sidebar-primary: 207 80% 65%;
     --sidebar-primary-foreground: 210 100% 10%;
-    --sidebar-accent: oklch(70% 0.22 353.77); /* Vibrant Pink-500 like for dark mode */
+    --sidebar-accent: oklch(66% 0.21 354); /* Pink-500 */
     --sidebar-accent-foreground: oklch(100% 0 0); /* White */
     --sidebar-border: 210 20% 35%;
     --sidebar-ring: 207 80% 65%;
