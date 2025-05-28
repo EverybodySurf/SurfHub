@@ -1,5 +1,2 @@
-# Firebase Studio
+A community hangout/hub/lab and directory with swell and surf forcasting tools baked in.
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
