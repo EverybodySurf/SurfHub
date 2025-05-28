@@ -14,14 +14,14 @@ body {
     --card-foreground: 210 40% 15%;
     --popover: 207 82% 97%;
     --popover-foreground: 210 40% 15%;
-    --primary: 207 89% 68%; /* Ocean Blue */
+    --primary: 328.6 85.5% 70.2%; /* Pink-400 */
     --primary-foreground: 0 0% 100%; /* White */
     --secondary: 207 70% 88%; /* Lighter blue for secondary elements */
     --secondary-foreground: 210 40% 15%;
     --muted: 207 60% 92%; /* Very light blue */
     --muted-foreground: 207 40% 45%;
-    --accent: oklch(66% 0.21 354); /* Pink-500 */
-    --accent-foreground: oklch(100% 0 0); /* White */
+    --accent: 207 89% 68%; /* Ocean Blue */
+    --accent-foreground: 0 0% 100%; /* White */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 207 50% 80%; /* Softer blue border */
@@ -37,10 +37,10 @@ body {
     /* Sidebar variables adapted to the new theme */
     --sidebar-background: 207 80% 92%; /* Slightly darker than main bg */
     --sidebar-foreground: 210 40% 15%;
-    --sidebar-primary: 207 89% 68%; /* Same as main primary */
+    --sidebar-primary: 328.6 85.5% 70.2%; /* Same as main primary */
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: oklch(66% 0.21 354); /* Pink-500 */
-    --sidebar-accent-foreground: oklch(100% 0 0); /* White */
+    --sidebar-accent: 207 89% 68%; /* Ocean Blue */
+    --sidebar-accent-foreground: 0 0% 100%; /* White */
     --sidebar-border: 207 50% 75%; /* Slightly darker border for sidebar */
     --sidebar-ring: 207 89% 68%;
   }
@@ -52,14 +52,14 @@ body {
     --card-foreground: 207 82% 90%;
     --popover: 210 25% 15%;
     --popover-foreground: 207 82% 90%;
-    --primary: 207 80% 65%; /* Ocean Blue - slightly adjusted for dark */
+    --primary: 328.6 85.5% 70.2%; /* Pink-400 */
     --primary-foreground: 210 100% 10%; /* Very dark blue for contrast */
     --secondary: 210 20% 25%; /* Darker blue for secondary elements */
     --secondary-foreground: 207 82% 90%;
     --muted: 210 20% 20%; /* Very dark blue */
     --muted-foreground: 207 50% 65%;
-    --accent: oklch(66% 0.21 354); /* Pink-500 */
-    --accent-foreground: oklch(100% 0 0); /* White */
+    --accent: 207 89% 68%; /* Ocean Blue */
+    --accent-foreground: 0 0% 100%; /* White */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 210 20% 30%; /* Darker border */
@@ -74,10 +74,10 @@ body {
     /* Dark Sidebar variables adapted to the new theme */
     --sidebar-background: 210 25% 18%; /* Slightly lighter than main dark bg */
     --sidebar-foreground: 207 82% 90%;
-    --sidebar-primary: 207 80% 65%;
+    --sidebar-primary: 328.6 85.5% 70.2%; /* pink-400 */
     --sidebar-primary-foreground: 210 100% 10%;
-    --sidebar-accent: oklch(66% 0.21 354); /* Pink-500 */
-    --sidebar-accent-foreground: oklch(100% 0 0); /* White */
+    --sidebar-accent: 207 89% 68%; /* Ocean Blue */
+    --sidebar-accent-foreground: 0 0% 100%; /* White */
     --sidebar-border: 210 20% 35%;
     --sidebar-ring: 207 80% 65%;
   }

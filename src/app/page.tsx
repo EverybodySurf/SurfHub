@@ -49,7 +49,7 @@ export default function HomePage() {
             Your ultimate companion for swell forecasts, surf spot discovery, and connecting with the surfing community. Catch the perfect wave, every time.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
-            <Button asChild size="lg">
+            <Button asChild className="bg-primary" size="lg">
               <Link href="/swell-forecaster">
                 Get Forecast <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
