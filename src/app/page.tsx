@@ -39,7 +39,7 @@ export default function HomePage() {
   return (
     <div className="flex flex-col items-center">
       {/* Hero Section */}
-      <section className="w-full py-20 md:py-32 bg-gradient-to-b from-primary/10 via-background to-background">
+      <section className="w-full py-20 md:py-32 bg-gradient-to-t from-primary/30 via-background to-background">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <Waves className="mx-auto h-16 w-16 text-primary mb-6" />
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-foreground">
@@ -69,8 +69,8 @@ export default function HomePage() {
           </h2>
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
-              <Card key={feature.title} className="flex flex-col overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <div className="relative h-56 w-full">
+              <Card key={feature.title} className="flex flex-col overflow-hidden shadow-lg hover:shadow-lg hover:shadow-green-300 transition-shadow duration-300">
+           {/*  <div className="relative h-56 w-full">
                   <Image
                     src={feature.imgSrc}
                     alt={feature.imgAlt}
@@ -78,7 +78,7 @@ export default function HomePage() {
                     className="object-cover"
                     data-ai-hint={feature.aiHint}
                   />
-                </div>
+                </div>  */}
                 <CardHeader>
                   <div className="flex items-center mb-2">
                     <feature.icon className="h-8 w-8 text-primary mr-3" />
@@ -100,7 +100,7 @@ export default function HomePage() {
       </section>
 
       {/* Community & Marketplace Teaser */}
-      <section className="w-full py-16 md:py-24 bg-secondary/50">
+      <section className="w-full py-16 md:py-24 bg-backgound">
         <div className="container mx-auto px-4 md:px-6">
           <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
             <div className="text-center md:text-left">
@@ -109,7 +109,7 @@ export default function HomePage() {
               <p className="text-muted-foreground mb-4">
                 Share tips, report conditions, and connect with fellow surfers in our vibrant forum.
               </p>
-              <Button asChild>
+              <Button asChild variant="outline" className="border-none">
                 <Link href="/forum">Visit Forum</Link>
               </Button>
             </div>
@@ -119,7 +119,7 @@ export default function HomePage() {
               <p className="text-muted-foreground mb-4">
                 Buy, sell, and promote surf gear, lessons, and services within the community.
               </p>
-              <Button asChild>
+              <Button asChild variant="outline" className="border-none">
                 <Link href="/marketplace">Explore Marketplace</Link>
               </Button>
             </div>

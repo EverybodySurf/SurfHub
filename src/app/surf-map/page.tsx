@@ -20,7 +20,7 @@ export default function SurfMapPage() {
         </p>
       </div>
 
-      <div className="bg-muted rounded-lg p-8 text-center shadow-lg">
+      <div className="bg-secondary rounded-lg p-8 text-center shadow-lg">
         <div className="relative w-full h-96 mb-6 rounded-md overflow-hidden">
           <Image 
             src="https://placehold.co/1200x600.png" 

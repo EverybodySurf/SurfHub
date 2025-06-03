@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, AlertTriangle, MessageSquareText } from 'lucide-react';
 import { fetchSwellForecastAction } from '@/app/swell-forecaster/actions';
-import type { SwellForecastOutput } from '@/ai/flows/swell-forecast';
+import type { SwellForecastOutput, SwellForecastInput } from '@/ai/flows/swell-forecast'; // Ensure SwellForecastInput is imported
 
 const formSchema = z.object({
   surfSpot: z.string().min(2, { message: 'Surf spot must be at least 2 characters.' }),
@@ -33,7 +33,9 @@ export function SwellForecastClient() {
     setForecast(null);
 
     try {
-      const result = await fetchSwellForecastAction({ surfSpot: data.surfSpot });
+      // Pass the simplified input object with surfSpot and a placeholder date, typed correctly
+      const input: SwellForecastInput = { surfSpot: data.surfSpot, date: '2025-05-30' }; // Placeholder date
+      const result = await fetchSwellForecastAction(input);
       if (result.error) {
         setError(result.error);
       } else if (result.data) {
