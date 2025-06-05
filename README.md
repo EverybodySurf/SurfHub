@@ -2,19 +2,14 @@ A community hangout/hub/lab and directory with swell and surf forcasting tools b
 
 next update:👇
 
-To move forward, we can consider the following:
+see if we need to add data points to the const url in the getSwellForecast function.
 
-Revert to /forecast.json (Temporarily): We could temporarily revert the API endpoint back to /forecast.json to see if the AI model consistently returns the expected response structure with that data. This would help us isolate whether the issue is with the AI model's handling of marine data or something else.
+address the red umderlines in the aiOutput function under .output
 
-Examine Raw AI Response: If possible, we could log the raw output object received from the swellForecastPrompt call before the content check. This would allow us to examine the exact structure of the AI's response when it fails and understand why output.content is missing.
+&
+the swellForecastFlow function under async function and .content
 
-Review AI Model Configuration: If we have control over the AI model's configuration or prompting, we might need to adjust it to ensure it handles the marine data correctly and consistently returns the forecast in the specified JSON format.
-
-Given that we've confirmed the API endpoint change to /marine.json is likely the cause of the AI returning empty content, I suggest we temporarily revert to /forecast.json to see if the AI response issue is resolved. This will help us determine if the problem is specific to the marine data or a more general issue with the AI call or prompting.
-
-——————————
-
-continue debugging the swell forecast feature.run get swell forecast and see what it says.
+continue debugging the swell forecast feature. Run get swell forecast and see what it says.
 
 last sesh:👇
 

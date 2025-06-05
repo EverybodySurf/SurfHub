@@ -54,7 +54,7 @@ export default function HomePage() {
                 Get Forecast <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
-            <Button asChild variant="outline" size="lg">
+            <Button asChild variant="outlineGlow" size="lg">
               <Link href="/directory">Explore Spots</Link>
             </Button>
           </div>
@@ -109,7 +109,7 @@ export default function HomePage() {
               <p className="text-muted-foreground mb-4">
                 Share tips, report conditions, and connect with fellow surfers in our vibrant forum.
               </p>
-              <Button asChild variant="outline" className="border-none">
+              <Button asChild variant="outlineGlow">
                 <Link href="/forum">Visit Forum</Link>
               </Button>
             </div>
@@ -119,7 +119,7 @@ export default function HomePage() {
               <p className="text-muted-foreground mb-4">
                 Buy, sell, and promote surf gear, lessons, and services within the community.
               </p>
-              <Button asChild variant="outline" className="border-none">
+              <Button asChild variant="outlineGlow">
                 <Link href="/marketplace">Explore Marketplace</Link>
               </Button>
             </div>
