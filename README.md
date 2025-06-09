@@ -2,6 +2,8 @@ A community hangout/hub/lab and directory with swell and surf forcasting tools b
 
 +database todo:👇
 
+(try using github copilot to...) fix this bug we found while trying to deploy on Vercel: You cannot have two parallel pages that resolve to the same path. Please check /(auth)/confirm/page and /(auth)/confirm/route. Refer to the route group docs for more information: https://nextjs.org/docs/app/building-your-application/routing/route-groups
+
 add a private/dashboard page for users who are signed in.
 
 Now, you need to configure your Supabase project to redirect users to this new page (/auth/confirm-success) after they click the confirmation link in the email.
