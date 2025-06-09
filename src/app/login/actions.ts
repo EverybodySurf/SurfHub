@@ -28,8 +28,8 @@ export async function login(formData: FormData) {
 export async function socialLogin(provider: 'google' | 'github' | 'facebook' | 'apple') {
   const supabase = await createClient();
   let redirectToUrl = process.env.NEXT_PUBLIC_VERCEL_URL
-    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/auth/confirm`
-    : 'http://localhost:3000/auth/confirm';
+    ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/auth/confirm-prompt`
+    : 'http://localhost:3000/auth/confirm-prompt';
   
   let data, error;
 
@@ -84,5 +84,5 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/auth/confirm')
+  redirect('/auth/confirm-prompt')
 }
