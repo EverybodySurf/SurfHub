@@ -14,7 +14,9 @@ import {z} from 'zod';
 
 const SwellForecastInputSchema = z.object({ // This is the schema for the input received by the `getSwellForecast` function
  surfSpot: z.string().describe('The name of the surf spot to get the swell forecast for.'),//
-  water_temp_c: z.number().optional().describe('Water temperature in Celsius.'),
+ date: z.string().optional().describe('The date of the forecast (for single-day forecast).'),
+ startDate: z.string().optional().describe('Start date of the forecast range (for multi-day forecast).'),
+ endDate: z.string().optional().describe('End date of the forecast range (for multi-day forecast).'),
 });
 
 export type SwellForecastInput = z.infer<typeof SwellForecastInputSchema>;
@@ -94,14 +96,23 @@ const SwellForecastOutputSchema = z.object({
 });
 export type SwellForecastOutput = z.infer<typeof SwellForecastOutputSchema>;
 
-export async function getSwellForecast(input: { surfSpot: string; date: string }): Promise<SwellForecastOutput> {
- console.log('getSwellForecast function called with input:', input);
+export async function getSwellForecast(input: SwellForecastInput): Promise<SwellForecastOutput> {
+  console.log('getSwellForecast function called with input:', input);
   const API_KEY = process.env.WEATHER_API_DOTCOM_KEY;
   const BASE_URL = 'https://api.weatherapi.com/v1/marine.json';
 
-  const url = `${BASE_URL}?key=${API_KEY}&q=${input.surfSpot}&dt=${input.date}&days=1&aqi=no&alerts=no&tides=yes`;
- console.log('Fetching weather data from URL:', url);
   try {
+    let url = `${BASE_URL}?key=${API_KEY}&q=${input.surfSpot}&aqi=no&alerts=no&tides=yes`;
+
+    if (input.date) {
+      url += `&dt=${input.date}&days=1`;
+    } else if (input.startDate && input.endDate) {
+      url += `&dt=${input.startDate}&end_dt=${input.endDate}`;
+    } else {
+      throw new Error('Either date or startDate and endDate must be provided.');
+    }
+
+    console.log('Fetching weather data from URL:', url);
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -188,7 +199,7 @@ export async function getSwellForecast(input: { surfSpot: string; date: string }
 
     // Pass the extracted data to the flow for AI processing
     const aiOutput = await swellForecastFlow(extractedData);
-    return aiOutput.output; // Return the forecast summary and detailed data from the AI output
+    return aiOutput; // Return the forecast summary and detailed data from the AI output
 
   } catch (error) {
     console.error('Error fetching weather data:', error);
@@ -219,16 +230,20 @@ output your response as a JSON object with two keys: “forecastSummary” and �
 const swellForecastFlow = ai.defineFlow(
   {
     name: 'swellForecastFlow',
-    inputSchema: SwellForecastInputSchema,
+    inputSchema: SwellForecastOutputSchema.shape.detailedData,
     outputSchema: SwellForecastOutputSchema, // The flow receives the detailed weather data
   },
   async (input: z.infer<typeof SwellForecastOutputSchema.shape.detailedData>) => {
     const rawOutput = await swellForecastPrompt(input);
-    if (!rawOutput.content || rawOutput.content.length === 0 || !rawOutput.content[0].text) {
-      throw new Error("AI response content is missing or empty.");
-    }
-    const outputJsonString = rawOutput.content[0].text;    const parsedOutput = JSON.parse(outputJsonString);
-    return parsedOutput;
 
+    // Safely extract the text content from the AI response
+    const outputJsonString = rawOutput.content?.find(part => part.text)?.text;
+
+    if (!outputJsonString) {
+      throw new Error("AI response content is missing or does not contain text.");
+    }
+
+    const parsedOutput = JSON.parse(outputJsonString);
+    return parsedOutput;
   }
 );

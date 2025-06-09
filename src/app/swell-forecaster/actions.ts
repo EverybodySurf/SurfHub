@@ -1,6 +1,7 @@
 'use server';
 
-import { getSwellForecast, type SwellForecastInput, type SwellForecastOutput } from '@/ai/flows/swell-forecast';
+import { getSwellForecast, type SwellForecastInput, type SwellForecastOutput } from '@/ai/flows/swell-forecast'; 
+export type { SwellForecastInput, SwellForecastOutput };
 
 interface ActionResult {
   data?: SwellForecastOutput;
