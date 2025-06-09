@@ -30,7 +30,7 @@ export async function socialLogin(provider: 'google' | 'github' | 'facebook' | '
   let redirectToUrl = process.env.NEXT_PUBLIC_VERCEL_URL
     ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}/auth/confirm`
     : 'http://localhost:3000/auth/confirm';
-
+  
   let data, error;
 
   switch (provider) {
