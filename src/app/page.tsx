@@ -33,13 +33,31 @@ const features = [
     imgAlt: 'Directory listing',
     aiHint: 'surf beach',
   },
+  {
+    icon: List,
+    title: 'Join the Community',
+    description: 'Share tips, report conditions, and connect with fellow surfers in our vibrant forum.',
+    href: '/forum',
+    imgSrc: 'https://placehold.co/600x400.png',
+    imgAlt: 'Community forum',
+    aiHint: 'forum',
+  },
+  {
+    icon: List,
+    title: 'Marketplace',
+    description: 'Buy, sell, and promote surf gear, lessons, and services within the community.',
+    href: '/marketplace',
+    imgSrc: 'https://placehold.co/600x400.png',
+    imgAlt: 'Marketplace',
+    aiHint: 'Market',
+  },
 ];
 
 export default function HomePage() {
   return (
     <div className="flex flex-col items-center">
       {/* Hero Section */}
-      <section className="w-full py-20 md:py-32 bg-gradient-to-t from-primary/30 via-background to-background">
+      <section id="hero" className="w-full py-12 md:py-20 bg-gradient-to-t from-primary/10 via-primary/5 to-background">
         <div className="container mx-auto px-4 md:px-6 text-center">
           <Waves className="mx-auto h-16 w-16 text-primary mb-6" />
           <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl text-foreground">
@@ -58,11 +76,25 @@ export default function HomePage() {
               <Link href="/directory">Explore Spots</Link>
             </Button>
           </div>
+          <div className="mt-10">
+             <p className="text-md mt-2 max-w-xs mx-auto block">
+                To offer your own local reports, use the marketplace & more,
+            </p>
+            <Link href="/signup" className="mt-2 text-primary text-md underline hover:text-foreground">
+              Sign up here!
+            </Link> 
+            <p className="text-md mt-1">
+              It's free!
+            </p>
+          </div>
+          <div className="mt-9 text-muted-foreground block mx-auto text-center">
+            <Link href="#features">Explore More 👇</Link>
+          </div>
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="w-full py-16 md:py-24">
+      <section id="features" className="w-full py-16 md:py-24 bg-gradient-to-b from-primary/10 via-primary/5 to-background">
         <div className="container mx-auto px-4 md:px-6">
           <h2 className="text-3xl font-bold tracking-tight text-center text-foreground sm:text-4xl mb-12">
             Discover What SurfHub Offers
@@ -95,34 +127,6 @@ export default function HomePage() {
                 </CardContent>
               </Card>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Community & Marketplace Teaser */}
-      <section className="w-full py-16 md:py-24 bg-backgound">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
-            <div className="text-center md:text-left">
-              <Users className="mx-auto md:mx-0 h-12 w-12 text-primary mb-4" />
-              <h3 className="text-2xl font-semibold text-foreground mb-3">Join the Community</h3>
-              <p className="text-muted-foreground mb-4">
-                Share tips, report conditions, and connect with fellow surfers in our vibrant forum.
-              </p>
-              <Button asChild variant="outlineGlow">
-                <Link href="/forum">Visit Forum</Link>
-              </Button>
-            </div>
-            <div className="text-center md:text-left">
-              <ShoppingBag className="mx-auto md:mx-0 h-12 w-12 text-primary mb-4" />
-              <h3 className="text-2xl font-semibold text-foreground mb-3">Surf Marketplace</h3>
-              <p className="text-muted-foreground mb-4">
-                Buy, sell, and promote surf gear, lessons, and services within the community.
-              </p>
-              <Button asChild variant="outlineGlow">
-                <Link href="/marketplace">Explore Marketplace</Link>
-              </Button>
-            </div>
           </div>
         </div>
       </section>

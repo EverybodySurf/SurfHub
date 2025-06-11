@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 
-import { updateProfile } from "@/app/private/actions"; // Import the updateProfile action
+import { updateProfile } from "@/app/account/actions"; // Import the updateProfile action
 
 interface ProfileFormProps {
   user: any; // Replace 'any' with a more specific user type if you have one

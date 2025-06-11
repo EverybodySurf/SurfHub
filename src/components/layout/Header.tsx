@@ -2,8 +2,9 @@ import Link from 'next/link';
 import { Waves, List, MapPin, BarChart3, Users, ShoppingBag, Menu } from 'lucide-react';
 import { NavLink } from './NavLink';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { ThemeToggleButton } from '@/components/theme/theme-toggle-button';
+import { CircleUserRound } from 'lucide-react';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Waves },
@@ -33,7 +34,12 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center justify-end gap-2 ml-auto">
+        <div className="flex items-center justify-end gap-6 ml-auto">
+          <div className="hidden md:flex space-x-6">
+            <Link href="/login" className="text-sm font-medium">
+              Login / Sign Up
+            </Link>
+          </div>
           <div className="hidden md:flex">
             <ThemeToggleButton />
           </div>
@@ -46,6 +52,7 @@ export function Header() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[300px] sm:w-[400px] flex flex-col">
+                <SheetTitle>Menu</SheetTitle>
                 <div className="p-6">
                   <Link href="/" className="mb-8 flex items-center space-x-2">
                     <Waves className="h-8 w-8 text-primary" />
@@ -59,7 +66,13 @@ export function Header() {
                       </NavLink>
                     ))}
                   </nav>
-                </div>
+                  <div className="flex flex-col space-y-3 mt-6">
+                    <Link href="/login" className="flex items-center text-base font-medium">
+                      <CircleUserRound className="mr-2 h-5 w-5" />
+                      Login / Sign Up
+                    </Link>
+                  </div>
+                </div> 
                 <div className="mt-auto p-6 border-t border-border/40">
                   <ThemeToggleButton />
                 </div>

@@ -1,5 +1,3 @@
-"use client"
-
 import { login, signup, socialLogin } from './actions'
 import {
   Card,
@@ -33,7 +31,7 @@ export default function LoginPage() {
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
-              <form className="space-y-4">
+              <form className="space-y-4" action={login}>
                 <div>
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" name="email" type="email" required />
@@ -42,11 +40,11 @@ export default function LoginPage() {
                   <Label htmlFor="password">Password</Label>
                   <Input id="password" name="password" type="password" required />
                 </div>
-                <Button className="w-full" formAction={login}>Log In</Button>
+                <Button className="w-full" type="submit">Log In</Button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
-              <form className="space-y-4">
+              <form className="space-y-4" action={signup}>
                 <div>
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" name="email" type="email" required />
@@ -55,7 +53,7 @@ export default function LoginPage() {
                   <Label htmlFor="password">Password</Label>
                   <Input id="password" name="password" type="password" required />
                 </div>
-                <Button className="w-full" formAction={signup}>Sign Up</Button>
+                <Button className="w-full" type="submit">Sign Up</Button>
               </form>
             </TabsContent>
           </Tabs>
@@ -72,10 +70,22 @@ export default function LoginPage() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 w-full mt-4">
-            <Button variant="outline" className="w-full" onClick={async () => socialLogin('google')}>Google</Button>
-            <Button variant="outline" className="w-full" onClick={async () => socialLogin('github')}>GitHub</Button>
-            <Button variant="outline" className="w-full" onClick={async () => socialLogin('facebook')}>Facebook</Button>
-            <Button variant="outline" className="w-full" onClick={async () => socialLogin('apple')}>Apple</Button>
+            <form action={socialLogin}>
+              <input type="hidden" name="provider" value="google" />
+              <Button variant="outline" className="w-full" type="submit">Google</Button>
+            </form>
+            <form action={socialLogin}>
+              <input type="hidden" name="provider" value="github" />
+              <Button variant="outline" className="w-full" type="submit">GitHub</Button>
+            </form>
+            <form action={socialLogin}>
+              <input type="hidden" name="provider" value="facebook" />
+              <Button variant="outline" className="w-full" type="submit">Facebook</Button>
+            </form>
+            <form action={socialLogin}>
+              <input type="hidden" name="provider" value="apple" />
+              <Button variant="outline" className="w-full" type="submit">Apple</Button>
+            </form>
           </div>
         </CardFooter>
       </Card>
