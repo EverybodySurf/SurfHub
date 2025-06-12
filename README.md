@@ -1,35 +1,43 @@
 A community hangout/hub/lab and directory with swell and surf forcasting tools baked in.
 
 
-login bug fix:👇
 
-That’s the issue!
-Because your Tabs component is marked with "use client", your entire login page becomes a Client Component.
-Server Actions (action={login}) do not work in Client Components.
++ todo:👇
 
-How to fix
-Option 1: Remove Tabs or Replace With Server-Compatible Tabs
-Replace your <Tabs> UI with a server-compatible implementation (such as simple conditional rendering with state managed by the URL or a server-side variable).
-Or, temporarily remove the <Tabs> and use two separate forms to confirm Server Actions work.
-Option 2: Use Client-Side Form Handling
-If you want to keep using the Radix Tabs (client component), you must handle login/signup on the client (with onSubmit and Supabase client SDK), not with Server Actions.
-Summary Table
-Component	"use client"?	Server Actions Work?
-Card	No	Yes
-Tabs (Radix)	Yes	No
-What should you do?
-If you want to use Server Actions:
-Remove or replace the Tabs component with a server-compatible solution.
+smoothout login and signup
 
-If you want to keep Tabs:
-Switch to client-side form handling (no Server Actions).
+next move: account page UI:
 
-Let me know which approach you want, and I can give you the exact code!
+Absolutely! Here’s how you can style your /account page to match your existing scheme, using your UI components and Tailwind classes for a clean, modern look.
+
+Below is a styled scaffold for your AccountForm (assuming you want to show avatar, email, username, about, website, and a save button).
+You can adjust fields as needed!
+
+ut id="about" value={about} onChange={e => setAbout(e.target.value)} />
+            </div>
+            <div>
+              <Label htmlFor="website">Website</Label>
+              <Input id="website" value={website} onChange={e => setWebsite(e.target.value)} />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
+Styling notes:
+
+Uses your Card, Input, Label, and Button components for consistency.
+Responsive and centered.
+Clean spacing and sectioning.
+Add or remove fields as needed.
+Let me know if you want to further customize colors, add sections, or include dashboard links!
 
 
-+database todo:👇
-
-co-pilot's next step suggestions(havent asked about deploy bbug yet): Great progress! Here’s a checklist and some guidance for finishing your Supabase auth flow and dashboard:
+ Great progress! Here’s a checklist and some guidance for finishing your Supabase auth flow and dashboard:
 
 ### 1. **Email Confirmation Redirect**
 - In Supabase Dashboard, set the **Redirect URL** to `/auth/confirm-success` (as you noted in your README).

@@ -1,4 +1,7 @@
-import { login, signup, socialLogin } from './actions'
+'use client'
+
+import { useState } from 'react';
+import { createClient } from '@/utils/supabase/client';
 import {
   Card,
   CardContent,
@@ -10,11 +13,53 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
+
 export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [tab, setTab] = useState('login');
+
+  const supabase = createClient();
+
+  async function handleSocialLogin(provider: 'google' | 'github' | 'facebook' | 'apple') {
+    setLoading(true);
+    setError('');
+    const { error } = await supabase.auth.signInWithOAuth({ provider });
+    if (error) setError(error.message);
+    setLoading(false);
+  }
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      window.location.href = '/dashboard';
+    }
+  }
+
+  async function handleSignup(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    const { error } = await supabase.auth.signUp({ email, password });
+    setLoading(false);
+    if (error) {
+      setError(error.message);
+    } else {
+      window.location.href = '/confirm-request';
+    }
+  }
+
   return (
     <div className="flex justify-center items-center h-screen">
       <Card className="w-[400px]">
@@ -25,35 +70,37 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs defaultValue="login" className="w-full" onValueChange={setTab}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Log In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="login">
-              <form className="space-y-4" action={login}>
+              <form className="space-y-4" onSubmit={handleLogin}>
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" required />
+                  <Input id="email" name="email" type="email" required value={email} onChange={e => setEmail(e.target.value)} />
                 </div>
                 <div>
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" name="password" type="password" required />
+                  <Input id="password" name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
                 </div>
-                <Button className="w-full" type="submit">Log In</Button>
+                <Button className="w-full" type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Log In'}</Button>
+                {error && <div className="text-red-500">{error}</div>}
               </form>
             </TabsContent>
             <TabsContent value="signup">
-              <form className="space-y-4" action={signup}>
+              <form className="space-y-4" onSubmit={handleSignup}>
                 <div>
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" name="email" type="email" required />
+                  <Input id="email" name="email" type="email" required value={email} onChange={e => setEmail(e.target.value)} />
                 </div>
                 <div>
                   <Label htmlFor="password">Password</Label>
-                  <Input id="password" name="password" type="password" required />
+                  <Input id="password" name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
                 </div>
-                <Button className="w-full" type="submit">Sign Up</Button>
+                <Button className="w-full" type="submit" disabled={loading}>{loading ? 'Signing up...' : 'Sign Up'}</Button>
+                {error && <div className="text-red-500">{error}</div>}
               </form>
             </TabsContent>
           </Tabs>
@@ -70,22 +117,42 @@ export default function LoginPage() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 w-full mt-4">
-            <form action={socialLogin}>
-              <input type="hidden" name="provider" value="google" />
-              <Button variant="outline" className="w-full" type="submit">Google</Button>
-            </form>
-            <form action={socialLogin}>
-              <input type="hidden" name="provider" value="github" />
-              <Button variant="outline" className="w-full" type="submit">GitHub</Button>
-            </form>
-            <form action={socialLogin}>
-              <input type="hidden" name="provider" value="facebook" />
-              <Button variant="outline" className="w-full" type="submit">Facebook</Button>
-            </form>
-            <form action={socialLogin}>
-              <input type="hidden" name="provider" value="apple" />
-              <Button variant="outline" className="w-full" type="submit">Apple</Button>
-            </form>
+            <Button
+              variant="outline"
+              className="w-full"
+              type="button"
+              onClick={() => handleSocialLogin('google')}
+              disabled={loading}
+            >
+              Google
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              type="button"
+              onClick={() => handleSocialLogin('github')}
+              disabled={loading}
+            >
+              GitHub
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              type="button"
+              onClick={() => handleSocialLogin('facebook')}
+              disabled={loading}
+            >
+              Facebook
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              type="button"
+              onClick={() => handleSocialLogin('apple')}
+              disabled={loading}
+            >
+              Apple
+            </Button>
           </div>
         </CardFooter>
       </Card>

@@ -64,7 +64,7 @@ export default function HomePage() {
             Welcome to SurfHub
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg leading-8 text-muted-foreground">
-            Your ultimate companion for swell forecasts, surf spot discovery, and connecting with the surfing community. Catch the perfect wave, every time.
+            Your ultimate companion for swell forecasts, surf spot discovery, and connecting with the surfing community.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Button asChild className="bg-primary" size="lg">
@@ -99,34 +99,39 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold tracking-tight text-center text-foreground sm:text-4xl mb-12">
             Discover What SurfHub Offers
           </h2>
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature) => (
-              <Card key={feature.title} className="flex flex-col overflow-hidden shadow-lg hover:shadow-lg hover:shadow-green-300 transition-shadow duration-300">
-           {/*  <div className="relative h-56 w-full">
-                  <Image
-                    src={feature.imgSrc}
-                    alt={feature.imgAlt}
-                    fill
-                    className="object-cover"
-                    data-ai-hint={feature.aiHint}
-                  />
-                </div>  */}
-                <CardHeader>
-                  <div className="flex items-center mb-2">
-                    <feature.icon className="h-8 w-8 text-primary mr-3" />
-                    <CardTitle className="text-2xl">{feature.title}</CardTitle>
-                  </div>
-                  <CardDescription>{feature.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="mt-auto">
-                  <Button asChild variant="link" className="px-0 text-primary">
-                    <Link href={feature.href}>
-                      Learn More <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex justify-center">
+            <div className="flex flex-wrap justify-center gap-8 max-w-none mx-auto">
+              {features.map((feature) => (
+                <Card 
+                  key={feature.title} 
+                  className="flex flex-col overflow-hidden shadow-lg hover:shadow-lg hover:shadow-green-300 transition-shadow duration-300 md:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1rem)]"
+                >
+                 {/*<div className="relative h-56 w-full">
+                      <Image
+                        src={feature.imgSrc}
+                        alt={feature.imgAlt}
+                        fill
+                        className="object-cover"
+                        data-ai-hint={feature.aiHint}
+                      />
+                    </div>  */}
+                  <CardHeader>
+                    <div className="flex items-center mb-2">
+                      <feature.icon className="h-8 w-8 text-primary mr-3" />
+                      <CardTitle className="text-2xl">{feature.title}</CardTitle>
+                    </div>
+                    <CardDescription>{feature.description}</CardDescription>
+                  </CardHeader>
+                  <CardContent className="mt-auto">
+                    <Button asChild variant="link" className="px-0 text-primary">
+                      <Link href={feature.href}>
+                        Learn More <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>

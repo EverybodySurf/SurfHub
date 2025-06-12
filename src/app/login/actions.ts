@@ -29,7 +29,8 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/private')
+  redirect('/dashboard')
+  // Redirect to the account page after successful login
 }
 
 export async function signup(formData: FormData) {
