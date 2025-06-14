@@ -1,40 +1,14 @@
 A community hangout/hub/lab and directory with swell and surf forcasting tools baked in.
 
-
+Did:👇
+smoothed out some si
 
 + todo:👇
+add supabase real time chat ability
 
-smoothout login and signup
+Redirect unauthenticated users who try to access the dashboard to a sign-in/sign-up page.
+This keeps your navigation clean and guides users to the right place.
 
-next move: account page UI:
-
-Absolutely! Here’s how you can style your /account page to match your existing scheme, using your UI components and Tailwind classes for a clean, modern look.
-
-Below is a styled scaffold for your AccountForm (assuming you want to show avatar, email, username, about, website, and a save button).
-You can adjust fields as needed!
-
-ut id="about" value={about} onChange={e => setAbout(e.target.value)} />
-            </div>
-            <div>
-              <Label htmlFor="website">Website</Label>
-              <Input id="website" value={website} onChange={e => setWebsite(e.target.value)} />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  )
-}
-Styling notes:
-
-Uses your Card, Input, Label, and Button components for consistency.
-Responsive and centered.
-Clean spacing and sectioning.
-Add or remove fields as needed.
-Let me know if you want to further customize colors, add sections, or include dashboard links!
 
 
  Great progress! Here’s a checklist and some guidance for finishing your Supabase auth flow and dashboard:

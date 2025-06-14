@@ -9,7 +9,7 @@ export default function ConfirmSuccessPage() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      router.push('/account');
+      router.push('/');
     }, 3000); // Redirect after 3 seconds
     
     return () => clearTimeout(timeout); // Cleanup on unmount

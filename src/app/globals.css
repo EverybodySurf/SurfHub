@@ -35,14 +35,14 @@ body {
     --radius: 0.5rem;
 
     /* Sidebar variables adapted to the new theme */
-    --sidebar-background: 207 80% 92%; /* Slightly darker than main bg */
-    --sidebar-foreground: 210 40% 15%;
-    --sidebar-primary: 328.6 85.5% 70.2%; /* Same as main primary */
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 207 89% 68%; /* Ocean Blue */
-    --sidebar-accent-foreground: 0 0% 100%; /* White */
-    --sidebar-border: 207 50% 75%; /* Slightly darker border for sidebar */
-    --sidebar-ring: 207 89% 68%;
+    --sidebar-background: 0 0% 98%; /* Slightly darker than main bg */
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%; /* Same as main primary */
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%; /* Ocean Blue */
+    --sidebar-accent-foreground: 240 5.9% 10%; /* White */
+    --sidebar-border: 220 13% 91%; /* Slightly darker border for sidebar */
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
@@ -72,14 +72,14 @@ body {
     --chart-5: 340 75% 55%;
 
     /* Dark Sidebar variables adapted to the new theme */
-    --sidebar-background: 210 25% 18%; /* Slightly lighter than main dark bg */
-    --sidebar-foreground: 207 82% 90%;
-    --sidebar-primary: 328.6 85.5% 70.2%; /* pink-400 */
-    --sidebar-primary-foreground: 210 100% 10%;
-    --sidebar-accent: 207 89% 68%; /* Ocean Blue */
-    --sidebar-accent-foreground: 0 0% 100%; /* White */
-    --sidebar-border: 210 20% 35%;
-    --sidebar-ring: 207 80% 65%;
+    --sidebar-background: 240 5.9% 10%; /* Slightly lighter than main dark bg */
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%; /* pink-400 */
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%; /* Ocean Blue */
+    --sidebar-accent-foreground: 240 4.8% 95.9%; /* White */
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 

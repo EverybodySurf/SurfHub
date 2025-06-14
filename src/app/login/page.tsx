@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
 import {
   Card,
@@ -18,14 +19,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 
 export default function LoginPage() {
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'login';
+  const [tab, setTab] = useState(initialTab);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [tab, setTab] = useState('login');
 
   const supabase = createClient();
 
+  useEffect(() => {
+    setTab(initialTab);
+  }, [initialTab]);
+    // Check if user is already logge
+    
   async function handleSocialLogin(provider: 'google' | 'github' | 'facebook' | 'apple') {
     setLoading(true);
     setError('');
@@ -43,7 +51,7 @@ export default function LoginPage() {
     if (error) {
       setError(error.message);
     } else {
-      window.location.href = '/dashboard';
+      window.location.href = '/'; // Redirect to dashboard or home page after login
     }
   }
 
@@ -70,7 +78,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="login" className="w-full" onValueChange={setTab}>
+          <Tabs value={tab} className="w-full" onValueChange={setTab}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Log In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>

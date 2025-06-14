@@ -80,7 +80,7 @@ export default function HomePage() {
              <p className="text-md mt-2 max-w-xs mx-auto block">
                 To offer your own local reports, use the marketplace & more,
             </p>
-            <Link href="/signup" className="mt-2 text-primary text-md underline hover:text-foreground">
+            <Link href="/login" className="mt-2 text-primary text-md underline hover:text-foreground">
               Sign up here!
             </Link> 
             <p className="text-md mt-1">
