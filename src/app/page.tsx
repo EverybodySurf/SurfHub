@@ -77,13 +77,13 @@ export default function HomePage() {
             </Button>
           </div>
           <div className="mt-10">
-             <p className="text-md mt-2 max-w-xs mx-auto block">
+             <p className="text-muted-extra text-md mt-2 max-w-xs mx-auto block">
                 To offer your own local reports, use the marketplace & more,
             </p>
             <Link href="/login" className="mt-2 text-primary text-md underline hover:text-foreground">
-              Sign up here!
+              Sign up here
             </Link> 
-            <p className="text-md mt-1">
+            <p className="text-muted-extra text-md mt-1">
               It's free!
             </p>
           </div>

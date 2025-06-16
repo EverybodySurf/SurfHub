@@ -2,6 +2,9 @@
 
 import * as React from "react"
 import {
+  BookUserIcon,
+  StoreIcon,
+  CircleUserIcon,
   ArrowUpCircleIcon,
   BarChartIcon,
   CameraIcon,
@@ -17,6 +20,7 @@ import {
   SearchIcon,
   SettingsIcon,
   UsersIcon,
+  MessageCircleIcon,
 } from "lucide-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -53,12 +57,12 @@ const data = {
     {
       title: "My Marketplace",
       url: "#",
-      icon: FolderIcon,
+      icon: StoreIcon,
     },
     {
       title: "Directory Tools",
       url: "#",
-      icon: UsersIcon,
+      icon: BookUserIcon,
     },
     {
       title: "My Forum Activity",
@@ -139,8 +143,8 @@ const data = {
   documents: [
     {
       name: "Direct Messaging",
-      url: "#",
-      icon: DatabaseIcon,
+      url: "/dashboard?tab=direct-messaging",
+      icon: MessageCircleIcon,
     },
     {
       name: "Events",
@@ -148,9 +152,9 @@ const data = {
       icon: ClipboardListIcon,
     },
     {
-      name: "placeholder...",
-      url: "#",
-      icon: FileIcon,
+      name: "My Profile",
+      url: "/account",
+      icon: CircleUserIcon,
     },
   ],
 }

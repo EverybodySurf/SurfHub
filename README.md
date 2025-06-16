@@ -1,12 +1,13 @@
 A community hangout/hub/lab and directory with swell and surf forcasting tools baked in.
 
 Did:👇
-smoothed out some si
+
 
 + todo:👇
-add supabase real time chat ability
 
-Redirect unauthenticated users who try to access the dashboard to a sign-in/sign-up page.
++setting up chat: 
+
++Redirect unauthenticated users who try to access the     dashboard to a sign-in/sign-up page.
 This keeps your navigation clean and guides users to the right place.
 
 

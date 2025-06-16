@@ -22,5 +22,5 @@ export default function AccountPage() {
   if (loading) return <div>Loading...</div>
   if (!user) return <div>Please log in.</div>
 
-  return <AccountForm user={user} />
+  return <AccountForm mode="edit" />
 }

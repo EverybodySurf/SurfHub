@@ -1,7 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
+import type { User } from '@supabase/supabase-js'
 import { AppSidebar } from "@/components/app-sidebar"
 import { ChartAreaInteractive } from "@/components/chart-area-interactive"
 import { DataTable } from "@/components/data-table"
@@ -9,11 +10,21 @@ import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import data from "./data.json"
+import { RealtimeChat } from "@/components/realtime-chat"
 
 export default function Page() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
+  const searchParams = useSearchParams();
+  const tab = searchParams.get('tab');
+  const [user, setUser] = useState<User | null>(null)
+  const username =
+  user?.user_metadata?.full_name ||
+  user?.email ||
+  'Anonymous'
+  
+
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -25,6 +36,10 @@ export default function Page() {
       }
     })
   }, [router, supabase])
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUser(data.user))
+  }, [supabase])
 
   if (loading) {
     return <div>Loading...</div>
@@ -42,6 +57,12 @@ export default function Page() {
               <div className="px-4 lg:px-6">
                 <ChartAreaInteractive />
               </div>
+              {tab === "direct-messaging" && (
+                <div className="px-4 lg:px-6">
+                  <RealtimeChat 
+                    roomName="general" username={username} />
+                </div>
+              )}
               <DataTable data={data} />
             </div>
           </div>

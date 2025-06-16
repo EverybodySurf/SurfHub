@@ -9,7 +9,7 @@ body {
 @layer base {
   :root {
     --background: 224.4 64.3% 32.9%; /* Blue-900 */
-    --foreground: 213.8 100% 96.9%; /* Blue-50 */
+    --foreground: 0 0% 98%; /* zinc-50 */
     --card: 225.9 70.7% 40.2%; /* Blue-800 Slightly lighter than background */
     --card-foreground: 213.8 100% 96.9%; /* Blue-50 */
     --popover: 207 82% 97%;
@@ -19,14 +19,15 @@ body {
     --secondary: 225.9 70.7% 40.2%; /* Blue-800 Slightly lighter than background */
     --secondary-foreground: 210 40% 15%;
     --muted: 207 60% 92%; /* Very light blue */
-    --muted-foreground: 211.7 96.4% 78.4%; /* Blue-300 */
+    --muted-foreground: 213.3 96.9% 87.3%; /* Blue-200 */
+    --muted-extra: 211.7 96.4% 78.4%; /* Blue-300 for extra muted text */
     --accent: 140.6 84.2% 92.5%; /* Green-100 */
     --accent-foreground: 141.9 69.2% 58%; /* Green-300 */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 140.6 84.2% 92.5%; /* Softer blue border */
-    --input: 207 60% 92%; /* Slightly lighter input background, matching muted */
-    --ring: 140.6 84.2% 92.5%; /* Primary color for ring */
+    --border: 140.6 84.2% 92.5%; /* Green-100 */
+    --input: 140.6 84.2% 92.5%; /* Green-100 */
+    --ring: 140.6 84.2% 92.5%; /* Green-100 */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
@@ -47,7 +48,7 @@ body {
 
   .dark {
     --background: 210 25% 12%; /* Dark grayish blue */
-    --foreground: 207 82% 90%; /* Light blue for text */
+    --foreground: 0 0% 98%; /* Zinc-50 for text */
     --card: 210 25% 15%; /* Slightly lighter than dark background */
     --card-foreground: 207 82% 90%;
     --popover: 210 25% 15%;
@@ -57,14 +58,15 @@ body {
     --secondary: 210 20% 25%; /* Darker blue for secondary elements */
     --secondary-foreground: 207 82% 90%;
     --muted: 210 20% 20%; /* Very dark blue */
-    --muted-foreground: 207 50% 65%;
-    --accent: 207 89% 68%; /* Ocean Blue */
-    --accent-foreground: 0 0% 100%; /* White */
+    --muted-foreground: 240 5% 64.9%; /* zinc-400 for muted text */
+    --muted-extra: 240 3.8% 46.1%; /* Zinc-500 for extra muted text */
+    --accent: 140.6 84.2% 92.5%; /* Green-100 */
+    --accent-foreground: 141.9 69.2% 58%; /* Green-300 */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 210 20% 30%; /* Darker border */
-    --input: 210 20% 22%; /* Slightly lighter input background in dark */
-    --ring: 207 80% 65%; /* Primary color for ring in dark */
+    --border: 140.6 84.2% 92.5%; /* Green-100 */
+    --input: 140.6 84.2% 92.5%; /* Green-100 */
+    --ring: 140.6 84.2% 92.5%; /* Green-100 */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
