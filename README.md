@@ -5,7 +5,13 @@ Did:👇
 
 + todo:👇
 
-+setting up chat: 
++chat is intergrated!   
+  but input is locked. fix this.
+
++work on dashboard
+  top tab group: dashboard my reports, my forum activity etc. not working.
+
++add a back arrow btn/link to edit my account ui.
 
 +Redirect unauthenticated users who try to access the     dashboard to a sign-in/sign-up page.
 This keeps your navigation clean and guides users to the right place.

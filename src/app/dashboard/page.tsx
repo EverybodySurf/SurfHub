@@ -1,4 +1,5 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
@@ -23,6 +24,7 @@ export default function Page() {
   user?.user_metadata?.full_name ||
   user?.email ||
   'Anonymous'
+  console.log("tab:", tab);
   
 
 
@@ -45,6 +47,8 @@ export default function Page() {
     return <div>Loading...</div>
   }
 
+  
+
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
@@ -53,17 +57,67 @@ export default function Page() {
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <SectionCards />
-              <div className="px-4 lg:px-6">
-                <ChartAreaInteractive />
-              </div>
-              {tab === "direct-messaging" && (
+              <div>Current tab: {tab}</div>
+              {tab === "dashboard" && (
                 <div className="px-4 lg:px-6">
-                  <RealtimeChat 
-                    roomName="general" username={username} />
+                  <SectionCards />
                 </div>
               )}
-              <DataTable data={data} />
+              {tab === "surf-reports" && (
+                <div className="px-4 lg:px-6">
+                  <ChartAreaInteractive />
+                </div>
+              )}
+              {tab === "marketplace" && (
+                <div className="px-4 lg:px-6">
+                  {/* <ProfileComponent user={user} /> <--inserted here */}
+                </div>
+              )}
+              {tab === "directory-tools" && (
+                <div className="px-4 lg:px-6">
+                  {/* <ProfileComponent user={user} /> <--inserted here */}
+                </div>
+              )}
+              {tab === "forum-activity" && (
+                <div className="px-4 lg:px-6">
+                  {/* <ProfileComponent user={user} /> <--inserted here */}
+                </div>
+              )}
+              {tab === "analytics" && (
+                <div className="px-4 lg:px-6">
+                  {/* <ProfileComponent user={user} /> <--inserted here */}
+                </div>
+              )}
+              {tab === "direct-messaging" && user && (
+                <div className="px-4 lg:px-6">
+                  <RealtimeChat 
+                    roomName="my-chat-room" username={username} />
+                </div>
+              )}
+              {tab === "events" && (
+                <div className="px-4 lg:px-6">
+                  {/* <ProfileComponent user={user} /> <--inserted here */}
+                </div>
+              )}
+              {tab === "profile" && (
+                <div className="px-4 lg:px-6">
+                  <DataTable data={data} />
+                </div>
+              )}
+              {/* Default dashboard content if no tab is set */}
+              {!tab && (
+                <>
+                  <div className="px-4 lg:px-6">
+                  <SectionCards />
+                </div>
+                <div className="px-4 lg:px-6">
+                  <ChartAreaInteractive />
+                </div>
+                <div className="px-4 lg:px-6">
+                  <DataTable data={data} />
+                </div>
+              </>
+            )}
             </div>
           </div>
         </div>

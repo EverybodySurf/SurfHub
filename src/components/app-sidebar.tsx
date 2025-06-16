@@ -39,39 +39,39 @@ import {
 
 const data = {
   user: {
-    name: "shadcn",
+    name: "SurfHub",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard?tab=dashboard",
       icon: LayoutDashboardIcon,
     },
     {
       title: "My Surf Reports / Forecasts",
-      url: "#",
+      url: "/dashboard?tab=surf-reports",
       icon: ListIcon,
     },
     {
       title: "My Marketplace",
-      url: "#",
+      url: "/dashboard?tab=marketplace",
       icon: StoreIcon,
     },
     {
       title: "Directory Tools",
-      url: "#",
+      url: "/dashboard?tab=directory-tools",
       icon: BookUserIcon,
     },
     {
       title: "My Forum Activity",
-      url: "#",
+      url: "/dashboard?tab=forum-activity",
       icon: UsersIcon,
     },
     {
       title: "Analytics",
-      url: "#",
+      url: "/dashboard?tab=analytics",
       icon: BarChartIcon,
     },
   ],
@@ -126,17 +126,17 @@ const data = {
   navSecondary: [
     {
       title: "Settings",
-      url: "#",
+      url: "/dashboard?tab=settings",
       icon: SettingsIcon,
     },
     {
       title: "Get Help",
-      url: "#",
+      url: "/dashboard?tab=help",
       icon: HelpCircleIcon,
     },
     {
       title: "Search",
-      url: "#",
+      url: "/dashboard?tab=search",
       icon: SearchIcon,
     },
   ],
@@ -148,12 +148,12 @@ const data = {
     },
     {
       name: "Events",
-      url: "#",
+      url: "/dashboard?tab=events",
       icon: ClipboardListIcon,
     },
     {
       name: "My Profile",
-      url: "/account",
+      url: "/dashboard?tab=profile",
       icon: CircleUserIcon,
     },
   ],
@@ -171,7 +171,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">SurfHub</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
