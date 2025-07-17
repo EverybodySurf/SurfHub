@@ -3,7 +3,10 @@ A community hangout/hub/lab and directory with swell and surf forcasting tools b
 Did:👇
 
 
-+ todo:👇
++ todo:👇 (++ = priority)
+
+++ fix forecast
+  we need a new weather provider api
 
 +chat is intergrated!   
   but input is locked. fix this.

@@ -2,10 +2,68 @@
 
 /**
  * @fileOverview Provides a GenAI-powered surf report and/or forecast
- * witch full detail for pros, and user-friendly summarries for newbies.
- *
- * - getSwellForecast - A function that generates a swell forecast summary.
- * - SwellForecastInput - The input type for the getSwellForecast function.
+ * with full detail for pros, and user-friendly summarries for newb    // Step 2: Get weather and marine data using One Call API 3.0
+    const ONECALL_BASE_URL = 'https://api.openweathermap.org/data/3.0/onecall';
+    
+    let weatherUrl = `${ONECALL_BASE_URL}?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&exclude=minutely,alerts`;
+    
+    // Handle date parameters - One Call API provides current + 7 days forecast
+    if (input.date || (input.startDate && input.endDate)) {
+      console.log('Note: One Call API provides current + 7-day forecast. Date filtering will be applied to results.');
+    }
+
+    console.log('Fetching weather and marine data from One Call API URL:', weatherUrl);
+    const response = await fetch(weatherUrl);
+
+    if (!response.ok) {
+      throw new Error(`One Call API error! status: ${response.status}`);
+    }
+
+    const data = await response.json();ellForecast - A function that generates a swell forecast summary.
+ * - Swel prompt: `You are an expert surf forecaster, providing concise summaries for surfers who want to know where and when to surf. Based on the following weather and marine conditions for {{{surfSpot}}} on {{{date}}}:
+
+Weather Conditions:
+- Temperature: {{{avgtemp_c}}}°C ({{{avgtemp_f}}}°F)
+- Max Wind Speed: {{{maxwind_mph}}} mph
+- Wind Direction: {{{wind_dir}}}
+- Humidity: {{{avghumidity}}}%
+- Visibility: {{{avgvis_km}}} km
+- UV Index: {{{uv}}}
+- Precipitation: {{{totalprecip_mm}}} mm
+
+Marine Conditions:
+{{#if swell_ht_mt}}
+- Swell Height: {{{swell_ht_ft}}} ft ({{{swell_ht_mt}}} m)
+- Swell Period: {{{swell_period_secs}}} seconds
+- Swell Direction: {{{swell_dir_16_point}}} ({{{swell_dir}}}°)
+{{/if}}
+{{#if water_temp_c}}
+- Water Temperature: {{{water_temp_c}}}°C ({{{water_temp_f}}}°F)
+{{/if}}
+{{#if sig_ht_mt}}
+- Significant Wave Height: {{{sig_ht_mt}}} m
+{{/if}}
+
+Astronomical Data:
+- Sunrise: {{{sunrise}}}
+- Sunset: {{{sunset}}}
+{{#if moonrise}}
+- Moonrise: {{{moonrise}}}
+- Moonset: {{{moonset}}}
+- Moon Phase: {{{moon_phase}}}
+{{/if}}
+
+{{#if tide_time}}
+Tide Information:
+- Tide Time: {{{tide_time}}}
+- Tide Type: {{{tide_type}}}
+{{else}}
+Note: Tide information not available from current data source.
+{{/if}}
+
+Based on these conditions, provide a comprehensive surf forecast summary and advise the user whether, when and where to go surfing. Consider wave quality, wind conditions, water temperature, and timing. Cite general surfing knowledge and weather patterns in your response.
+
+Format your response as a JSON object with two keys: "forecastSummary" and "detailedData". The value of "forecastSummary" should be your summary and advice. The value of "detailedData" should be the original input data you received, in JSON format.`, - The input type for the getSwellForecast function.
  * - SwellForecastOutput - The return type for the getSwellForecast function.
  */
 
@@ -50,9 +108,9 @@ const SwellForecastOutputSchema = z.object({
     moon_illumination: z.number().describe('Moon illumination percentage.'),
     is_moon_up: z.number().describe('Whether the moon is currently up (1 = Yes, 0 = No).'),
     is_sun_up: z.number().describe('Whether the sun is currently up (1 = Yes, 0 = No).'),
-    tide_time: z.string().describe('Time of the tide.'),
-    tide_height_mt: z.number().describe('Height of the tide in meters.'),
-    tide_type: z.string().describe('Type of the tide (e.g., HIGH, LOW).'),
+    tide_time: z.string().nullable().describe('Time of the tide.'),
+    tide_height_mt: z.number().nullable().describe('Height of the tide in meters.'),
+    tide_type: z.string().nullable().describe('Type of the tide (e.g., HIGH, LOW).'),
     hourlyForecast: z.array(z.object({
       time_epoch: z.number().describe('Time as epoch.'),
       time: z.string().describe('Date and time.'),
@@ -96,106 +154,169 @@ const SwellForecastOutputSchema = z.object({
 });
 export type SwellForecastOutput = z.infer<typeof SwellForecastOutputSchema>;
 
+// Helper functions for OpenWeatherMap API data conversion
+function getWindDirection(degrees: number): string {
+  const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+  return directions[Math.round(degrees / 22.5) % 16];
+}
+
+function calculateDewPoint(tempC: number, humidity: number): number {
+  // Magnus formula for dew point calculation
+  const a = 17.27;
+  const b = 237.7;
+  const alpha = ((a * tempC) / (b + tempC)) + Math.log(humidity / 100);
+  return (b * alpha) / (a - alpha);
+}
+
 export async function getSwellForecast(input: SwellForecastInput): Promise<SwellForecastOutput> {
   console.log('getSwellForecast function called with input:', input);
-  const API_KEY = process.env.WEATHER_API_DOTCOM_KEY;
-  const BASE_URL = 'https://api.weatherapi.com/v1/marine.json';
+  const API_KEY = process.env.OPENWEATHER_API_KEY;
+  const GEOCODING_URL = 'https://api.openweathermap.org/geo/1.0/direct';
+  
+  if (!API_KEY) {
+    throw new Error('OpenWeatherMap API key is not configured. Please set OPENWEATHER_API_KEY environment variable.');
+  }
 
   try {
-    let url = `${BASE_URL}?key=${API_KEY}&q=${input.surfSpot}&aqi=no&alerts=no&tides=yes`;
+    // Step 1: Get coordinates for the surf spot using geocoding
+    console.log('Geocoding surf spot:', input.surfSpot);
+    const geocodingUrl = `${GEOCODING_URL}?q=${encodeURIComponent(input.surfSpot)}&limit=1&appid=${API_KEY}`;
+    console.log('Geocoding URL:', geocodingUrl);
+    
+    const geocodingResponse = await fetch(geocodingUrl);
+    if (!geocodingResponse.ok) {
+      throw new Error(`Geocoding API error! status: ${geocodingResponse.status}`);
+    }
+    
+    const geocodingData = await geocodingResponse.json();
+    console.log('Geocoding response:', geocodingData);
+    
+    if (!geocodingData || geocodingData.length === 0) {
+      throw new Error(`Could not find coordinates for surf spot: ${input.surfSpot}`);
+    }
+    
+    const { lat, lon } = geocodingData[0];
+    console.log('Coordinates found:', { lat, lon });
 
-    if (input.date) {
-      url += `&dt=${input.date}&days=1`;
-    } else if (input.startDate && input.endDate) {
-      url += `&dt=${input.startDate}&end_dt=${input.endDate}`;
-    } else {
-      throw new Error('Either date or startDate and endDate must be provided.');
+    // Step 2: Get weather data using forecast API (free tier compatible)
+    // Note: One Call API 3.0 requires a paid subscription
+    const FORECAST_BASE_URL = 'https://api.openweathermap.org/data/2.5/forecast';
+    
+    let weatherUrl = `${FORECAST_BASE_URL}?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`;
+    
+    // Handle date parameters - forecast API provides 5-day forecast
+    if (input.date || (input.startDate && input.endDate)) {
+      console.log('Note: OpenWeatherMap free tier provides 5-day forecast. Date filtering will be applied to results.');
     }
 
-    console.log('Fetching weather data from URL:', url);
-    const response = await fetch(url);
+    console.log('Fetching weather data from URL:', weatherUrl);
+    const response = await fetch(weatherUrl);
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`Weather API error! status: ${response.status}`);
     }
 
     const data = await response.json();
 
-        console.log('WeatherAPI Response Data:', data);
+    console.log('OpenWeatherMap Response Data:', data);
 
-    // Extract relevant data based on the schema
+    // Helper function to convert Celsius to Fahrenheit
+    const celsiusToFahrenheit = (celsius: number) => (celsius * 9/5) + 32;
+    // Helper function to convert m/s to mph
+    const msToMph = (ms: number) => ms * 2.237;
+    // Helper function to convert m/s to kph
+    const msToKph = (ms: number) => ms * 3.6;
+    // Helper function to convert meters to miles
+    const metersToMiles = (meters: number) => meters * 0.000621371;
+
+    // Get current date for fallback
+    const currentDate = new Date().toISOString().split('T')[0];
+    const currentEpoch = Math.floor(Date.now() / 1000);
+
+    // Extract forecast data from forecast API structure
+    const forecastList = data.list || [];
+    const firstForecast = forecastList.length > 0 ? forecastList[0] : null;
+    
+    // Calculate daily aggregates from 3-hour forecasts
+    const dailyTemps = forecastList.map((item: any) => item.main.temp);
+    const dailyWinds = forecastList.map((item: any) => item.wind.speed);
+    const dailyPrecip = forecastList.map((item: any) => item.rain?.['3h'] || 0);
+    const dailyHumidity = forecastList.map((item: any) => item.main.humidity);
+    
+    // Extract relevant data adapted for forecast API structure
     const extractedData = {
       surfSpot: input.surfSpot,
-      date: data.forecast?.forecastday?.[0]?.date,
-      date_epoch: data.forecast?.forecastday?.[0]?.date_epoch,
-      maxtemp_c: data.forecast?.forecastday?.[0]?.day?.maxtemp_c,
-      maxtemp_f: data.forecast?.forecastday?.[0]?.day?.maxtemp_f,
-      mintemp_c: data.forecast?.forecastday?.[0]?.day?.mintemp_c,
-      mintemp_f: data.forecast?.forecastday?.[0]?.day?.mintemp_f,
-      avgtemp_c: data.forecast?.forecastday?.[0]?.day?.avgtemp_c,
-      avgtemp_f: data.forecast?.forecastday?.[0]?.day?.avgtemp_f,
-      maxwind_mph: data.forecast?.forecastday?.[0]?.day?.maxwind_mph,
-      maxwind_kph: data.forecast?.forecastday?.[0]?.day?.maxwind_kph,
-      totalprecip_mm: data.forecast.forecastday[0].day.totalprecip_mm,
-      totalprecip_in: data.forecast.forecastday[0].day.totalprecip_in,
-      avgvis_km: data.forecast.forecastday[0].day.avgvis_km,
-      avgvis_miles: data.forecast.forecastday[0].day.avgvis_miles,
-      avghumidity: data.forecast.forecastday[0].day.avghumidity,
-      condition_icon: data.forecast.forecastday[0].day.condition.icon,
-      uv: data.forecast.forecastday[0].day.uv,
-      sunrise: data.forecast.forecastday[0].astro.sunrise,
-      sunset: data.forecast.forecastday[0].astro.sunset,
-      moonrise: data.forecast.forecastday[0].astro.moonrise,
-      moonset: data.forecast.forecastday[0].astro.moonset,
-      moon_phase: data.forecast.forecastday[0].astro.moon_phase,
-      moon_illumination: data.forecast.forecastday[0].astro.moon_illumination,
-      is_moon_up: data.forecast.forecastday[0].astro.is_moon_up,
-      is_sun_up: data.forecast.forecastday[0].astro.is_sun_up,
-      tide_time: data.forecast?.forecastday?.[0]?.tides?.[0]?.tide_time || null, // Assuming the first tide entry, added null check
-      tide_height_mt: data.forecast?.forecastday?.[0]?.tides?.[0]?.tide_height_mt || null, // Assuming the first tide entry, added null check
-      tide_type: data.forecast?.forecastday?.[0]?.tides?.[0]?.tide_type || null, // Assuming the first tide entry, added null check
-      hourlyForecast: data.forecast.forecastday[0].hour.map((hourData: any) => ({
-        time_epoch: hourData.time_epoch,
-        time: hourData.time,
-        temp_c: hourData.temp_c,
-        temp_f: hourData.temp_f,
-        condition_icon: hourData.condition.icon,
-        wind_mph: hourData.wind_mph,
-        wind_kph: hourData.wind_kph,
-        wind_degree: hourData.wind_degree,
-        wind_dir: hourData.wind_dir,
-        pressure_mb: hourData.pressure_mb,
-        pressure_in: hourData.pressure_in,
-        precip_mm: hourData.precip_mm,
-        precip_in: hourData.precip_in,
-        humidity: hourData.humidity,
-        cloud: hourData.cloud,
-        feelslike_c: hourData.feelslike_c,
-        feelslike_f: hourData.feelslike_f,
-        windchill_c: hourData.windchill_c,
-        windchill_f: hourData.windchill_f,
-        heatindex_c: hourData.heatindex_c,
-        heatindex_f: hourData.heatindex_f,
-        dewpoint_c: hourData.dewpoint_c,
-        dewpoint_f: hourData.dewpoint_f,
-        is_day: hourData.is_day,
-        vis_km: hourData.vis_km,
-        vis_miles: hourData.vis_miles,
-        gust_mph: hourData.gust_mph,
-        gust_kph: hourData.gust_kph,
-        sig_ht_mt: hourData.sig_ht_mt,
-        swell_ht_mt: hourData.swell_ht_mt,
-        swell_ht_ft: hourData.swell_ht_ft,
-        uv: hourData.uv,
-        swell_dir: hourData.swell_dir,
-        swell_dir_16_point: hourData.swell_dir_16_point,
-        swell_period_secs: hourData.swell_period_secs,
-        water_temp_c: hourData.water_temp_c,
-        water_temp_f: hourData.water_temp_f,
+      date: input.date || currentDate,
+      date_epoch: firstForecast?.dt || currentEpoch,
+      maxtemp_c: Math.max(...dailyTemps.slice(0, 8)) || (firstForecast?.main?.temp || 0),
+      maxtemp_f: celsiusToFahrenheit(Math.max(...dailyTemps.slice(0, 8)) || (firstForecast?.main?.temp || 0)),
+      mintemp_c: Math.min(...dailyTemps.slice(0, 8)) || (firstForecast?.main?.temp || 0),
+      mintemp_f: celsiusToFahrenheit(Math.min(...dailyTemps.slice(0, 8)) || (firstForecast?.main?.temp || 0)),
+      avgtemp_c: dailyTemps.slice(0, 8).reduce((a: number, b: number) => a + b, 0) / Math.min(dailyTemps.length, 8) || (firstForecast?.main?.temp || 0),
+      avgtemp_f: celsiusToFahrenheit(dailyTemps.slice(0, 8).reduce((a: number, b: number) => a + b, 0) / Math.min(dailyTemps.length, 8) || (firstForecast?.main?.temp || 0)),
+      maxwind_mph: msToMph(Math.max(...dailyWinds.slice(0, 8)) || (firstForecast?.wind?.speed || 0)),
+      maxwind_kph: msToKph(Math.max(...dailyWinds.slice(0, 8)) || (firstForecast?.wind?.speed || 0)),
+      totalprecip_mm: dailyPrecip.slice(0, 8).reduce((a: number, b: number) => a + b, 0) || 0,
+      totalprecip_in: (dailyPrecip.slice(0, 8).reduce((a: number, b: number) => a + b, 0) || 0) / 25.4,
+      avgvis_km: (firstForecast?.visibility || 10000) / 1000,
+      avgvis_miles: metersToMiles(firstForecast?.visibility || 10000),
+      avghumidity: dailyHumidity.slice(0, 8).reduce((a: number, b: number) => a + b, 0) / Math.min(dailyHumidity.length, 8) || (firstForecast?.main?.humidity || 0),
+      condition_icon: `https://openweathermap.org/img/wn/${firstForecast?.weather?.[0]?.icon || '01d'}@2x.png`,
+      uv: 0, // UV index not available in forecast API
+      sunrise: new Date((data.city?.sunrise || currentEpoch) * 1000).toLocaleTimeString(),
+      sunset: new Date((data.city?.sunset || currentEpoch) * 1000).toLocaleTimeString(),
+      moonrise: "N/A", // Not available in forecast API
+      moonset: "N/A", // Not available in forecast API  
+      moon_phase: "N/A", // Not available in forecast API
+      moon_illumination: 0, // Not available in forecast API
+      is_moon_up: 0, // Not available in forecast API
+      is_sun_up: firstForecast?.weather?.[0]?.icon?.includes('d') ? 1 : 0,
+      tide_time: null, // Not available in forecast API
+      tide_height_mt: null, // Not available in forecast API
+      tide_type: null, // Not available in forecast API
+      hourlyForecast: forecastList.slice(0, 24).map((hourData: any) => ({
+        time_epoch: hourData.dt,
+        time: new Date(hourData.dt * 1000).toISOString(),
+        temp_c: hourData.main.temp,
+        temp_f: celsiusToFahrenheit(hourData.main.temp),
+        condition_icon: `https://openweathermap.org/img/wn/${hourData.weather[0].icon}@2x.png`,
+        wind_mph: msToMph(hourData.wind.speed),
+        wind_kph: msToKph(hourData.wind.speed),
+        wind_degree: hourData.wind.deg,
+        wind_dir: getWindDirection(hourData.wind.deg),
+        pressure_mb: hourData.main.pressure,
+        pressure_in: hourData.main.pressure * 0.02953,
+        precip_mm: hourData.rain?.['3h'] || 0,
+        precip_in: (hourData.rain?.['3h'] || 0) / 25.4,
+        humidity: hourData.main.humidity,
+        cloud: hourData.clouds.all,
+        feelslike_c: hourData.main.feels_like,
+        feelslike_f: celsiusToFahrenheit(hourData.main.feels_like),
+        windchill_c: hourData.main.feels_like, // Approximation
+        windchill_f: celsiusToFahrenheit(hourData.main.feels_like),
+        heatindex_c: hourData.main.feels_like, // Approximation
+        heatindex_f: celsiusToFahrenheit(hourData.main.feels_like),
+        dewpoint_c: calculateDewPoint(hourData.main.temp, hourData.main.humidity),
+        dewpoint_f: celsiusToFahrenheit(calculateDewPoint(hourData.main.temp, hourData.main.humidity)),
+        is_day: hourData.weather[0].icon.includes('d') ? 1 : 0,
+        vis_km: (hourData.visibility || 10000) / 1000,
+        vis_miles: metersToMiles(hourData.visibility || 10000),
+        gust_mph: msToMph(hourData.wind.gust || hourData.wind.speed),
+        gust_kph: msToKph(hourData.wind.gust || hourData.wind.speed),
+        // Marine data - Not available in forecast API
+        sig_ht_mt: 0,
+        swell_ht_mt: 0,
+        swell_ht_ft: 0,
+        uv: 0, // Not available in forecast API
+        swell_dir: 0,
+        swell_dir_16_point: "N/A",
+        swell_period_secs: 0,
+        water_temp_c: 0,
+        water_temp_f: 0,
       })),
     };
 
-    console.log('Extracted Weather Data:', extractedData); // Log the extracted data
+    console.log('Extracted Weather and Marine Data:', extractedData);
 
     // Pass the extracted data to the flow for AI processing
     const aiOutput = await swellForecastFlow(extractedData);
@@ -236,14 +357,11 @@ const swellForecastFlow = ai.defineFlow(
   async (input: z.infer<typeof SwellForecastOutputSchema.shape.detailedData>) => {
     const rawOutput = await swellForecastPrompt(input);
 
-    // Safely extract the text content from the AI response
-    const outputJsonString = rawOutput.content?.find(part => part.text)?.text;
-
-    if (!outputJsonString) {
-      throw new Error("AI response content is missing or does not contain text.");
+    // Extract the output from the AI response
+    if (!rawOutput.output) {
+      throw new Error("AI response output is missing.");
     }
 
-    const parsedOutput = JSON.parse(outputJsonString);
-    return parsedOutput;
+    return rawOutput.output;
   }
 );

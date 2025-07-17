@@ -2,7 +2,17 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  allowedDevOrigins: ['https://3000-firebase-studio-1748440712172.cluster-pgviq6mvsncnqxx6kr7pbz65v6.cloudworkstations.dev'],
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        'localhost:3000',
+        '*.app.github.dev',
+        '*.github.dev',
+        '3000-firebase-studio-1748440712172.cluster-pgviq6mvsncnqxx6kr7pbz65v6.cloudworkstations.dev',
+        'scaling-zebra-wrvpgv6rvrrv3g4r7-3000.app.github.dev'
+      ]
+    }
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
