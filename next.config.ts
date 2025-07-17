@@ -19,6 +19,28 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Add webpack configuration to handle build issues
+  webpack: (config, { isServer }) => {
+    // Handle missing modules in client-side bundles
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+      }
+    }
+    
+    // Ignore OpenTelemetry warnings during build
+    config.ignoreWarnings = [
+      /Critical dependency: the request of a dependency is an expression/,
+      /Module not found: Can't resolve '@opentelemetry\/exporter-jaeger'/,
+      /require\.extensions is not supported by webpack/,
+    ]
+    
+    return config
+  },
   images: {
     remotePatterns: [
       {
