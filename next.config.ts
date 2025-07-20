@@ -2,6 +2,13 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  // Turbopack configuration (now stable in Next.js 15+)
+  turbopack: {
+    resolveAlias: {
+      // Add any custom aliases here if needed
+      '@': './src',
+    },
+  },
   experimental: {
     serverActions: {
       allowedOrigins: [
@@ -19,28 +26,8 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Add webpack configuration to handle build issues
-  webpack: (config, { isServer }) => {
-    // Handle missing modules in client-side bundles
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        crypto: false,
-      }
-    }
-    
-    // Ignore OpenTelemetry warnings during build
-    config.ignoreWarnings = [
-      /Critical dependency: the request of a dependency is an expression/,
-      /Module not found: Can't resolve '@opentelemetry\/exporter-jaeger'/,
-      /require\.extensions is not supported by webpack/,
-    ]
-    
-    return config
-  },
+  // Note: Webpack configuration removed as it conflicts with Turbopack
+  // Turbopack handles module resolution and build optimizations automatically
   images: {
     remotePatterns: [
       {

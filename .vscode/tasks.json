@@ -1,0 +1,50 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Turbopack Dev Server",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": [
+          {
+            "regexp": ".",
+            "file": 1,
+            "location": 2,
+            "message": 3
+          }
+        ],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "^.*compiled.*",
+          "endsPattern": "^.*Local:.*http://localhost:3000.*"
+        }
+      }
+    },
+    {
+      "label": "Start Turbopack Dev with Debug",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev:debug"],
+      "group": "build",
+      "isBackground": true
+    },
+    {
+      "label": "Build with Turbopack",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "build:turbo"],
+      "group": "build"
+    },
+    {
+      "label": "Clear Next.js Cache",
+      "type": "shell",
+      "command": "rm",
+      "args": ["-rf", ".next"],
+      "group": "build"
+    }
+  ]
+}

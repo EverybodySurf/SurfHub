@@ -150,7 +150,7 @@ export default function AccountForm({ mode, onSuccess }: AccountFormProps) {
           updated_at: new Date().toISOString(),
         })
         if (userError || profileError) {
-          setError(userError?.message || profileError?.message)
+          setError(userError?.message || profileError?.message || 'Unknown error occurred')
           return
         }
         setSuccess('Profile updated!')

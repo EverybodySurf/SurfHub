@@ -3,7 +3,6 @@ import React, { useEffect, useState, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { triggerFileInput } from '@/utils/fileInputTrigger'
 
 interface AvatarProps {
   uid: string | null

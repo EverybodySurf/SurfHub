@@ -6,34 +6,24 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Loader2, AlertTriangle, MessageSquareText } from 'lucide-react';
+import { Loader2, AlertTriangle, MessageSquareText, MapPin, Wind, Cloud } from 'lucide-react';
 import { fetchSwellForecastAction, type SwellForecastOutput } from '@/app/swell-forecaster/actions';
-import { Calendar } from '@/components/ui/calendar';
-import { type DateRange } from 'react-day-picker';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { CalendarIcon } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { SwellForecastInput } from '@/app/swell-forecaster/actions';
+import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
-  surfSpot: z.string().min(2, { message: 'Surf spot must be at least 2 characters.' }),
+  location: z.string().min(2, { message: 'Location must be at least 2 characters.' }),
 });
 
 type FormData = z.infer<typeof formSchema>;
-type ForecastOption = 'today' | 'today_and_5_days' | 'future-dates';
 
 export function SwellForecastClient() {
   const [isLoading, setIsLoading] = useState(false);
   const [forecast, setForecast] = useState<SwellForecastOutput | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
-  const [forecastOption, setForecastOption] = useState<ForecastOption>('today_and_5_days');
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -44,50 +34,37 @@ export function SwellForecastClient() {
     setError(null);
     setForecast(null);
 
-    let input: SwellForecastInput;
-
-    if (forecastOption === 'today') {
-      const today = new Date();
-      input = {
-        surfSpot: data.surfSpot,
-        date: format(today, 'yyyy-MM-dd'),
-      };
-    } else if (forecastOption === 'today_and_5_days') {
-      const start = new Date();
-      const end = new Date();
-      end.setDate(start.getDate() + 5); // Today + 5 days
-
-      input = {
-        surfSpot: data.surfSpot,
-        startDate: format(start, 'yyyy-MM-dd'),
-        endDate: format(end, 'yyyy-MM-dd'),
-      };
-    } else { // future-dates
-      if (!dateRange?.from) {
-        setError("Please select a start date for future forecast.");
-        setIsLoading(false);
-        return;
-      }
-      const start = dateRange.from;
-      const end = dateRange.to || dateRange.from; // If no end date, use the start date
-
-      input = {
-        surfSpot: data.surfSpot,
-        startDate: format(start, 'yyyy-MM-dd'),
-        endDate: format(end, 'yyyy-MM-dd'),
-      };
-    }
-
-    // Clear previous date range state if a non-range option is selected
-    if (forecastOption === 'today' || forecastOption === 'today_and_5_days') {
-      setDateRange(undefined);
-    }
-    // Clear previous single date state if a range option is selected
-    if (forecastOption === 'future-dates') {
-      setDate(undefined);
-    }
-
     try {
+      // Check if API key is available
+      if (!process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY) {
+        throw new Error('OpenWeatherMap API key is not configured. Please check your environment variables.');
+      }
+
+      // First, fetch weather data for the location
+      const weatherResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(data.location)}&appid=${process.env.NEXT_PUBLIC_OPENWEATHER_API_KEY}&units=metric`);
+      
+      if (!weatherResponse.ok) {
+        const errorText = await weatherResponse.text();
+        console.error('Weather API Error:', errorText);
+        throw new Error(`Unable to fetch weather data for "${data.location}". Please check the location name and try again.`);
+      }
+      
+      const weatherData = await weatherResponse.json();
+      
+      // Prepare input for swell forecast with weather data
+      const input: SwellForecastInput = {
+        location: data.location,
+        temperature: weatherData.main.temp,
+        humidity: weatherData.main.humidity,
+        windSpeed: weatherData.wind.speed,
+        windDirection: weatherData.wind.deg || 0,
+        pressure: weatherData.main.pressure,
+        visibility: weatherData.visibility || 10000,
+        cloudiness: weatherData.clouds.all,
+        weatherDescription: weatherData.weather[0].description,
+        preferredForecastType: 'auto', // Use smart auto-selection
+      };
+
       const result = await fetchSwellForecastAction(input);
       if (result.error) {
         setError(result.error);
@@ -95,7 +72,7 @@ export function SwellForecastClient() {
         setForecast(result.data);
       }
     } catch (e: any) {
-      setError('An unexpected error occurred. Please try again.');
+      setError(e.message || 'An unexpected error occurred. Please try again.');
       console.error(e);
     } finally {
       setIsLoading(false);
@@ -103,108 +80,49 @@ export function SwellForecastClient() {
   };
 
   return (
-    <>
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto space-y-6">
       <Card className="shadow-lg">
         <CardHeader>
-          <CardTitle>Get Your Forecast</CardTitle>
-          <CardDescription>Enter the name of your desired surf spot.</CardDescription>
+          <CardTitle className="flex items-center gap-2">
+            <MapPin className="h-5 w-5" />
+            Get Current Surf Conditions
+          </CardTitle>
+          <CardDescription>
+            Enter a location to get intelligent surf conditions powered by AI with automatic data source selection
+          </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit(submitHandler)}>
           <CardContent className="space-y-4">
-            <div>
+            <div className="space-y-2">
+              <Label htmlFor="location">Location</Label>
               <Input
-                id="surfSpot"
-                placeholder="e.g., Mavericks, California"
-                {...register('surfSpot')}
-                aria-invalid={errors.surfSpot ? "true" : "false"}
-                className={errors.surfSpot ? "border-destructive focus-visible:ring-destructive" : ""}
+                id="location"
+                placeholder="Enter location (e.g., Malibu, CA)"
+                {...register('location')}
+                aria-invalid={errors.location ? "true" : "false"}
+                className={errors.location ? "border-destructive focus-visible:ring-destructive" : ""}
               />
-              {errors.surfSpot && (
-                <p className="text-sm text-destructive mt-1">{errors.surfSpot.message}</p>
+              {errors.location && (
+                <p className="text-sm text-destructive mt-1">{errors.location.message}</p>
               )}
             </div>
             
-            <div className={"flex flex-col space-y-2"}>
-              <Label>Forecast Duration</Label>
-              <RadioGroup
-                defaultValue={forecastOption}
-                onValueChange={(value: ForecastOption) => setForecastOption(value)}
-                className={"flex space-x-4"}
-              >
-                <div className={"flex items-center space-x-2"}>
-                  <RadioGroupItem value="today" id="today" />
-                  <Label htmlFor="today">Today</Label>
-                </div>
-                <div className={"flex items-center space-x-2"}>
-                  <RadioGroupItem value="today_and_5_days" id="today_and_5_days" />
-                  <Label htmlFor="today_and_5_days">Today and 5 Days</Label>
-                </div>
-                <div className={"flex items-center space-x-2"}>
-                  <RadioGroupItem value="future-dates" id="future-dates" />
-                  <Label htmlFor="future-dates">Future Dates</Label>
-                </div>
-              </RadioGroup>
-            </div>
-            
-            {forecastOption === 'future-dates' && (
-              <div className="flex flex-col space-y-2">
-                <Label htmlFor="datePicker">Select Date(s)</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      id="datePicker"
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !date && !dateRange && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dateRange?.from ? (
-                        dateRange.to ? (
-                          `${format(dateRange.from, "LLL dd, y")} - ${format(dateRange.to, "LLL dd, y")}`
-                        ) : (
-                          format(dateRange.from, "LLL dd, y")
-                        )
-                      ) : (
-                        "Select a date range"
-                      )}
-                    </Button>
-
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      initialFocus
-                      mode="range"
-                      defaultMonth={dateRange?.from}
-                      selected={dateRange}
-                      onSelect={setDateRange}
-                      numberOfMonths={1}
-                      disabled={(date) => date < new Date()} // Disable past dates
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            )}
-          </CardContent>
-          <CardFooter>
             <Button type="submit" disabled={isLoading} className="w-full">
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Forecasting...
+                  Getting Forecast...
                 </>
               ) : (
-                'Get Forecast'
+                'Get Current Conditions'
               )}
             </Button>
-          </CardFooter>
+          </CardContent>
         </form>
       </Card>
 
       {error && (
-        <Alert variant="destructive" className="mt-6">
+        <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
@@ -212,21 +130,112 @@ export function SwellForecastClient() {
       )}
 
       {forecast && (
-        <Card className="mt-6 shadow-lg">
-          <CardHeader>
-            <div className="flex items-center">
-              <MessageSquareText className="h-6 w-6 mr-2 text-primary" />
-              <CardTitle>Forecast Summary</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-md whitespace-pre-wrap leading-relaxed text-foreground/90">
-              {forecast.forecastSummary}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="space-y-4">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquareText className="h-5 w-5" />
+                AI Surf Forecast for {forecast.location}
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">
+                  Score: {forecast.surfabilityScore}/10
+                </Badge>
+                {forecast.forecastType && (
+                  <Badge variant="secondary">
+                    {forecast.forecastType}
+                  </Badge>
+                )}
+                {forecast.dataQuality && (
+                  <Badge variant={forecast.dataQuality === 'Premium' ? 'default' : 'outline'}>
+                    {forecast.dataQuality} Data
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Overall Conditions</h4>
+                  <p className="text-muted-foreground">{forecast.conditions}</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2">Recommendation</h4>
+                  <p className="text-muted-foreground">{forecast.recommendation}</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <Wind className="h-4 w-4" />
+                    Wind Conditions
+                  </h4>
+                  <p className="text-muted-foreground">{forecast.windConditions}</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-semibold mb-2 flex items-center gap-2">
+                    <Cloud className="h-4 w-4" />
+                    Weather Summary
+                  </h4>
+                  <p className="text-muted-foreground">{forecast.weatherSummary}</p>
+                </div>
+
+                {/* Enhanced Surf Quality Analysis */}
+                {forecast.surfQuality && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Surf Quality Analysis</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline">
+                          {forecast.surfQuality.rating} ({forecast.surfQuality.overallScore}/10)
+                        </Badge>
+                      </div>
+                      <p className="text-muted-foreground text-sm">{forecast.surfQuality.description}</p>
+                      <div className="grid grid-cols-2 gap-2 text-sm">
+                        <div>Wave Height: {(forecast.surfQuality.breakdown.waveHeight * 10).toFixed(1)}/10</div>
+                        <div>Wave Period: {(forecast.surfQuality.breakdown.wavePeriod * 10).toFixed(1)}/10</div>
+                        <div>Wind: {(forecast.surfQuality.breakdown.wind * 10).toFixed(1)}/10</div>
+                        <div>Swell Direction: {(forecast.surfQuality.breakdown.swellDirection * 10).toFixed(1)}/10</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Real Marine Data */}
+                {forecast.marineData && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Marine Conditions</h4>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      <div>Wave Height: {forecast.marineData.waveHeight.toFixed(1)}m</div>
+                      <div>Swell Height: {forecast.marineData.primarySwellHeight.toFixed(1)}m</div>
+                      <div>Swell Period: {forecast.marineData.primarySwellPeriod}s</div>
+                      <div>Swell Direction: {forecast.marineData.primarySwellDirection}°</div>
+                      <div>Wind Speed: {forecast.marineData.windSpeed.toFixed(1)} m/s</div>
+                      <div>Wind Direction: {forecast.marineData.windDirection}°</div>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Data source: {forecast.marineData.dataSource}
+                    </p>
+                  </div>
+                )}
+
+                {/* Spot Information */}
+                {forecast.spotInfo && (
+                  <div>
+                    <h4 className="font-semibold mb-2">Spot Information</h4>
+                    <div className="space-y-1 text-sm">
+                      <div><strong>Type:</strong> {forecast.spotInfo.type}</div>
+                      <div><strong>Difficulty:</strong> {forecast.spotInfo.difficulty}</div>
+                      <div><strong>Optimal Conditions:</strong> {forecast.spotInfo.optimalConditions}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
-    </>
   );
 }

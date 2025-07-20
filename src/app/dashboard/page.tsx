@@ -12,6 +12,7 @@ import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import data from "./data.json"
 import { RealtimeChat } from "@/components/realtime-chat"
+import AccountForm from "@/app/account/account-form"
 
 function DashboardContent() {
   const router = useRouter()
@@ -101,7 +102,10 @@ function DashboardContent() {
               )}
               {tab === "profile" && (
                 <div className="px-4 lg:px-6">
-                  <DataTable data={data} />
+                  <div className="max-w-2xl mx-auto">
+                    <h2 className="text-2xl font-bold mb-6">My Profile</h2>
+                    <AccountForm mode="edit" />
+                  </div>
                 </div>
               )}
               {/* Default dashboard content if no tab is set */}

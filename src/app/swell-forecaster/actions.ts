@@ -1,14 +1,14 @@
 'use client';
 
-import { type SwellForecastInput, type SwellForecastOutput } from '@/ai/flows/swell-forecast'; 
-export type { SwellForecastInput, SwellForecastOutput };
+import { type SmartForecastInput, type SmartForecastOutput } from '@/ai/flows/smart-swell-forecast'; 
+export type { SmartForecastInput as SwellForecastInput, SmartForecastOutput as SwellForecastOutput };
 
 interface ActionResult {
-  data?: SwellForecastOutput;
+  data?: SmartForecastOutput;
   error?: string;
 }
 
-export async function fetchSwellForecastAction(input: SwellForecastInput): Promise<ActionResult> {
+export async function fetchSwellForecastAction(input: SmartForecastInput): Promise<ActionResult> {
   try {
     const response = await fetch('/api/swell-forecast', {
       method: 'POST',

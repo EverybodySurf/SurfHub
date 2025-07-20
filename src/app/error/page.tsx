@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button'
 import { createClient } from '@/utils/supabase/client'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from '@/hooks/use-session'  
 
 export default function ErrorPage() {
   return (
