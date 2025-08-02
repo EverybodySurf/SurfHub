@@ -19,17 +19,28 @@ const MarineEnhancedOutputSchema = z.object({
   surfabilityScore: z.number().min(1).max(10).describe('Surfability score from 1-10'),
   
   // Real marine data
-  marineData: z.object({
-    waveHeight: z.number().describe('Significant wave height in meters'),
-    primarySwellHeight: z.number().describe('Primary swell height in meters'),
-    primarySwellPeriod: z.number().describe('Primary swell period in seconds'),
-    primarySwellDirection: z.number().describe('Primary swell direction in degrees'),
-    windSpeed: z.number().describe('Wind speed in m/s'),
-    windDirection: z.number().describe('Wind direction in degrees'),
-    dataSource: z.string().describe('Source of marine data'),
-  }).describe('Real marine conditions'),
-  
-  // Enhanced surf analysis
+      marineData: z.object({
+        waveHeight: z.number().describe('Significant wave height in meters'),
+        primarySwellHeight: z.number().describe('Primary swell height in meters'),
+        primarySwellPeriod: z.number().describe('Primary swell period in seconds'), 
+        primarySwellDirection: z.number().describe('Primary swell direction in degrees'),
+        secondarySwellHeight: z.number().optional().describe('Secondary swell height in meters'),
+        secondarySwellPeriod: z.number().optional().describe('Secondary swell period in seconds'),
+        secondarySwellDirection: z.number().optional().describe('Secondary swell direction in degrees'),
+        windWaveHeight: z.number().optional().describe('Wind wave height in meters'),
+        windWavePeriod: z.number().optional().describe('Wind wave period in seconds'),
+        windWaveDirection: z.number().optional().describe('Wind wave direction in degrees'),
+        seaTemperature: z.number().optional().describe('Sea surface temperature in Celsius'),
+        windSpeed: z.number().describe('Wind speed in m/s'),
+        windDirection: z.number().describe('Wind direction in degrees'),
+        // New oceanographic data
+        currentHeight: z.number().optional().describe('Current tide height in meters'),
+        nextHighTide: z.string().optional().describe('Time of next high tide'),
+        nextLowTide: z.string().optional().describe('Time of next low tide'), 
+        oceanCurrentVelocity: z.number().optional().describe('Ocean current velocity in m/s'),
+        oceanCurrentDirection: z.number().optional().describe('Ocean current direction in degrees'),
+        dataSource: z.string().describe('Source of marine data'),
+      }).optional().describe('Real marine weather conditions'),  // Enhanced surf analysis
   surfQuality: z.object({
     overallScore: z.number().min(1).max(10),
     rating: z.string(),
@@ -223,6 +234,13 @@ export const marineEnhancedSwellForecastFlow = ai.defineFlow(
           primarySwellHeight: marineConditions.waves.primarySwellHeight,
           primarySwellPeriod: marineConditions.waves.primarySwellPeriod,
           primarySwellDirection: marineConditions.waves.primarySwellDirection,
+          secondarySwellHeight: marineConditions.waves.secondarySwellHeight,
+          secondarySwellPeriod: marineConditions.waves.secondarySwellPeriod,
+          secondarySwellDirection: marineConditions.waves.secondarySwellDirection,
+          windWaveHeight: marineConditions.waves.windWaveHeight,
+          windWavePeriod: marineConditions.waves.windWavePeriod,
+          windWaveDirection: marineConditions.waves.windWaveDirection,
+          seaTemperature: marineConditions.weather.temperature,
           windSpeed: marineConditions.wind.speed,
           windDirection: marineConditions.wind.direction,
           dataSource: marineConditions.dataSource,

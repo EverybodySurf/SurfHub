@@ -11,7 +11,8 @@ body {
     --background: 224.4 64.3% 32.9%; /* Blue-900 */
     --foreground: 0 0% 98%; /* zinc-50 */
     --card: 225.9 70.7% 40.2%; /* Blue-800 Slightly lighter than background */
-    --card-foreground: 213.8 100% 96.9%; /* Blue-50 */
+    --card-foreground: 214.3 94.6% 92.7%; /* Blue-100 */
+    --card-border: 221.2 83.2% 53.3%; /* Blue-600 */
     --popover: 207 82% 97%;
     --popover-foreground: 210 40% 15%;
     --primary: 328.6 85.5% 70.2%; /* Pink-400 */

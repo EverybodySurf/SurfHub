@@ -64,16 +64,16 @@ export default function HomePage() {
             Welcome to SurfHub
           </h1>
           <p className="mt-6 max-w-2xl mx-auto text-lg leading-8 text-muted-foreground">
-            Your ultimate companion for swell forecasts, surf spot discovery, and connecting with the surfing community.
+            Your ultimate companion for swell forecasts, local business discovery, and connecting with the surfing community.
           </p>
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Button asChild className="bg-primary" size="lg">
               <Link href="/swell-forecaster">
-                Get Forecast <ArrowRight className="ml-2 h-5 w-5" />
+                Get Surf Reports
               </Link>
             </Button>
             <Button asChild variant="outlineGlow" size="lg">
-              <Link href="/directory">Explore Spots</Link>
+              <Link href="/directory">Explore Local Biz</Link>
             </Button>
           </div>
           <div className="mt-10">

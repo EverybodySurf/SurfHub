@@ -10,20 +10,11 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { ThemeToggleButton } from '@/components/theme/theme-toggle-button';
 import { CircleUserRound, LogOut } from 'lucide-react';
+import type { Session } from '@supabase/supabase-js';
 
-
-const navItems = [
-  { href: '/', label: 'Home', icon: Waves },
-  { href: '/swell-forecaster', label: 'Swell Forecaster', icon: BarChart3 },
-  { href: '/surf-map', label: 'Surf Map', icon: MapPin },
-  { href: '/directory', label: 'Directory', icon: List },
-  { href: '/forum', label: 'Forum', icon: Users },
-  { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-];
 
 export function Header() {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState<Session | null>(null);
   const supabase = createClient();
   const pathname = usePathname();
   const router = useRouter();
@@ -36,7 +27,7 @@ export function Header() {
 
   const baseNavItems = [
     { href: '/', label: 'Home', icon: Waves },
-    { href: '/swell-forecaster', label: 'Swell Forecaster', icon: BarChart3 },
+    { href: '/swell-forecaster', label: 'Surf Reports', icon: BarChart3 },
     { href: '/surf-map', label: 'Surf Map', icon: MapPin },
     { href: '/directory', label: 'Directory', icon: List },
     { href: '/forum', label: 'Forum', icon: Users },

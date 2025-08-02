@@ -1,6 +1,7 @@
-// Smart Swell Forecast Router - Chooses best available forecaster
+// Smart Swell Forecast Router - Chooses best available forecaster with robust error handling
 import { z } from 'zod';
 import { ai } from '../genkit';
+import { aiServiceManager, AIServiceError } from '@/lib/ai-service-manager';
 
 // Import all forecasters
 import { swellForecastFlow, type SwellForecastInput, type SwellForecastOutput } from './swell-forecast';
@@ -51,8 +52,21 @@ const SmartForecastOutputSchema = z.object({
     primarySwellHeight: z.number().describe('Primary swell height in meters'),
     primarySwellPeriod: z.number().describe('Primary swell period in seconds'),
     primarySwellDirection: z.number().describe('Primary swell direction in degrees'),
+    secondarySwellHeight: z.number().optional().describe('Secondary swell height in meters'),
+    secondarySwellPeriod: z.number().optional().describe('Secondary swell period in seconds'),
+    secondarySwellDirection: z.number().optional().describe('Secondary swell direction in degrees'),
+    windWaveHeight: z.number().optional().describe('Wind wave height in meters'),
+    windWavePeriod: z.number().optional().describe('Wind wave period in seconds'), 
+    windWaveDirection: z.number().optional().describe('Wind wave direction in degrees'),
+    seaTemperature: z.number().optional().describe('Sea surface temperature in Celsius'),
     windSpeed: z.number().describe('Wind speed in m/s'),
     windDirection: z.number().describe('Wind direction in degrees'),
+    // New oceanographic data
+    currentHeight: z.number().optional().describe('Current tide height in meters'),
+    nextHighTide: z.string().optional().describe('Time of next high tide'),
+    nextLowTide: z.string().optional().describe('Time of next low tide'),
+    oceanCurrentVelocity: z.number().optional().describe('Ocean current velocity in m/s'),
+    oceanCurrentDirection: z.number().optional().describe('Ocean current direction in degrees'),
     dataSource: z.string().describe('Source of marine data'),
   }).optional().describe('Real marine conditions'),
   
@@ -201,73 +215,115 @@ export const smartSwellForecastFlow = ai.defineFlow(
       
       let result: any;
       
-      // Call appropriate forecaster
-      switch (forecasterInfo.type) {
-        case 'marine':
-          result = await marineEnhancedSwellForecastFlow(forecasterInput);
-          break;
+      // Call appropriate forecaster with error handling
+      try {
+        switch (forecasterInfo.type) {
+          case 'marine':
+            result = await aiServiceManager.executeWithRetry(
+              async () => await marineEnhancedSwellForecastFlow(forecasterInput),
+              undefined, // No custom fallback, will use built-in
+              `marine forecast for ${input.location}`
+            );
+            break;
+            
+          case 'enhanced':
+            result = await aiServiceManager.executeWithRetry(
+              async () => await enhancedSwellForecastFlow(forecasterInput),
+              undefined, // No custom fallback, will use built-in
+              `enhanced forecast for ${input.location}`
+            );
+            // Convert enhanced format to unified format
+            result = {
+              ...result,
+              marineData: {
+                waveHeight: result.estimatedWaveConditions.waveHeight,
+                primarySwellHeight: result.estimatedWaveConditions.waveHeight * 0.8,
+                primarySwellPeriod: result.estimatedWaveConditions.wavePeriod,
+                primarySwellDirection: result.estimatedWaveConditions.swellDirection,
+                windSpeed: 5, // Default
+                windDirection: 270, // Default
+                dataSource: 'estimated',
+              }
+            };
+            break;
+            
+          case 'basic':
+          default:
+            result = await aiServiceManager.executeWithRetry(
+              async () => await swellForecastFlow(forecasterInput),
+              undefined, // No custom fallback, will use built-in
+              `basic forecast for ${input.location}`
+            );
+            // Convert basic format to unified format
+            result = {
+              ...result,
+              surfQuality: {
+                overallScore: result.surfabilityScore,
+                rating: result.surfabilityScore >= 8 ? 'Excellent' : 
+                       result.surfabilityScore >= 6 ? 'Good' : 
+                       result.surfabilityScore >= 4 ? 'Fair' : 'Poor',
+                breakdown: {
+                  waveHeight: 0.5,
+                  wavePeriod: 0.5,
+                  wind: 0.5,
+                  swellDirection: 0.5,
+                },
+                description: result.recommendation,
+              }
+            };
+            break;
+        }
+        
+        // Add metadata
+        return {
+          ...result,
+          forecastType: forecasterInfo.type,
+          dataQuality: forecasterInfo.quality,
+          apiCostsUsed: forecasterInfo.type === 'marine' && (!!process.env.STORMGLASS_API_KEY || !!process.env.WORLD_WEATHER_API_KEY),
+        };
+        
+      } catch (error) {
+        console.error(`AI service error for ${forecasterInfo.type} forecaster:`, error);
+        
+        // Check if it's an AI service error
+        if (error instanceof AIServiceError) {
+          console.log('AI service error encountered, generating basic fallback:', error.message);
           
-        case 'enhanced':
-          result = await enhancedSwellForecastFlow(forecasterInput);
-          // Convert enhanced format to unified format
-          result = {
-            ...result,
-            marineData: {
-              waveHeight: result.estimatedWaveConditions.waveHeight,
-              primarySwellHeight: result.estimatedWaveConditions.waveHeight * 0.8,
-              primarySwellPeriod: result.estimatedWaveConditions.wavePeriod,
-              primarySwellDirection: result.estimatedWaveConditions.swellDirection,
-              windSpeed: 5, // Default
-              windDirection: 270, // Default
-              dataSource: 'estimated',
-            }
+          // Generate a basic fallback forecast when AI services fail
+          const fallbackData = {
+            location: input.location,
+            conditions: `Weather-based forecast for ${input.location}. AI analysis temporarily unavailable due to high demand.`,
+            recommendation: 'Our AI forecasting service is currently experiencing high traffic. Please try again in a few minutes for enhanced analysis, or check local surf reports.',
+            windConditions: 'Check local weather conditions',
+            weatherSummary: 'Weather data processing limited',
+            surfabilityScore: 6, // Neutral score when AI unavailable
           };
-          break;
           
-        case 'basic':
-        default:
-          result = await swellForecastFlow(forecasterInput);
-          // Convert basic format to unified format
-          result = {
-            ...result,
-            surfQuality: {
-              overallScore: result.surfabilityScore,
-              rating: result.surfabilityScore >= 8 ? 'Excellent' : 
-                     result.surfabilityScore >= 6 ? 'Good' : 
-                     result.surfabilityScore >= 4 ? 'Fair' : 'Poor',
-              breakdown: {
-                waveHeight: 0.5,
-                wavePeriod: 0.5,
-                wind: 0.5,
-                swellDirection: 0.5,
-              },
-              description: result.recommendation,
-            }
+          return {
+            ...fallbackData,
+            forecastType: `${forecasterInfo.type}-fallback`,
+            dataQuality: 'Limited (AI service overloaded)',
+            apiCostsUsed: false,
           };
-          break;
+        }
+        
+        // Re-throw non-AI service errors
+        throw error;
       }
-      
-      // Add metadata
-      return {
-        ...result,
-        forecastType: forecasterInfo.type,
-        dataQuality: forecasterInfo.quality,
-        apiCostsUsed: forecasterInfo.type === 'marine' && (!!process.env.STORMGLASS_API_KEY || !!process.env.WORLD_WEATHER_API_KEY),
-      };
       
     } catch (error) {
       console.error('Smart forecast error:', error);
       
-      // Ultimate fallback
+      // Ultimate fallback for any remaining errors
       return {
         location: input.location,
-        conditions: `Unable to generate forecast for ${input.location}. Please try again.`,
-        recommendation: 'Forecast unavailable - please check location and try again.',
+        conditions: `Unable to generate forecast for ${input.location}. Service temporarily unavailable.`,
+        recommendation: 'Forecast unavailable - please try again in a few minutes. Our AI service may be experiencing high demand.',
         windConditions: 'Data unavailable',
         weatherSummary: 'Data unavailable',
         surfabilityScore: 5,
-        forecastType: 'fallback',
-        dataQuality: 'Unavailable',
+        forecastType: 'emergency-fallback',
+        dataQuality: 'Service Unavailable',
         apiCostsUsed: false,
       };
     }

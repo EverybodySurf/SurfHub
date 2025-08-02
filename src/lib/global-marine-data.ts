@@ -1,5 +1,6 @@
 // Marine Data Service - NOAA + Global Sources
 import { z } from 'zod';
+import { fetchWeatherApi } from 'openmeteo';
 
 // Marine data interfaces
 export interface MarineConditions {
@@ -38,7 +39,11 @@ export interface MarineConditions {
     nextHigh?: { time: string; height: number };
     nextLow?: { time: string; height: number };
   };
-  dataSource: 'noaa' | 'stormglass' | 'worldweatheronline' | 'openweather';
+  oceanCurrent?: {
+    velocity: number; // m/s
+    direction: number; // degrees
+  };
+  dataSource: 'noaa' | 'stormglass' | 'worldweatheronline' | 'openweather' | 'openmeteo';
   timestamp: string;
 }
 
@@ -46,6 +51,7 @@ export class GlobalMarineDataService {
   private noaaBaseUrl = 'https://api.weather.gov';
   private stormglassBaseUrl = 'https://api.stormglass.io/v2';
   private worldWeatherBaseUrl = 'https://api.worldweatheronline.com/premium/v1';
+  private openMeteoBaseUrl = 'https://marine-api.open-meteo.com/v1';
   
   constructor(
     private openWeatherApiKey: string,
@@ -64,6 +70,8 @@ export class GlobalMarineDataService {
       switch (dataSource) {
         case 'noaa':
           return await this.getNoaaData(lat, lon, locationName);
+        case 'openmeteo':
+          return await this.getOpenMeteoData(lat, lon, locationName);
         case 'stormglass':
           return await this.getStormglassData(lat, lon, locationName);
         case 'worldweatheronline':
@@ -98,12 +106,16 @@ export class GlobalMarineDataService {
       }
     }
 
-    // For global coverage, prefer Stormglass if available
+    // For global coverage, prioritize established marine APIs first
+    // Open-Meteo is promising but marine API may still be in development
     if (this.stormglassApiKey) return 'stormglass';
     if (this.worldWeatherApiKey) return 'worldweatheronline';
     
-    // Fallback to OpenWeather
-    return 'openweather';
+    // Try Open-Meteo as alternative (when their marine API is stable)
+    return 'openmeteo';
+    
+    // Final fallback to OpenWeather
+    // return 'openweather';
   }
 
   /**
@@ -156,6 +168,234 @@ export class GlobalMarineDataService {
       throw new Error('No NOAA forecast data available');
     } catch (error) {
       throw new Error(`NOAA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Get tide data from NOAA Tides & Currents API (global coverage near coastlines)
+   */
+  private async getTideData(lat: number, lon: number): Promise<{ currentHeight: number; nextHigh?: { time: string; height: number }; nextLow?: { time: string; height: number } } | undefined> {
+    try {
+      // NOAA provides tide data globally - find nearest station
+      const stationResponse = await fetch(
+        `https://api.tidesandcurrents.noaa.gov/mdapi/prod/webapi/stations.json?type=tidepredictions&units=metric&lat=${lat}&lon=${lon}&radius=50`
+      );
+      
+      if (!stationResponse.ok) {
+        return undefined; // No tide data available for this location
+      }
+      
+      const stationData = await stationResponse.json();
+      
+      if (!stationData.stations || stationData.stations.length === 0) {
+        return undefined;
+      }
+      
+      // Use the closest station
+      const station = stationData.stations[0];
+      
+      const tideResponse = await fetch(
+        `https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=${station.id}&product=predictions&datum=MLLW&time_zone=gmt&units=metric&format=json`
+      );
+      
+      if (!tideResponse.ok) {
+        return undefined;
+      }
+      
+      const tideData = await tideResponse.json();
+      
+      if (!tideData.predictions || tideData.predictions.length === 0) {
+        return undefined;
+      }
+      
+      // Find current tide level (approximate from latest prediction)
+      const now = new Date();
+      const currentPrediction = tideData.predictions
+        .filter((p: any) => new Date(p.t) <= now)
+        .pop() || tideData.predictions[0];
+      const currentHeight = parseFloat(currentPrediction?.v || '0');
+      
+      // Find next high and low tides from extremes
+      const extremes = tideData.predictions.filter((p: any) => p.type === 'H' || p.type === 'L');
+      const nextHigh = extremes.find((p: any) => p.type === 'H' && new Date(p.t) > now);
+      const nextLow = extremes.find((p: any) => p.type === 'L' && new Date(p.t) > now);
+      
+      return {
+        currentHeight,
+        nextHigh: nextHigh ? { time: nextHigh.t, height: parseFloat(nextHigh.v) } : undefined,
+        nextLow: nextLow ? { time: nextLow.t, height: parseFloat(nextLow.v) } : undefined
+      };
+    } catch (error) {
+      console.log('Tide data not available:', error);
+      return undefined;
+    }
+  }
+
+  /**
+   * Get Open-Meteo marine data (Global coverage, professional grade)
+   */
+  private async getOpenMeteoData(lat: number, lon: number, locationName: string): Promise<MarineConditions> {
+    try {
+      // Try the direct API approach first (simpler and faster)
+      try {
+        const params = [
+          'wave_height',
+          'wave_direction', 
+          'wave_period',
+          'wind_wave_height',
+          'wind_wave_direction',
+          'wind_wave_period',
+          'swell_wave_height',
+          'swell_wave_direction', 
+          'swell_wave_period',
+          'secondary_swell_wave_height',
+          'secondary_swell_wave_period',
+          'secondary_swell_wave_direction',
+          'sea_surface_temperature'
+        ];
+
+        const apiUrl = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}&current=${params.join(',')}&timezone=auto`;
+        const response = await fetch(apiUrl);
+        
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.current) {
+            const current = data.current;
+            
+            return {
+              location: { name: locationName, lat, lon },
+              waves: {
+                significantHeight: current.wave_height || 1.0,
+                primarySwellHeight: current.swell_wave_height || current.wave_height * 0.7 || 0.7,
+                primarySwellPeriod: current.swell_wave_period || current.wave_period || 8,
+                primarySwellDirection: current.swell_wave_direction || current.wave_direction || 225,
+                secondarySwellHeight: current.secondary_swell_wave_height > 0 ? current.secondary_swell_wave_height : undefined,
+                secondarySwellPeriod: current.secondary_swell_wave_period > 0 ? current.secondary_swell_wave_period : undefined,
+                secondarySwellDirection: current.secondary_swell_wave_direction > 0 ? current.secondary_swell_wave_direction : undefined,
+                windWaveHeight: current.wind_wave_height || current.wave_height * 0.3 || 0.3,
+                windWavePeriod: current.wind_wave_period || 4,
+                windWaveDirection: current.wind_wave_direction || current.wave_direction || 270
+              },
+              wind: {
+                speed: 5, // Open-Meteo marine API focuses on waves, not wind
+                direction: 270
+              },
+              weather: {
+                temperature: current.sea_surface_temperature || 20,
+                pressure: 1013,
+                humidity: 70,
+                visibility: 10000,
+                description: 'Marine conditions from Open-Meteo'
+              },
+              dataSource: 'openmeteo',
+              timestamp: new Date().toISOString()
+            };
+          }
+        }
+      } catch (directApiError) {
+        console.log('Direct API failed, trying NPM package approach:', directApiError);
+      }
+
+      // Fallback to NPM package approach
+      const params = {
+        latitude: lat,
+        longitude: lon,
+        current: [
+          'wave_height',
+          'wave_direction', 
+          'wave_period',
+          'wind_wave_height',
+          'wind_wave_direction',
+          'wind_wave_period',
+          'swell_wave_height',
+          'swell_wave_direction', 
+          'swell_wave_period',
+          'secondary_swell_wave_height',
+          'secondary_swell_wave_period',
+          'secondary_swell_wave_direction',
+          'sea_surface_temperature',
+          'ocean_current_velocity',
+          'ocean_current_direction'
+        ],
+        timezone: "auto"
+      };
+
+      const url = "https://marine-api.open-meteo.com/v1/marine";
+      const responses = await fetchWeatherApi(url, params);
+
+      if (!responses || responses.length === 0) {
+        throw new Error('No response from Open-Meteo marine API');
+      }
+
+      // Process first location
+      const response = responses[0];
+      const current = response.current();
+
+      if (!current) {
+        throw new Error('No current data available from Open-Meteo');
+      }
+
+      // Extract current marine data using the variable indices
+      const waveHeight = current.variables(0)?.value() || 1.0;
+      const waveDirection = current.variables(1)?.value() || 225;
+      const wavePeriod = current.variables(2)?.value() || 8;
+      
+      const windWaveHeight = current.variables(3)?.value() || waveHeight * 0.3;
+      const windWaveDirection = current.variables(4)?.value() || waveDirection;
+      const windWavePeriod = current.variables(5)?.value() || 4;
+      
+      const swellHeight = current.variables(6)?.value() || waveHeight * 0.7;
+      const swellDirection = current.variables(7)?.value() || waveDirection;
+      const swellPeriod = current.variables(8)?.value() || wavePeriod;
+      
+      const secondarySwellHeight = current.variables(9)?.value() || 0;
+      const secondarySwellPeriod = current.variables(10)?.value() || 0;
+      const secondarySwellDirection = current.variables(11)?.value() || 0;
+      
+      const seaTemperature = current.variables(12)?.value() || 20;
+      const oceanCurrentVelocity = current.variables(13)?.value() || 0;
+      const oceanCurrentDirection = current.variables(14)?.value() || 0;
+
+      // Fetch tide data in parallel (optional, may not be available for all locations)
+      const tideDataPromise = this.getTideData(lat, lon);
+      const tideData = await tideDataPromise.catch(() => undefined);
+
+      return {
+        location: { name: locationName, lat, lon },
+        waves: {
+          significantHeight: waveHeight,
+          primarySwellHeight: swellHeight,
+          primarySwellPeriod: swellPeriod,
+          primarySwellDirection: swellDirection,
+          secondarySwellHeight: secondarySwellHeight > 0 ? secondarySwellHeight : undefined,
+          secondarySwellPeriod: secondarySwellPeriod > 0 ? secondarySwellPeriod : undefined,
+          secondarySwellDirection: secondarySwellDirection > 0 ? secondarySwellDirection : undefined,
+          windWaveHeight: windWaveHeight,
+          windWavePeriod: windWavePeriod,
+          windWaveDirection: windWaveDirection
+        },
+        wind: {
+          speed: 5, // Would need separate weather API call for wind data
+          direction: 270
+        },
+        weather: {
+          temperature: seaTemperature,
+          pressure: 1013,
+          humidity: 70,
+          visibility: 10000,
+          description: 'Marine conditions from Open-Meteo'
+        },
+        tides: tideData,
+        oceanCurrent: oceanCurrentVelocity > 0 ? {
+          velocity: oceanCurrentVelocity,
+          direction: oceanCurrentDirection
+        } : undefined,
+        dataSource: 'openmeteo',
+        timestamp: new Date().toISOString()
+      };
+    } catch (error) {
+      throw new Error(`Open-Meteo error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 

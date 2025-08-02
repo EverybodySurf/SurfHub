@@ -1,23 +1,69 @@
 A community hangout/hub/lab and directory with swell and surf forcasting tools baked in.
 
+run with:
+
+ "npm run dev"
+
+
 Did:👇
 
+  1.Added NOAA for us territories
+  2.Stormglass free tier integration (not activated yet with api)
+  3.Openweathermap free tier
+  4.Added current & forecast tabs to surf reports components
+  5.reports feature Formated, getting there! Still needs some tweaks.
+  6.Added Open meteo marine data api! (working just need to fine tune output)
+  7.Integrated Chat with Supabase
+  8.optimized reports UI upon initial search trigger (search condensed, space optimized)
+  9.added date function to include the current date of search.
 
-+ todo:👇 (++ = priority)
 
-++ fix forecast
-  we need a new weather provider api
+  + todo:👇 (++ = priority)
 
-+chat is intergrated!   
-  but input is locked. fix this.
+  *note: Going slow and taking it step by step with Copilot works very well!*
+
+++ forecast
+  # Looks like blue-100 is going to be the new card-foreground setting.
+  # Increase the size of the weather icon,give it appropriate m/p to be harmonious with sourounding features
+  # add the Temperature in Celcius and Farenheight right along side the weather icon (flex items-center gap-4) remove from forecast.weatherSummary below it.
+  # where we currently have the forecast.recommendation.split... lets instead have weather insight exp.: "Sunny and warm with light winds, and 20% chance of rain." using the data we're pulling.
+  # tweak reports UI: 1.Edit and enhane AI advice section.2 format overall conditions response so it looks nicer and optimized.
+  # add location info to report.(spot, city & country) 
+  # Add search results when multiple cities or surfsports with same name 
+  # Add beach or surfspot name recognition - IN PROGRESS: Known surf spot database with 25+ famous spots
+  # Add sunny/cloudy/rainy and maybe temp. to current conditions sections. I imagine a sunny/cloudy/rainy image in the right space of this section
+  actually looks like we can combine the weather over view section wit the current conditions section. to give users an imidieate snap shot of the overall conditions.
+  # surf reports UI/UX should all include the same cards, and if the data is not available for a particular spot we just populate "unavailable for this spot"
+
+    
+    
+
++chat   
+  #but input is locked. fix this.
 
 +work on dashboard
-  top tab group: dashboard my reports, my forum activity etc. not working.
+  #top tab group: dashboard my reports, my forum activity etc. not working.
 
 +add a back arrow btn/link to edit my account ui.
 
 +Redirect unauthenticated users who try to access the     dashboard to a sign-in/sign-up page.
 This keeps your navigation clean and guides users to the right place.
+
+
+## 📚 **Documentation**
+
+All technical documentation has been organized in the [`docs/`](./docs/) directory:
+
+- **🌟 [`docs/COMPREHENSIVE_SURF_FORECAST_GUIDE.md`](./docs/COMPREHENSIVE_SURF_FORECAST_GUIDE.md)** - Complete system overview (marine data, surf algorithms, AI forecasting)
+- **🛠️ [`docs/setup-guides/`](./docs/setup-guides/)** - Setup and migration guides
+- **👨‍💻 [`docs/development/`](./docs/development/)** - Technical implementation details
+- **📋 [`docs/blueprint.md`](./docs/blueprint.md)** - Original project vision
+
+**Quick Start**: For technical details, start with the Comprehensive Surf Forecast Guide.
+
+---
+
+
 
 
 
