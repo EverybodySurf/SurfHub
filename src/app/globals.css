@@ -52,6 +52,7 @@ body {
     --foreground: 0 0% 98%; /* Zinc-50 for text */
     --card: 210 25% 15%; /* Slightly lighter than dark background */
     --card-foreground: 207 82% 90%;
+    --card-border: 240 5.2% 33.9%; /* Zinc-600 */
     --popover: 210 25% 15%;
     --popover-foreground: 207 82% 90%;
     --primary: 328.6 85.5% 70.2%; /* Pink-400 */

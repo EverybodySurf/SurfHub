@@ -184,7 +184,7 @@ export default function SwellForecastClient({
                     {forecast.conditions.split('.')[0]}. Current conditions at {forecast.location}.
                   </p>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-6">
                   {getWeatherIcon(forecast.weatherSummary)}
                   <div className="bg-background p-3 rounded-lg border border-card-border space-y-2">
                     <p className="text-sm text-card-foreground"><strong>Weather:</strong> {forecast.weatherSummary}</p>
