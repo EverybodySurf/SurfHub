@@ -114,7 +114,7 @@ export default function SwellForecastClient({
     } else if (weather.includes('cloud') || weather.includes('overcast')) {
       return <Cloud className="h-8 w-8 text-gray-600" />;
     } else {
-      return <Sun className="h-8 w-8 text-yellow-500" />;
+      return <Sun className="h-12 w-12 text-yellow-500" />;
     }
   };
 
@@ -184,8 +184,13 @@ export default function SwellForecastClient({
                     {forecast.conditions.split('.')[0]}. Current conditions at {forecast.location}.
                   </p>
                 </div>
-                <div className="space-y-6">
-                  {getWeatherIcon(forecast.weatherSummary)}
+                <div className="space-y-2.5">
+                  <div className="flex items-center gap-4">
+                    {getWeatherIcon(forecast.weatherSummary)}
+                    <div className="text-lg font-semibold text-card-foreground">
+                      22°C / 72°F
+                    </div>
+                  </div>
                   <div className="bg-background p-3 rounded-lg border border-card-border space-y-2">
                     <p className="text-sm text-card-foreground"><strong>Weather:</strong> {forecast.weatherSummary}</p>
                     <p className="text-sm text-card-foreground">{forecast.recommendation.split('.')[0]}.</p>

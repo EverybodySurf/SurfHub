@@ -23,8 +23,7 @@ Did:👇
   *note: Going slow and taking it step by step with Copilot works very well!*
 
 ++ forecast
-  # Looks like blue-100 is going to be the new card-foreground setting.
-  # Increase the size of the weather icon,give it appropriate m/p to be harmonious with sourounding features
+
   # add the Temperature in Celcius and Farenheight right along side the weather icon (flex items-center gap-4) remove from forecast.weatherSummary below it.
   # where we currently have the forecast.recommendation.split... lets instead have weather insight exp.: "Sunny and warm with light winds, and 20% chance of rain." using the data we're pulling.
   # tweak reports UI: 1.Edit and enhane AI advice section.2 format overall conditions response so it looks nicer and optimized.
