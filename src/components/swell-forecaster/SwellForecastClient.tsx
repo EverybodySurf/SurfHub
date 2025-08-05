@@ -17,6 +17,7 @@ interface ForecastData {
   weatherSummary: string;
   forecastType?: string;
   dataQuality?: string;
+  temperature?: number;
   marineData?: {
     waveHeight: number;
     primarySwellHeight: number;
@@ -118,6 +119,28 @@ export default function SwellForecastClient({
     }
   };
 
+  // Helper function to get temperature display
+  const getTemperatureDisplay = () => {
+    // Try to get air temperature from forecast data first
+    let celsius = forecast?.temperature;
+    
+    // Fallback to sea temperature if air temperature is not available
+    if (!celsius && forecast?.marineData?.seaTemperature) {
+      celsius = forecast.marineData.seaTemperature;
+    }
+
+    // Final fallback - return N/A only if temp. is truly missing (null or undefined)
+    // Note: 0 degrees is vali data (freezing temp!)
+    if (typeof celsius !== 'number') {
+      return 'N/A'; 
+    }
+
+    const fahrenheit = Math.round((celsius * 9/5) + 32);
+    return `${celsius}°C / ${fahrenheit}°F`;
+  };
+
+
+  // Render the component
   return (
     <div className={`transition-all duration-700 ease-in-out ${
       forecast ? 'max-w-7xl mx-auto space-y-8' : 'space-y-6'
@@ -128,8 +151,8 @@ export default function SwellForecastClient({
           {/* Compact Search Card - Takes 1/3 width on large screens */}
           <Card className="lg:col-span-1">
             <CardHeader className="pb-4">
-              <CardTitle className="text-2xl flex items-center gap-2 text-card-foreground">
-                <MapPin className="h-8 w-8 text-card-foreground" />
+              <CardTitle className="text-2xl flex items-center gap-2 font-medium text-muted-foreground">
+                <MapPin className="h-7 w-7 text-muted-foreground" />
                 Search
               </CardTitle>
             </CardHeader>
@@ -157,15 +180,15 @@ export default function SwellForecastClient({
 
           {/* Overall Conditions Summary Card - Takes 2/3 width on large screens */}
           <Card className="lg:col-span-2 shadow-none">
-            <CardHeader className="pb-4">
+            <CardHeader className="pb-6">
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <CardTitle className="text-xl text-card-foreground">
-                    Overall Conditions Summary - {forecast.location}
+                  <CardTitle className="text-lg font-normal text-muted-foreground">
+                    Overview - {forecast.location}
                   </CardTitle>
                 </div>
                 {searchDateTime && (
-                  <div className="text-lg text-card-foreground">
+                  <div className="text-md font-normal text-muted-foreground">
                     {searchDateTime}
                   </div>
                 )}
@@ -173,27 +196,27 @@ export default function SwellForecastClient({
             </CardHeader>
             <CardContent>
               <div className="grid lg:grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <strong className="text-card-foreground">Wave Score:</strong>
-                    <Badge variant="outline" className="text-xl px-4 py-2 font-bold text-card-foreground">
+                <div className="space-y-8">
+                  <div className="flex items-center gap-2 pt-3">
+                    <p className="text-xl font-medium text-card-foreground">Wave Score:</p>
+                    <Badge variant="outline" className="text-xl px-3 py-0 font-bold text-card-foreground">
                       {forecast.surfabilityScore}/10
                     </Badge>
                   </div>
-                  <p className="text-sm text-card-foreground leading-relaxed bg-background p-3 rounded-lg border border-card-border">
+                  <p className="text-sm text-muted-foreground leading-relaxed bg-background p-3 rounded-lg border border-card-border">
                     {forecast.conditions.split('.')[0]}. Current conditions at {forecast.location}.
                   </p>
                 </div>
-                <div className="space-y-2.5">
-                  <div className="flex items-center gap-4">
+                <div className="space-y-6">
+                  <div className="flex items-center gap-6">
                     {getWeatherIcon(forecast.weatherSummary)}
-                    <div className="text-lg font-semibold text-card-foreground">
-                      22°C / 72°F
+                    <div className="text-xl font-semibold text-card-foreground">
+                      {getTemperatureDisplay()}
                     </div>
                   </div>
                   <div className="bg-background p-3 rounded-lg border border-card-border space-y-2">
-                    <p className="text-sm text-card-foreground"><strong>Weather:</strong> {forecast.weatherSummary}</p>
-                    <p className="text-sm text-card-foreground">{forecast.recommendation.split('.')[0]}.</p>
+                    <p className="text-sm text-muted-foreground"><strong>Weather:</strong> {forecast.weatherSummary}</p>
+                    <p className="text-sm text-muted-foreground">{forecast.recommendation.split('.')[0]}.</p>
                   </div>
                 </div>
               </div>
@@ -229,7 +252,7 @@ export default function SwellForecastClient({
           {/* AI Advice Card - Full width */}
           <Card className="shadow-none bg-card">
             <CardHeader className="pb-4">
-              <CardTitle className="text-xl text-card-foreground flex items-center gap-2">
+              <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                 AI Surf Recommendation & Analysis
               </CardTitle>
             </CardHeader>
@@ -297,7 +320,7 @@ export default function SwellForecastClient({
           {/* Detailed Scoring Card - Full width */}
           <Card className="shadow-none bg-card">
             <CardHeader className="pb-4">
-              <CardTitle className="text-xl text-card-foreground flex items-center gap-2">
+              <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                 Detailed Surf Quality Breakdown
               </CardTitle>
             </CardHeader>
@@ -355,7 +378,7 @@ export default function SwellForecastClient({
             {/* Wave Height Card */}
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-base text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Wave Height
                 </CardTitle>
               </CardHeader>
@@ -377,7 +400,7 @@ export default function SwellForecastClient({
             {/* Swell Period Card */}
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-base text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Swell Period
                 </CardTitle>
               </CardHeader>
@@ -399,7 +422,7 @@ export default function SwellForecastClient({
             {/* Wind Info Card */}
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-base text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Wind Conditions
                 </CardTitle>
               </CardHeader>
@@ -421,7 +444,7 @@ export default function SwellForecastClient({
             {/* Tide Info Card */}
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-base text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Tide Info
                 </CardTitle>
               </CardHeader>
@@ -442,7 +465,7 @@ export default function SwellForecastClient({
             {/* Secondary Swell */}
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-base text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Secondary Swell
                 </CardTitle>
               </CardHeader>
@@ -465,7 +488,7 @@ export default function SwellForecastClient({
             {/* Water Temperature */}
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-base text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Water Temp
                 </CardTitle>
               </CardHeader>
@@ -490,7 +513,7 @@ export default function SwellForecastClient({
             {/* Swell Direction */}
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-base text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Swell Direction
                 </CardTitle>
               </CardHeader>
@@ -508,7 +531,7 @@ export default function SwellForecastClient({
             {/* Data Source */}
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-base text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Data Quality
                 </CardTitle>
               </CardHeader>
@@ -532,7 +555,7 @@ export default function SwellForecastClient({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Next 6 Hours
                 </CardTitle>
               </CardHeader>
@@ -552,7 +575,7 @@ export default function SwellForecastClient({
 
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Next 12 Hours
                 </CardTitle>
               </CardHeader>
@@ -572,7 +595,7 @@ export default function SwellForecastClient({
 
             <Card className="bg-card shadow-none">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg text-card-foreground flex items-center gap-2">
+                <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                   Next 24 Hours
                 </CardTitle>
               </CardHeader>
@@ -593,7 +616,7 @@ export default function SwellForecastClient({
 
           <Card className="bg-card shadow-none">
             <CardHeader className="pb-4">
-              <CardTitle className="text-xl text-card-foreground flex items-center gap-2">
+              <CardTitle className="text-lg font-normal text-muted-foreground flex items-center gap-2">
                 Extended Analysis & Recommendations
               </CardTitle>
             </CardHeader>

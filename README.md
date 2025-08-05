@@ -22,6 +22,57 @@ Did:👇
 
   *note: Going slow and taking it step by step with Copilot works very well!*
 
+!! next step instructions: 📋 Next Step Instructions: Make Temperature Dynamic
+   Now let's replace that hardcoded 22°C / 72°F with real temperature data!
+
+🎯 Your Next Task:
+Replace the dummy temperature with actual data from the forecast
+
+📍 Where to Work:
+Around line 191, you'll find:
+
+<div className="text-lg font-semibold text-card-foreground">
+  22°C / 72°F
+</div>
+
+🔧 Step-by-Step Instructions:
+Step 1: Create a Temperature Helper Function 
+
+What to do: Add this function right after your getWeatherIcon function (around line 109)
+
+Add this code:
+
+// Helper function to get temperature display
+const getTemperatureDisplay = () => {
+  // For now, use a mock temperature - we'll make this dynamic later
+  const celsius = 22;
+  const fahrenheit = Math.round((celsius * 9/5) + 32);
+  return `${celsius}°C / ${fahrenheit}°F`;
+};
+
+
+Step 2: Replace the Hardcoded Temperature
+
+What to do: Replace the dummy text with your new function
+
+Change this:
+
+<div className="text-lg font-semibold text-card-foreground">
+  22°C / 72°F
+</div>
+
+To this:
+
+<div className="text-lg font-semibold text-card-foreground">
+  {getTemperatureDisplay()}
+</div>
+
+🎓 Learning Goals:
+Function creation - Building reusable helper functions
+Temperature conversion - Understanding Celsius to Fahrenheit formula
+Dynamic rendering - Using functions instead of hardcoded values
+Ready to give it a try? This will set you up perfectly for when we add real temperature data from the API! 🌡️🏄‍♂️
+
 ++ forecast
 
   # add the Temperature in Celcius and Farenheight right along side the weather icon (flex items-center gap-4) remove from forecast.weatherSummary below it.
