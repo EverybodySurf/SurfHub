@@ -34,8 +34,8 @@ export class SurfQualityCalculator {
   static scoreWaveHeight(height: number, optimal: [number, number]): number {
     const [min, max] = optimal;
     
-    if (height < min * 0.5) return 0.1; // way too small
-    if (height < min) return (height / min) * 0.6; // too small
+    if (height < min * 0.5) return 0.1; // way too small ?
+    if (height < min) return (height / min) * 0.6; // too small ?
     if (height <= max) return 1.0; // perfect range
     if (height <= max * 1.5) return Math.max(0.4, 1 - ((height - max) / max) * 0.6); // getting big
     return 0.2; // too big
