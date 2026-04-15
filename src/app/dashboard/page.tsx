@@ -2,32 +2,59 @@
 
 import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { AppSidebar } from "@/components/app-sidebar"
-import { ChartAreaInteractive } from "@/components/chart-area-interactive"
-import { DataTable } from "@/components/data-table"
 import { SectionCards } from "@/components/section-cards"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import data from "./data.json"
-import { RealtimeChat } from "@/components/realtime-chat"
-import AccountForm from "@/app/account/account-form"
+
+// Lazy-load heavy components to reduce initial bundle
+const ChartAreaInteractive = dynamic(
+  () => import("@/components/chart-area-interactive").then(mod => ({ default: mod.ChartAreaInteractive })),
+  { 
+    loading: () => <div className="h-[300px] animate-pulse bg-muted rounded-lg" />,
+    ssr: false 
+  }
+)
+
+const DataTable = dynamic(
+  () => import("@/components/data-table").then(mod => ({ default: mod.DataTable })),
+  { 
+    loading: () => <div className="h-[400px] animate-pulse bg-muted rounded-lg" />,
+    ssr: false 
+  }
+)
+
+const RealtimeChat = dynamic(
+  () => import("@/components/realtime-chat").then(mod => ({ default: mod.RealtimeChat })),
+  { 
+    loading: () => <div className="h-[400px] animate-pulse bg-muted rounded-lg" />,
+    ssr: false 
+  }
+)
+
+const AccountForm = dynamic(
+  () => import("@/app/account/account-form"),
+  { 
+    loading: () => <div className="h-[400px] animate-pulse bg-muted rounded-lg" />,
+    ssr: false 
+  }
+)
 
 function DashboardContent() {
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(true)
-  const searchParams = useSearchParams();
-  const tab = searchParams.get('tab');
+  const searchParams = useSearchParams()
+  const tab = searchParams.get('tab')
   const [user, setUser] = useState<User | null>(null)
   const username =
-  user?.user_metadata?.full_name ||
-  user?.email ||
-  'Anonymous'
-  console.log("tab:", tab);
-  
-
+    user?.user_metadata?.full_name ||
+    user?.email ||
+    'Anonymous'
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -35,7 +62,6 @@ function DashboardContent() {
         router.push('/auth/signin')
       } else {
         setLoading(false)
-        
       }
     })
   }, [router, supabase])
@@ -45,10 +71,8 @@ function DashboardContent() {
   }, [supabase])
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div className="flex items-center justify-center min-h-screen">Loading...</div>
   }
-
-  
 
   return (
     <SidebarProvider>
@@ -112,16 +136,16 @@ function DashboardContent() {
               {!tab && (
                 <>
                   <div className="px-4 lg:px-6">
-                  <SectionCards />
-                </div>
-                <div className="px-4 lg:px-6">
-                  <ChartAreaInteractive />
-                </div>
-                <div className="px-4 lg:px-6">
-                  <DataTable data={data} />
-                </div>
-              </>
-            )}
+                    <SectionCards />
+                  </div>
+                  <div className="px-4 lg:px-6">
+                    <ChartAreaInteractive />
+                  </div>
+                  <div className="px-4 lg:px-6">
+                    <DataTable data={data} />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
