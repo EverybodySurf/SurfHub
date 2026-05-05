@@ -13,7 +13,7 @@ const SurfMap = dynamic(() => import('@/components/surf-map/SurfMap'), {
   loading: () => (
     <div className="h-full w-full flex items-center justify-center bg-muted rounded-lg">
       <div className="text-center">
-        <Waves className="h-12 w-12 mx-auto mb-3 animate-pulse text-primary" />
+        <Waves className="h-12 w-12 mx-auto mb-3 animate-pulse text-cyan-400" />
         <p className="text-muted-foreground">Loading map...</p>
       </div>
     </div>
@@ -62,7 +62,7 @@ export default function SurfMapPage() {
       <header className="border-b border-border bg-card px-4 py-6">
         <div className="container mx-auto">
           <div className="flex items-center gap-3 mb-2">
-            <MapPin className="h-8 w-8 text-primary" />
+            <MapPin className="h-8 w-8 text-cyan-400" />
             <h1 className="text-3xl font-bold tracking-tight">
               Guadeloupe Surf Spots
             </h1>
@@ -89,7 +89,7 @@ export default function SurfMapPage() {
               ) : (
                 <div className="h-full w-full flex items-center justify-center bg-muted rounded-lg">
                   <div className="text-center">
-                    <Waves className="h-12 w-12 mx-auto mb-3 animate-pulse text-primary" />
+                    <Waves className="h-12 w-12 mx-auto mb-3 animate-pulse text-cyan-400" />
                     <p className="text-muted-foreground">Loading map...</p>
                   </div>
                 </div>
@@ -207,7 +207,7 @@ export default function SurfMapPage() {
                             key={amenity.id}
                             className="flex items-start gap-2 p-2 rounded-md bg-muted/50 hover:bg-muted transition-colors"
                           >
-                            <Icon className="h-4 w-4 mt-0.5 text-primary" />
+                            <Icon className="h-4 w-4 mt-0.5 text-cyan-400" />
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-medium truncate">{amenity.name}</p>
                               <div className="flex items-center gap-2 text-xs text-muted-foreground">

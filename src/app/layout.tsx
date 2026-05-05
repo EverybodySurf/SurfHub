@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Inter, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -10,6 +10,12 @@ import { ThemeProvider } from '@/components/theme/theme-provider';
 const inter = Inter({
   variable: '--font-inter',
   subsets: ['latin'],
+});
+
+const cormorant = Cormorant_Garamond({
+  variable: '--font-serif',
+  subsets: ['latin'],
+  weight: ['400', '500', '600'],
 });
 
 export const metadata: Metadata = {
@@ -26,7 +32,8 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={cn(
         "min-h-screen font-sans antialiased",
-        inter.variable
+        inter.variable,
+        cormorant.variable
       )}>
         <ThemeProvider
             attribute="class"
@@ -34,11 +41,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-          <div className="relative flex min-h-screen flex-col bg-background">
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <Header />
+          <main className="flex-1">{children}</main>
+          <Footer />
           <Toaster />
         </ThemeProvider>
       </body>
