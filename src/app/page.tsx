@@ -28,7 +28,7 @@ interface GridItem {
 const allItems: GridItem[] = [
   // FEEL GOOD FEED
   { id: 'fg1', feed: 'feelgood', size: 'tall', type: 'quote', title: 'Wave Wisdom', content: '"The ocean heals everything. It whispers to those who listen."', source: 'Surfer\'s Journal', image: 'https://images.unsplash.com/photo-1505142468610-359797ca27ae?w=600&auto=format' },
-  { id: 'fg2', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Morning Glass Session', content: 'Sunrise paints the waves gold. 4min drift.', image: 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format', videoUrl: 'placeholder' },
+  { id: 'fg2', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Surfing Guadeloupe 🌊', content: 'DU VRAI NIVEAU — Local surfers showing real skills.', image: 'https://i.ytimg.com/vi/k8VxkPMqYdU/hqdefault.jpg', videoUrl: 'https://youtu.be/k8VxkPMqYdU', videoType: 'youtube' },
   { id: 'fg3', feed: 'feelgood', size: 'wide', type: 'photo', title: 'Empty Lineup', content: 'Just you, the board, and the swell.', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format' },
   { id: 'fg4', feed: 'feelgood', size: 'small', type: 'quote', title: '', content: '"You can\'t stop the waves, but you can learn how to swim."', source: 'Jon Kabat-Zinn' },
   { id: 'fg5', feed: 'feelgood', size: 'horizontal', type: 'reel', title: 'First Wave Forever', content: 'Remember your first wave? That feeling never leaves. 🎬 TikTok', image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=800&auto=format', videoUrl: 'placeholder' },
@@ -38,8 +38,8 @@ const allItems: GridItem[] = [
   
   // LOCAL (Guadeloupe) FEED
   { id: 'loc1', feed: 'local', size: 'square', type: 'spot', title: 'Caravelle', content: 'East coast gem. Beginner-friendly. Clean waves when swell hits.', location: 'Sainte-Anne', image: 'https://images.unsplash.com/photo-1506905925346-21b49c82b1dd?w=400&auto=format' },
-  { id: 'loc2', feed: 'local', size: 'horizontal', type: 'reel', title: 'Anse Bertrand Raw', content: 'North coast powerhouse. Fast, hollow waves. 🎬 Instagram', location: 'Anse-Bertrand', image: 'https://images.unsplash.com/photo-1455729552865-3658e0c677dd?w=800&auto=format', videoUrl: 'placeholder' },
-  { id: 'loc3', feed: 'local', size: 'horizontal', type: 'video', title: 'Surf Contest Gwada 2026', content: 'Annual competition footage. Music, food, waves.', location: 'Le Moule', image: 'https://images.unsplash.com/photo-1505142468610-359797ca27ae?w=800&auto=format', videoUrl: 'placeholder' },
+  { id: 'loc2', feed: 'local', size: 'horizontal', type: 'reel', title: 'Bonnes Conditions ce Matin 🌊', content: 'GwadaShots — Perfect morning conditions in Guadeloupe.', location: 'Guadeloupe', image: 'https://images.pexels.com/photos/1556663/pexels-photo-1556663.jpeg?auto=compress&cs=tinysrgb&w=800', videoUrl: 'https://www.instagram.com/reel/DYCUdqEBCqk/', videoType: 'instagram' },
+  { id: 'loc3', feed: 'local', size: 'horizontal', type: 'video', title: 'Compétition de Surf Gwada 🏆', content: 'Annual competition footage. Music, food, waves.', location: 'Guadeloupe', image: 'https://i.ytimg.com/vi/k8VxkPMqYdU/hqdefault.jpg', videoUrl: 'https://youtu.be/k8VxkPMqYdU', videoType: 'youtube' },
   { id: 'loc4', feed: 'local', size: 'small', type: 'spot', title: 'Port Louis', content: 'Northwest break. Afternoon sessions.', location: 'Port-Louis' },
   { id: 'loc5', feed: 'local', size: 'horizontal', type: 'tweet', title: 'New Surf School Opening', content: 'Fresh surf school confirmed in Le Moule! 📍', location: 'Le Moule', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format' },
   { id: 'loc6', feed: 'local', size: 'tall', type: 'spot', title: 'Pointe des Châteaux', content: 'Scenic point. Epic views when swell hits. Legendary sunrise spot.', location: 'Saint-François', image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=600&auto=format' },
