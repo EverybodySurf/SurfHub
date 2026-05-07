@@ -399,14 +399,14 @@ export default function HomePage() {
             className="relative mb-4"
             style={{ transform: `translateY(${titleOffset}px)` }}
           >
-            {/* SurfHub — small, gradient, top-left */}
+            {/* SurfHub — gradient, top-left (b reaches end of "a" in Guadeloupe) */}
             <span 
-              className="absolute -top-6 left-0 text-lg md:text-xl font-black tracking-wide bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
+              className="absolute -top-7 left-0 text-2xl md:text-3xl font-black tracking-wide bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
             >
               SurfHub
             </span>
-            {/* Guadeloupe — large, white */}
-            <h1 className="text-7xl md:text-9xl font-black tracking-tight text-white">
+            {/* Guadeloupe — large, white, tight kerning */}
+            <h1 className="text-7xl md:text-9xl font-black tracking-[-0.08em] text-white">
               Guadeloupe
             </h1>
           </div>
