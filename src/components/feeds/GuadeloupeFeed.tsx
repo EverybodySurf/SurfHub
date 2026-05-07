@@ -17,6 +17,15 @@ interface GuadeloupeItem {
 
 const guadeloupeData: GuadeloupeItem[] = [
   {
+    id: '8',
+    type: 'news',
+    title: 'Bonnes Conditions ce Matin 🌊',
+    content: 'Bonnes conditions ce matin, espérons que cela dure toute la journée ! Big up à mes deux champions.',
+    location: 'Guadeloupe',
+    image: 'https://images.pexels.com/photos/1556663/pexels-photo-1556663.jpeg?auto=compress&cs=tinysrgb&w=300',
+    url: 'https://www.instagram.com/reel/DYCUdqEBCqk/',
+  },
+  {
     id: '7',
     type: 'event',
     title: 'Compétition de Surf Gwada 🏆',
