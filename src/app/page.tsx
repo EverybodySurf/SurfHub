@@ -401,7 +401,7 @@ export default function HomePage() {
           >
             {/* SurfHub — gradient, top-left (b reaches end of "a" in Guadeloupe) */}
             <span 
-              className="absolute -top-7 left-0 text-2xl md:text-3xl font-black tracking-wide bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
+              className="absolute -top-8 left-0 text-3xl md:text-4xl font-black tracking-[-0.03em] bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
             >
               SurfHub
             </span>
