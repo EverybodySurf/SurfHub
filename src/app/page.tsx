@@ -21,6 +21,7 @@ interface GridItem {
   location?: string;
   image?: string;
   videoUrl?: string;
+  videoType?: 'youtube' | 'instagram' | 'tiktok';
 }
 
 // Expanded content pool for hero collage + feeds
@@ -107,6 +108,66 @@ const typeLabels: Record<string, string> = {
   tweet: '✕ X',
 };
 
+// Extract video ID from various URL formats
+function extractVideoId(url: string, videoType: string): string | null {
+  if (videoType === 'youtube') {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
+  }
+  if (videoType === 'instagram') {
+    const match = url.match(/instagram\.com\/(?:p|reel)\/([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
+  }
+  if (videoType === 'tiktok') {
+    const match = url.match(/tiktok\.com\/@[^/]+\/video\/(\d+)/);
+    return match ? match[1] : null;
+  }
+  return null;
+}
+
+// Render inline video embed
+function renderVideoEmbed(item: GridItem) {
+  const videoId = item.videoUrl && item.videoType ? extractVideoId(item.videoUrl, item.videoType) : null;
+  
+  if (!videoId) return null;
+  
+  if (item.videoType === 'youtube') {
+    return (
+      <iframe
+        src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
+        className="absolute inset-0 w-full h-full"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        title={item.title || item.content}
+      />
+    );
+  }
+  
+  if (item.videoType === 'instagram') {
+    return (
+      <iframe
+        src={`https://www.instagram.com/reel/${videoId}/embed`}
+        className="absolute inset-0 w-full h-full"
+        allowFullScreen
+        title={item.title || item.content}
+      />
+    );
+  }
+  
+  if (item.videoType === 'tiktok') {
+    return (
+      <iframe
+        src={`https://www.tiktok.com/embed/v2/${videoId}`}
+        className="absolute inset-0 w-full h-full"
+        allowFullScreen
+        title={item.title || item.content}
+      />
+    );
+  }
+  
+  return null;
+}
+
 // Straight layout generator for 20 collage slots (no rotations)
 function generateStraightLayout() {
   return {
@@ -130,6 +191,7 @@ export default function HomePage() {
   const [scrollY, setScrollY] = useState(0);
   const [layout, setLayout] = useState(generateStraightLayout());
   const [isHovered, setIsHovered] = useState<number | null>(null);
+  const [playingId, setPlayingId] = useState<string | null>(null);
   
   useEffect(() => {
     setLayout(generateStraightLayout());
@@ -403,15 +465,81 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-[180px]">
             
-            {filteredItems.map((item) => (
-              <a
-                key={item.id}
-                href={item.videoUrl || undefined}
-                target={item.videoUrl ? '_blank' : undefined}
-                rel={item.videoUrl ? 'noopener noreferrer' : undefined}
-                className="block"
-              >
+            {filteredItems.map((item) => {
+              // Video items with videoType: inline playback
+              if (item.videoUrl && item.videoType) {
+                const isPlaying = playingId === item.id;
+                
+                return (
+                  <Card 
+                    key={item.id}
+                    className={`${sizeClasses[item.size]} relative overflow-hidden group cursor-pointer bg-card/80 hover:border-primary/40 transition-all duration-300`}
+                    onClick={() => setPlayingId(isPlaying ? null : item.id)}
+                  >
+                    {isPlaying ? (
+                      // VIDEO PLAYING: show embed with close button
+                      <div className="absolute inset-0 z-20">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setPlayingId(null); }}
+                          className="absolute top-2 right-2 z-30 p-1.5 rounded-full bg-black/70 hover:bg-black text-white transition-colors"
+                          aria-label="Close video"
+                        >
+                          ✕
+                        </button>
+                        {renderVideoEmbed(item)}
+                      </div>
+                    ) : (
+                      // VIDEO CARD: show thumbnail with play button
+                      <>
+                        {item.image && (
+                          <div className="absolute inset-0 z-0">
+                            <Image
+                              src={item.image}
+                              alt={item.title || item.content}
+                              fill
+                              className="object-cover opacity-70 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700"
+                              sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                          </div>
+                        )}
+                        
+                        {/* Play button indicator */}
+                        <div className="absolute top-3 right-3 z-20 px-2 py-1.5 rounded bg-black/50 backdrop-blur-sm hover:bg-black/70 transition-colors">
+                          <span className="text-xs text-white/80">▶ Play</span>
+                        </div>
+                        
+                        <div className="relative z-10 h-full flex flex-col justify-end p-4">
+                          <div className="mb-auto">
+                            <span className="text-xs opacity-50">{typeLabels[item.type]}</span>
+                          </div>
+                          
+                          {item.title && (
+                            <h3 className="text-sm font-medium text-white mb-1 line-clamp-1">
+                              {item.title}
+                            </h3>
+                          )}
+                          <p className="text-xs text-white/70 line-clamp-2 mb-2">
+                            {item.content}
+                          </p>
+                          
+                          {(item.source || item.location) && (
+                            <div className="flex items-center gap-2 text-xs text-white/40">
+                              {item.source && <span>{item.source}</span>}
+                              {item.location && <span>📍 {item.location}</span>}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </Card>
+                );
+              }
+              
+              // Regular items: static cards or external links
+              return (
                 <Card 
+                  key={item.id}
                   className={`${sizeClasses[item.size]} relative overflow-hidden group cursor-pointer bg-card/80 hover:border-primary/40 transition-all duration-300`}
                 >
                 {item.image ? (
@@ -485,12 +613,6 @@ export default function HomePage() {
                   </div>
                 )}
                 
-                {item.videoUrl && item.image && (
-                  <div className="absolute top-3 right-3 z-20 px-2 py-1 rounded bg-black/50 backdrop-blur-sm">
-                    <span className="text-xs text-white/80">▶</span>
-                  </div>
-                )}
-                
                 <div className="relative z-10 h-full flex flex-col justify-end p-4">
                   <div className="mb-auto">
                     <span className="text-xs opacity-50">{typeLabels[item.type]}</span>
@@ -513,8 +635,8 @@ export default function HomePage() {
                   )}
                 </div>
               </Card>
-              </a>
-            ))}
+              );
+            })}
             
           </div>
         </div>
