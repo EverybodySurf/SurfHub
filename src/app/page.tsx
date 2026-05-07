@@ -394,12 +394,22 @@ export default function HomePage() {
         
         {/* Title overlay */}
         <div className="relative z-30 h-screen flex flex-col items-center justify-center px-4">
-          <h1 
-            className="text-7xl md:text-9xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent mb-4"
+          {/* Two-line brand + location */}
+          <div 
+            className="relative mb-4"
             style={{ transform: `translateY(${titleOffset}px)` }}
           >
-            SurfHub
-          </h1>
+            {/* SurfHub — small, yellow, top-left */}
+            <span 
+              className="absolute -top-6 left-0 text-lg md:text-xl font-semibold text-yellow-300 tracking-wide"
+            >
+              SurfHub
+            </span>
+            {/* Guadeloupe — large, gradient */}
+            <h1 className="text-7xl md:text-9xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
+              Guadeloupe
+            </h1>
+          </div>
           <p 
             className="text-lg md:text-xl text-white/50 max-w-md mx-auto mb-12 text-center"
             style={{ transform: `translateY(${titleOffset * 0.7}px)` }}
