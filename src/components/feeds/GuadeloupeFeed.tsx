@@ -12,9 +12,19 @@ interface GuadeloupeItem {
   location?: string;
   date?: string;
   image?: string;
+  url?: string;
 }
 
 const guadeloupeData: GuadeloupeItem[] = [
+  {
+    id: '7',
+    type: 'event',
+    title: 'Compétition de Surf Gwada 🏆',
+    content: 'DU VRAI NIVEAU — Local surfers showing real skills in Guadeloupe competition. Raw talent, powerful waves.',
+    location: 'Guadeloupe',
+    image: 'https://i.ytimg.com/vi/k8VxkPMqYdU/hqdefault.jpg',
+    url: 'https://youtu.be/k8VxkPMqYdU',
+  },
   {
     id: '1',
     type: 'spot',
@@ -108,15 +118,27 @@ export function GuadeloupeFeed() {
               </p>
               
               {/* Meta */}
-              <div className="flex items-center gap-2 text-xs text-primary/60">
-                {item.location && (
-                  <span className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    {item.location}
-                  </span>
-                )}
-                {item.date && (
-                  <span>{item.date}</span>
+              <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2 text-primary/60">
+                  {item.location && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {item.location}
+                    </span>
+                  )}
+                  {item.date && (
+                    <span>{item.date}</span>
+                  )}
+                </div>
+                {item.url && (
+                  <a 
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Watch →
+                  </a>
                 )}
               </div>
             </div>
