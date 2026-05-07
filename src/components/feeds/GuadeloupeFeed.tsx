@@ -16,6 +16,35 @@ interface GuadeloupeItem {
 }
 
 const guadeloupeData: GuadeloupeItem[] = [
+  // === KNOWN CONTENT CREATORS ===
+  {
+    id: 'creator-1',
+    type: 'news',
+    title: 'GwadaShots 📸',
+    content: 'Local surf photographer capturing Guadeloupe waves and surf culture. Follow for daily conditions and epic shots.',
+    location: 'Guadeloupe',
+    image: 'https://images.pexels.com/photos/1556663/pexels-photo-1556663.jpeg?auto=compress&cs=tinysrgb&w=300',
+    url: 'https://www.instagram.com/gwadashots/',
+  },
+  {
+    id: 'creator-2',
+    type: 'news',
+    title: 'Romain Alexis 🎬',
+    content: 'Local videographer documenting surf competitions and sessions. DU VRAI NIVEAU.',
+    location: 'Guadeloupe',
+    image: 'https://i.ytimg.com/vi/k8VxkPMqYdU/hqdefault.jpg',
+    url: 'https://www.youtube.com/@Romain_Alexis',
+  },
+  {
+    id: 'creator-3',
+    type: 'news',
+    title: 'Gwada Surf Report 🌊',
+    content: 'Daily surf conditions, spot reports, and local wave wisdom for Guadeloupe surfers.',
+    location: 'Guadeloupe',
+    image: 'https://images.pexels.com/photos-189349/pexels-photo-189349.jpeg?auto=compress&cs=tinysrgb&w=300',
+    url: 'https://www.instagram.com/gwadasurfreport/',
+  },
+  // === RECENT CONTENT ===
   {
     id: '8',
     type: 'news',
@@ -34,6 +63,7 @@ const guadeloupeData: GuadeloupeItem[] = [
     image: 'https://i.ytimg.com/vi/k8VxkPMqYdU/hqdefault.jpg',
     url: 'https://youtu.be/k8VxkPMqYdU',
   },
+  // === SPOTS ===
   {
     id: '1',
     type: 'spot',

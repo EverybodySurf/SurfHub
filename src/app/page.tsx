@@ -107,17 +107,13 @@ const typeLabels: Record<string, string> = {
   tweet: '✕ X',
 };
 
-// Random layout generator for 20 collage slots
-function generateRandomLayout() {
-  const randomRotation = () => (Math.random() * 10 - 5).toFixed(1);
-  const randomOpacity = () => 0.55 + Math.random() * 0.35;
-  const randomTranslate = () => Math.random() * 16 - 8;
-  
+// Straight layout generator for 20 collage slots (no rotations)
+function generateStraightLayout() {
   return {
-    rotations: Array(20).fill(0).map(() => parseFloat(randomRotation())),
-    opacities: Array(20).fill(0).map(() => randomOpacity()),
-    translates: Array(20).fill(0).map(() => randomTranslate()),
-    scaleVariations: Array(20).fill(0).map(() => 0.94 + Math.random() * 0.1),
+    rotations: Array(20).fill(0),
+    opacities: Array(20).fill(0).map(() => 0.6 + Math.random() * 0.25),
+    translates: Array(20).fill(0),
+    scaleVariations: Array(20).fill(0).map(() => 1.0),
   };
 }
 
@@ -132,11 +128,11 @@ const heroCollageItemsStatic = [
 export default function HomePage() {
   const [activeFeed, setActiveFeed] = useState<FeedType>('feelgood');
   const [scrollY, setScrollY] = useState(0);
-  const [layout, setLayout] = useState(generateRandomLayout());
+  const [layout, setLayout] = useState(generateStraightLayout());
   const [isHovered, setIsHovered] = useState<number | null>(null);
   
   useEffect(() => {
-    setLayout(generateRandomLayout());
+    setLayout(generateStraightLayout());
   }, []);
   
   useEffect(() => {
@@ -187,7 +183,6 @@ export default function HomePage() {
     if (!item) return null;
     
     const baseStyle = {
-      transform: `rotate(${layout.rotations[index]}deg) translate(${layout.translates[index]}px, ${layout.translates[index]}px) scale(${layout.scaleVariations[index]})`,
       opacity: layout.opacities[index],
       zIndex: isHovered === index ? 50 : 10 + index,
     };
@@ -347,7 +342,7 @@ export default function HomePage() {
             className="text-lg md:text-xl text-white/50 max-w-md mx-auto mb-12 text-center"
             style={{ transform: `translateY(${titleOffset * 0.7}px)` }}
           >
-            Surfing is a conversation with the ocean.
+            Surfing is one of the magical treasures this world has to offer. Dive in and be a part of it.
           </p>
           
           <button 
