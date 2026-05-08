@@ -27,6 +27,9 @@ export function Header() {
     });
   }, [supabase]);
 
+  // Admin routes have white background, need dark text
+  const isAdminRoute = pathname?.startsWith('/admin');
+  
   // Scroll effect: transparent → glassmorphic
   useEffect(() => {
     const onScroll = () => {
@@ -39,8 +42,8 @@ export function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Dynamic text color based on scroll
-  const navTextClass = scrolled
+  // Dynamic text color based on scroll and route
+  const navTextClass = scrolled || isAdminRoute
     ? 'text-foreground transition-colors duration-300'
     : 'text-white transition-colors duration-300';
 
@@ -78,7 +81,7 @@ export function Header() {
           fixed z-50 w-full
           transition-all duration-500 ease-out
           ${
-            scrolled
+            scrolled || isAdminRoute
               ? 'bg-background/80 backdrop-blur-xl shadow-sm border-b border-border/20'
               : 'bg-transparent'
           }
@@ -87,7 +90,7 @@ export function Header() {
         <div className="container flex h-16 max-w-screen-2xl items-center px-6">
           {/* Logo */}
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Waves className="h-6 w-6 text-yellow-300 transition-colors duration-300" />
+            <Waves className={`h-6 w-6 transition-colors duration-300 ${scrolled || isAdminRoute ? 'text-yellow-500' : 'text-yellow-300'}`} />
             <span className={`font-black sm:inline-block transition-colors duration-300 ${navTextClass}`}>
               SurfHub<span className="text-cyan-400 ml-1">GP</span>
             </span>
