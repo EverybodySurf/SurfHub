@@ -48,13 +48,14 @@ const allItems: GridItem[] = [
   
   // GLOBAL FEED
   { id: 'gl1', feed: 'global', size: 'horizontal', type: 'video', title: 'WSL Championship Highlights', content: 'Best waves from the world tour finals. 🎬 YouTube', source: 'World Surf League', image: 'https://images.unsplash.com/photo-1505142468610-359797ca27ae?w=800&auto=format', videoUrl: 'placeholder' },
-  { id: 'gl2', feed: 'global', size: 'tall', type: 'travel', title: 'Hidden Gems: Indonesia', content: 'Beyond Bali — discovering uncrowded perfection in Mentawai.', source: 'Surf Travel Mag', image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=600&auto=format' },
+  { id: 'gl2', feed: 'global', size: 'tall', type: 'travel', title: 'Hidden Gems: Indonesia', content: 'Beyond Bali — discovering uncrowded perfection in Mentawai.', source: 'Surf Travel Mag', image: 'https://images.unsplash.com/photo-1500462918059-1e51d7-e1e0cc?w=600&auto=format' },
   { id: 'gl3', feed: 'global', size: 'square', type: 'culture', title: 'Wave Riding Art', content: 'Traditional Hawaiian to modern performance shaping.', source: 'Surfer\'s Journal', image: 'https://images.unsplash.com/photo-1455729552865-3658e0c677dd?w=400&auto=format' },
   { id: 'gl4', feed: 'global', size: 'small', type: 'tweet', title: '', content: '"Ocean conservation wins — new protected areas announced globally." 🌍', source: '@OceanNews' },
   { id: 'gl5', feed: 'global', size: 'horizontal', type: 'reel', title: 'Sustainable Board Building', content: 'Eco-friendly materials reshaping the industry. 🎬 TikTok', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format', videoUrl: 'placeholder' },
   { id: 'gl6', feed: 'global', size: 'tall', type: 'travel', title: 'Europe Winter Swells', content: 'Portugal, France, Spain deliver when the Atlantic wakes up.', source: 'Euro Surf Guide', image: 'https://images.unsplash.com/photo-1534190760962-754642a4dc2e?w=600&auto=format' },
   { id: 'gl7', feed: 'global', size: 'square', type: 'photo', title: 'Tahiti Teahupo\'o', content: 'The heaviest wave on earth.', source: 'Surf Photography', image: 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=400&auto=format' },
   { id: 'gl8', feed: 'global', size: 'horizontal', type: 'video', title: 'Australia East Coast', content: 'Gold Coast to Noosa — endless waves. 🎬 YouTube', image: 'https://images.unsplash.com/photo-1559827260-dc66d52b21d4?w=800&auto=format', videoUrl: 'placeholder' },
+  { id: 'gl9', feed: 'global', size: 'horizontal', type: 'video', title: 'Soul Surfer: Bethany Hamilton', content: 'Inspiring story of resilience and return to the waves. 🎬 YouTube', source: 'YouTube', image: 'https://i.ytimg.com/vi/okE2130c4Xw/maxresdefault.jpg', videoUrl: 'https://youtu.be/okE2130c4Xw', videoType: 'youtube' },
   
   // TEXT TWEETS (pure text, no images)
   { id: 'tweet1', feed: 'feelgood', size: 'small', type: 'tweet', title: '', content: 'Nothing beats the feeling of catching your first wave. Pure joy. 🌊', source: '@SurferDaily' },
@@ -245,11 +246,12 @@ function generateCollageLayout() {
 }
 
 // Hero collage items — will be populated from live API data
+// Hero collage items — EXCLUDE video/reel items (only photos, quotes, text)
 const heroCollageItemsStatic = [
-  ...allItems.filter(item => item.size === 'horizontal' && item.image),
-  ...allItems.filter(item => item.image && item.size !== 'horizontal' && !item.id.startsWith('tweet')),
-  ...allItems.filter(item => item.type === 'tweet' && !item.image).slice(0, 3),
-  ...allItems.filter(item => item.id.startsWith('hero') && item.image),
+  ...allItems.filter(item => item.id.startsWith('hero') && item.image && item.type !== 'video' && item.type !== 'reel'),
+  ...allItems.filter(item => item.type === 'photo' && !item.id.startsWith('hero') && item.image),
+  ...allItems.filter(item => item.type === 'quote' && !item.id.startsWith('hero')),
+  ...allItems.filter(item => item.type === 'tweet' && !item.image).slice(0, 2),
 ].slice(0, 20);
 
 export default function HomePage() {
