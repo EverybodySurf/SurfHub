@@ -439,98 +439,96 @@ export default function HomePage() {
         {/* Base background gradient layer */}
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
         
-        {/* Collage grid — full coverage, NO negative margins. All slots within viewport. */}
+        {/* Collage grid — EXPLICIT placement, full coverage, NO gaps */}
         <div 
           className="absolute inset-0 z-1 grid grid-cols-12 grid-rows-10 gap-0"
           style={{ transform: `translateY(${collageOffset}px)` }}
         >
           {/* ═══════════════════════════════════════════════════════════════
-              LEFT SIDE (cols 1-6) — 6 images, full coverage
+              COLUMN 1-4 — Left side anchors
               ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 1 — Full left height (cols 1-4, rows 1-10) */}
-          {renderCollageSlot(0, 'col-span-4 row-span-10 relative overflow-hidden', { zIndex: 5 })}
+          {/* SLOT 1 — Full left (cols 1-4, rows 1-10) */}
+          <div className="col-[1_/_5] row-[1_/_11]">
+            {renderCollageSlot(0, 'relative overflow-hidden', { zIndex: 5 })}
+          </div>
           
-          {/* SLOT 2 — Top left accent (cols 1-3, rows 1-4) */}
-          {renderCollageSlot(1, 'col-span-3 row-span-4 relative overflow-hidden', { zIndex: 10 })}
-          
-          {/* SLOT 3 — Mid-left (cols 4-6, rows 1-5) */}
-          {renderCollageSlot(2, 'col-span-2 row-span-5 relative overflow-hidden', { zIndex: 15 })}
-          
-          {/* SLOT 4 — Center-left tall (cols 5-6, rows 5-10) */}
-          {renderCollageSlot(3, 'col-span-2 row-span-5 relative overflow-hidden', { zIndex: 20 })}
-          
-          {/* SLOT 5 — Bottom-left wide (cols 1-4, rows 6-10) */}
-          {renderCollageSlot(4, 'col-span-4 row-span-4 relative overflow-hidden', { zIndex: 25 })}
-          
-          {/* SLOT 6 — Top center (cols 4-6, rows 1-3) */}
-          {renderCollageSlot(5, 'col-span-2 row-span-3 relative overflow-hidden', { zIndex: 30 })}
+          {/* SLOT 2 — Left top accent (cols 1-2, rows 1-5) */}
+          <div className="col-[1_/_3] row-[1_/_6]">
+            {renderCollageSlot(1, 'relative overflow-hidden', { zIndex: 10 })}
+          </div>
           
           {/* ═══════════════════════════════════════════════════════════════
-              RIGHT SIDE (cols 7-12) — 6 images, full coverage  
+              COLUMN 5-8 — Center coverage
               ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 7 — Right edge full height (cols 10-12, rows 1-10) */}
-          {renderCollageSlot(6, 'col-span-2 row-span-10 relative overflow-hidden', { zIndex: 8 })}
+          {/* SLOT 3 — Center top (cols 5-8, rows 1-5) */}
+          <div className="col-[5_/_9] row-[1_/_6]">
+            {renderCollageSlot(2, 'relative overflow-hidden', { zIndex: 15 })}
+          </div>
           
-          {/* SLOT 8 — Top-right large (cols 7-10, rows 1-6) */}
-          {renderCollageSlot(7, 'col-span-3 row-span-6 relative overflow-hidden', { zIndex: 12 })}
+          {/* SLOT 4 — Center middle (cols 5-8, rows 5-7) — fills behind text */}
+          <div className="col-[5_/_9] row-[5_/_8]">
+            {renderCollageSlot(3, 'relative overflow-hidden', { zIndex: 20 })}
+          </div>
           
-          {/* SLOT 9 — Mid-right (cols 7-9, rows 6-10) */}
-          {renderCollageSlot(8, 'col-span-2 row-span-4 relative overflow-hidden', { zIndex: 18 })}
-          
-          {/* SLOT 10 — Upper-right corner (cols 10-12, rows 1-4) */}
-          {renderCollageSlot(9, 'col-span-2 row-span-4 relative overflow-hidden', { zIndex: 22 })}
-          
-          {/* SLOT 11 — Lower-right strip (cols 7-10, rows 4-7) */}
-          {renderCollageSlot(10, 'col-span-3 row-span-3 relative overflow-hidden', { zIndex: 28 })}
-          
-          {/* SLOT 12 — Bottom-right (cols 9-12, rows 7-10) */}
-          {renderCollageSlot(11, 'col-span-3 row-span-3 relative overflow-hidden', { zIndex: 35 })}
+          {/* SLOT 5 — Center bottom (cols 5-8, rows 7-10) */}
+          <div className="col-[5_/_9] row-[7_/_11]">
+            {renderCollageSlot(4, 'relative overflow-hidden', { zIndex: 25 })}
+          </div>
           
           {/* ═══════════════════════════════════════════════════════════════
-              FILLER SLOTS (12 more) — cover any remaining gaps
+              COLUMN 9-12 — Right side, full coverage (was the gap area)
               ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 13 — Top-center small (cols 6-7, rows 1-2) */}
-          {renderCollageSlot(12, 'col-span-1 row-span-2 relative overflow-hidden', { zIndex: 32 })}
+          {/* SLOT 6 — Right edge tall (cols 11-12, rows 1-10) — fills top-right strip */}
+          <div className="col-[11_/_13] row-[1_/_11]">
+            {renderCollageSlot(5, 'relative overflow-hidden', { zIndex: 8 })}
+          </div>
           
-          {/* SLOT 14 — Center accent (cols 6-8, rows 3-5) */}
-          {renderCollageSlot(13, 'col-span-2 row-span-2 relative overflow-hidden', { zIndex: 38 })}
+          {/* SLOT 7 — Upper-right (cols 9-11, rows 1-5) */}
+          <div className="col-[9_/_12] row-[1_/_6]">
+            {renderCollageSlot(6, 'relative overflow-hidden', { zIndex: 12 })}
+          </div>
           
-          {/* SLOT 15 — Mid-filler (cols 8-9, rows 5-6) */}
-          {renderCollageSlot(14, 'col-span-1 row-span-1 relative overflow-hidden', { zIndex: 40 })}
+          {/* SLOT 8 — Mid-right (cols 9-11, rows 5-7) */}
+          <div className="col-[9_/_12] row-[5_/_8]">
+            {renderCollageSlot(7, 'relative overflow-hidden', { zIndex: 18 })}
+          </div>
           
-          {/* SLOT 16 — Bottom-center (cols 5-7, rows 7-8) */}
-          {renderCollageSlot(15, 'col-span-2 row-span-1 relative overflow-hidden', { zIndex: 42 })}
+          {/* SLOT 9 — Lower-right (cols 9-11, rows 7-10) — fills bottom-right block */}
+          <div className="col-[9_/_12] row-[7_/_11]">
+            {renderCollageSlot(8, 'relative overflow-hidden', { zIndex: 22 })}
+          </div>
           
-          {/* SLOT 17 — Tiny upper-right (cols 10-11, rows 5-6) */}
-          {renderCollageSlot(16, 'col-span-1 row-span-1 relative overflow-hidden', { zIndex: 44 })}
+          {/* SLOT 10 — Top-right corner (cols 9-12, rows 1-3) */}
+          <div className="col-[9_/_13] row-[1_/_4]">
+            {renderCollageSlot(9, 'relative overflow-hidden', { zIndex: 28 })}
+          </div>
           
-          {/* SLOT 18 — Tiny mid (cols 9-10, rows 6-7) */}
-          {renderCollageSlot(17, 'col-span-1 row-span-1 relative overflow-hidden', { zIndex: 46 })}
+          {/* ═══════════════════════════════════════════════════════════════
+              FILLER SLOTS (14) — tiny accents, full coverage
+              ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 19 — Tiny bottom-left (cols 4-5, rows 5-6) */}
-          {renderCollageSlot(18, 'col-span-1 row-span-1 relative overflow-hidden', { zIndex: 48 })}
-          
-          {/* SLOT 20 — Edge filler top (cols 6-7, rows 2-3) */}
-          {renderCollageSlot(19, 'col-span-1 row-span-1 relative overflow-hidden', { zIndex: 50 })}
-          
-          {/* SLOT 21 — Bottom strip (cols 1-3, rows 10-10) */}
-          {renderCollageSlot(20, 'col-span-2 row-span-1 relative overflow-hidden', { zIndex: 52 })}
-          
-          {/* SLOT 22 — Right strip (cols 12-12, rows 4-5) */}
-          {renderCollageSlot(21, 'col-span-1 row-span-1 relative overflow-hidden', { zIndex: 54 })}
-          
-          {/* SLOT 23 — Upper-center (cols 3-4, rows 4-5) */}
-          {renderCollageSlot(22, 'col-span-1 row-span-1 relative overflow-hidden', { zIndex: 56 })}
-          
-          {/* SLOT 24 — Bottom accent (cols 8-9, rows 8-9) */}
-          {renderCollageSlot(23, 'col-span-1 row-span-1 relative overflow-hidden', { zIndex: 58 })}
+          {/* SLOT 11-24 — Small fillers spread across */}
+          <div className="col-[3_/_5] row-[3_/_5]">{renderCollageSlot(10, 'relative overflow-hidden', { zIndex: 30 })}</div>
+          <div className="col-[4_/_6] row-[4_/_6]">{renderCollageSlot(11, 'relative overflow-hidden', { zIndex: 32 })}</div>
+          <div className="col-[6_/_8] row-[3_/_4]">{renderCollageSlot(12, 'relative overflow-hidden', { zIndex: 34 })}</div>
+          <div className="col-[7_/_9] row-[4_/_5]">{renderCollageSlot(13, 'relative overflow-hidden', { zIndex: 36 })}</div>
+          <div className="col-[8_/_10] row-[2_/_4]">{renderCollageSlot(14, 'relative overflow-hidden', { zIndex: 38 })}</div>
+          <div className="col-[10_/_12] row-[3_/_5]">{renderCollageSlot(15, 'relative overflow-hidden', { zIndex: 40 })}</div>
+          <div className="col-[3_/_4] row-[6_/_8]">{renderCollageSlot(16, 'relative overflow-hidden', { zIndex: 42 })}</div>
+          <div className="col-[8_/_9] row-[6_/_8]">{renderCollageSlot(17, 'relative overflow-hidden', { zIndex: 44 })}</div>
+          <div className="col-[1_/_3] row-[8_/_10]">{renderCollageSlot(18, 'relative overflow-hidden', { zIndex: 46 })}</div>
+          <div className="col-[6_/_7] row-[6_/_7]">{renderCollageSlot(19, 'relative overflow-hidden', { zIndex: 48 })}</div>
+          <div className="col-[2_/_4] row-[5_/_6]">{renderCollageSlot(20, 'relative overflow-hidden', { zIndex: 50 })}</div>
+          <div className="col-[11_/_12] row-[6_/_8]">{renderCollageSlot(21, 'relative overflow-hidden', { zIndex: 52 })}</div>
+          <div className="col-[4_/_5] row-[8_/_9]">{renderCollageSlot(22, 'relative overflow-hidden', { zIndex: 54 })}</div>
+          <div className="col-[7_/_8] row-[8_/_10]">{renderCollageSlot(23, 'relative overflow-hidden', { zIndex: 56 })}</div>
         </div>
         
-        {/* Dark gradient overlay for title readability */}
-        <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/50 via-black/25 to-black/60" />
+        {/* Light gradient overlay for title readability — 80% transparent */}
+        <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/20 via-black/10 to-black/25" />
         
         {/* Title overlay */}
         <div className="relative z-30 h-screen flex flex-col items-center justify-center px-4">
