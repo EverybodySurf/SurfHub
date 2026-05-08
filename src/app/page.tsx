@@ -125,6 +125,40 @@ function extractVideoId(url: string, videoType: string): string | null {
   return null;
 }
 
+// Add crop params to image URL for full-bleed coverage based on slot dimensions
+function addCropParams(url: string, className: string): string {
+  // Parse grid spans from className
+  const colMatch = className.match(/col-span-(\d+)/);
+  const rowMatch = className.match(/row-span-(\d+)/);
+  
+  if (!colMatch || !rowMatch) return url;
+  
+  const cols = parseInt(colMatch[1]);
+  const rows = parseInt(rowMatch[1]);
+  
+  // Grid is 12 cols x 10 rows. Approximate pixel dimensions.
+  // Assume ~100px per grid unit (rough estimate, actual varies by viewport)
+  const width = cols * 120;
+  const height = rows * 80;
+  
+  // Unsplash: add fit=crop with dimensions
+  if (url.includes('unsplash.com')) {
+    // Remove existing params and add new ones
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&h=${height}&fit=crop&auto=format`;
+  }
+  
+  // Pexels: similar approach
+  if (url.includes('pexels.com')) {
+    const baseUrl = url.split('?')[0];
+    return `${baseUrl}?w=${width}&h=${height}&auto=compress&cs=tinysrgb`;
+  }
+  
+  // YouTube thumbnails: already fixed aspect ratio, return unchanged
+  // Other URLs: return unchanged
+  return url;
+}
+
 // Render inline video embed
 function renderVideoEmbed(item: GridItem) {
   const videoId = item.videoUrl && item.videoType ? extractVideoId(item.videoUrl, item.videoType) : null;
@@ -244,6 +278,9 @@ export default function HomePage() {
     const item = heroCollageItems[index];
     if (!item) return null;
     
+    // Apply crop params for full-bleed coverage
+    const croppedImage = item.image ? addCropParams(item.image, className) : null;
+    
     const baseStyle = {
       opacity: layout.opacities[index],
       zIndex: isHovered === index ? 50 : 10 + index,
@@ -258,14 +295,14 @@ export default function HomePage() {
         onMouseEnter={() => setIsHovered(index)}
         onMouseLeave={() => setIsHovered(null)}
       >
-        {item.image ? (
+        {croppedImage ? (
           <>
             <Image
-              src={item.image}
+              src={croppedImage}
               alt={item.title || item.content || ''}
               fill
               className="object-cover transition-transform duration-500"
-              sizes="400px"
+              sizes="(max-width: 768px) 100vw, 50vw"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/30 to-transparent" />
           </>
