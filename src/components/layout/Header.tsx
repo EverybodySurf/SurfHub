@@ -90,7 +90,7 @@ export function Header() {
         <div className="container flex h-16 max-w-screen-2xl items-center px-6">
           {/* Logo */}
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Waves className={`h-6 w-6 transition-colors duration-300 ${scrolled || isAdminRoute ? 'text-yellow-500' : 'text-yellow-300'}`} />
+            <Waves className="h-6 w-6 text-yellow-300 transition-colors duration-300" />
             <span className={`font-black sm:inline-block transition-colors duration-300 ${navTextClass}`}>
               SurfHub<span className="text-cyan-400 ml-1">GP</span>
             </span>

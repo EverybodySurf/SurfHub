@@ -143,7 +143,7 @@ export default function HeroCuratePage() {
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8 pt-6 text-center">
+        <div className="mb-8 pt-12 text-center">
           <h1 className="text-3xl font-bold mb-2">Hero Image Pool</h1>
           <p className="text-muted-foreground">
             Curate surfing photography for the hero collage. Photos from Unsplash & Pexels.

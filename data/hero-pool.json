@@ -710,22 +710,6 @@
       "status": "approved"
     },
     {
-      "id": "pexels-36122475",
-      "source": "pexels",
-      "sourceId": "36122475",
-      "url": "https://images.pexels.com/photos/36122475/pexels-photo-36122475.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-      "thumbnailUrl": "https://images.pexels.com/photos/36122475/pexels-photo-36122475.jpeg?auto=compress&cs=tinysrgb&h=350",
-      "width": 3368,
-      "height": 6000,
-      "orientation": "portrait",
-      "photographerName": "Fran  Zaina",
-      "photographerProfileUrl": "https://www.pexels.com/@fran",
-      "photoUrl": "https://www.pexels.com/photo/surfer-riding-the-waves-in-sydney-australia-36122475/",
-      "altDescription": "A lone surfer braves the powerful ocean waves in Sydney. An exhilarating display of skill and adventure.",
-      "addedAt": "2026-05-08T11:58:13.466Z",
-      "status": "approved"
-    },
-    {
       "id": "pexels-4600565",
       "source": "pexels",
       "sourceId": "4600565",
@@ -932,22 +916,6 @@
       "photographerProfileUrl": "https://www.pexels.com/@ridwan-nugraha-692540814",
       "photoUrl": "https://www.pexels.com/photo/surfer-on-wave-20044660/",
       "altDescription": "A surfer skillfully balances on a wave in the ocean with boats visible in the background.",
-      "addedAt": "2026-05-08T12:22:23.636Z",
-      "status": "approved"
-    },
-    {
-      "id": "pexels-4601396",
-      "source": "pexels",
-      "sourceId": "4601396",
-      "url": "https://images.pexels.com/photos/4601396/pexels-photo-4601396.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
-      "thumbnailUrl": "https://images.pexels.com/photos/4601396/pexels-photo-4601396.jpeg?auto=compress&cs=tinysrgb&h=350",
-      "width": 4080,
-      "height": 5100,
-      "orientation": "portrait",
-      "photographerName": "Jess Loiterton",
-      "photographerProfileUrl": "https://www.pexels.com/@jess-vide",
-      "photoUrl": "https://www.pexels.com/photo/woman-in-red-bikini-surfing-on-water-4601396/",
-      "altDescription": "Aerial view of surfers navigating waves in the ocean near Honolulu, capturing the thrill of surfing adventure.",
       "addedAt": "2026-05-08T12:22:23.636Z",
       "status": "approved"
     },
@@ -1502,12 +1470,48 @@
       "status": "removed",
       "removedAt": "2026-05-08T12:28:32.390Z",
       "removedReason": "User removed"
+    },
+    {
+      "id": "pexels-36122475",
+      "source": "pexels",
+      "sourceId": "36122475",
+      "url": "https://images.pexels.com/photos/36122475/pexels-photo-36122475.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "thumbnailUrl": "https://images.pexels.com/photos/36122475/pexels-photo-36122475.jpeg?auto=compress&cs=tinysrgb&h=350",
+      "width": 3368,
+      "height": 6000,
+      "orientation": "portrait",
+      "photographerName": "Fran  Zaina",
+      "photographerProfileUrl": "https://www.pexels.com/@fran",
+      "photoUrl": "https://www.pexels.com/photo/surfer-riding-the-waves-in-sydney-australia-36122475/",
+      "altDescription": "A lone surfer braves the powerful ocean waves in Sydney. An exhilarating display of skill and adventure.",
+      "addedAt": "2026-05-08T11:58:13.466Z",
+      "status": "removed",
+      "removedAt": "2026-05-08T12:28:41.590Z",
+      "removedReason": "User removed"
+    },
+    {
+      "id": "pexels-4601396",
+      "source": "pexels",
+      "sourceId": "4601396",
+      "url": "https://images.pexels.com/photos/4601396/pexels-photo-4601396.jpeg?auto=compress&cs=tinysrgb&h=650&w=940",
+      "thumbnailUrl": "https://images.pexels.com/photos/4601396/pexels-photo-4601396.jpeg?auto=compress&cs=tinysrgb&h=350",
+      "width": 4080,
+      "height": 5100,
+      "orientation": "portrait",
+      "photographerName": "Jess Loiterton",
+      "photographerProfileUrl": "https://www.pexels.com/@jess-vide",
+      "photoUrl": "https://www.pexels.com/photo/woman-in-red-bikini-surfing-on-water-4601396/",
+      "altDescription": "Aerial view of surfers navigating waves in the ocean near Honolulu, capturing the thrill of surfing adventure.",
+      "addedAt": "2026-05-08T12:22:23.636Z",
+      "status": "removed",
+      "removedAt": "2026-05-08T12:28:55.836Z",
+      "removedReason": "User removed"
     }
   ],
   "lastFetch": "2026-05-08T12:22:27.611Z",
   "fetchStats": {
     "totalAdded": 89,
-    "totalRemoved": 19,
+    "totalRemoved": 21,
     "sources": {
       "unsplash": 39,
       "pexels": 50
