@@ -213,54 +213,54 @@ function renderVideoEmbed(item: GridItem) {
   return null;
 }
 
-// Collage layout generator — mood board style with varying opacity and scale
+// Collage layout generator — mood board style: large anchors + small accents spiraling to center
 function generateCollageLayout() {
   return {
-    // Varying opacity: some prominent (0.9), some faded (0.4)
+    // Opacity: large anchors prominent, small accents faded
     opacities: [
-      0.85, // Slot 1 — anchor, prominent
-      0.55, // Slot 2 — faded background
-      0.70, // Slot 3 — medium
-      0.40, // Slot 4 — very faded
-      0.65, // Slot 5 — medium
-      0.50, // Slot 6 — faded
-      0.35, // Slot 7 — text, very faded
-      0.45, // Slot 8 — faded accent
-      0.60, // Slot 9 — medium
-      0.30, // Slot 10 — barely visible
-      0.55, // Slot 11
-      0.40, // Slot 12
-      0.50, // Slot 13
-      0.35, // Slot 14
-      0.45, // Slot 15
-      0.30, // Slot 16
-      0.40, // Slot 17
-      0.35, // Slot 18
-      0.30, // Slot 19
-      0.25, // Slot 20 — barely visible background fill
+      0.90, // Slot 1 — Large left anchor (dominant)
+      0.85, // Slot 2 — Large right anchor (dominant)
+      0.75, // Slot 3 — Medium top-center
+      0.70, // Slot 4 — Medium bottom-left
+      0.65, // Slot 5 — Medium bottom-right
+      0.55, // Slot 6 — Small accent (spiral start)
+      0.50, // Slot 7 — Small accent
+      0.45, // Slot 8 — Small accent
+      0.40, // Slot 9 — Small accent (spiral inward)
+      0.35, // Slot 10 — Small accent
+      0.30, // Slot 11 — Tiny accent
+      0.25, // Slot 12 — Tiny accent
+      0.20, // Slot 13 — Tiny (near center)
+      0.15, // Slot 14 — Tiny (near center)
+      0.12, // Slot 15 — Almost invisible
+      0.10, // Slot 16 — Almost invisible
+      0.08, // Slot 17 — Barely visible
+      0.06, // Slot 18 — Barely visible
+      0.04, // Slot 19 — Ghost
+      0.03, // Slot 20 — Ghost (center whisper)
     ],
-    // Scale variations for visual interest
+    // Scale: large anchors bigger, small accents smaller
     scaleVariations: [
-      1.05, // Slot 1 — slightly larger anchor
-      0.95,
-      1.0,
-      0.90,
-      1.02,
-      0.95,
-      1.0,
-      0.92,
-      1.0,
-      0.88,
-      0.95,
-      0.90,
-      0.92,
-      0.85,
-      0.90,
-      0.85,
-      0.88,
-      0.85,
-      0.80,
-      0.75,
+      1.08, // Slot 1 — Large anchor
+      1.06, // Slot 2 — Large anchor
+      1.02, // Slot 3 — Medium
+      1.0,  // Slot 4 — Medium
+      1.0,  // Slot 5 — Medium
+      0.92, // Slot 6 — Small
+      0.88, // Slot 7 — Small
+      0.85, // Slot 8 — Small
+      0.80, // Slot 9 — Small
+      0.75, // Slot 10 — Small
+      0.70, // Slot 11 — Tiny
+      0.65, // Slot 12 — Tiny
+      0.60, // Slot 13 — Tiny
+      0.55, // Slot 14 — Tiny
+      0.50, // Slot 15 — Very small
+      0.45, // Slot 16 — Very small
+      0.40, // Slot 17 — Very small
+      0.35, // Slot 18 — Very small
+      0.30, // Slot 19 — Ghost
+      0.25, // Slot 20 — Ghost
     ],
   };
 }
@@ -441,70 +441,90 @@ export default function HomePage() {
         {/* Base background gradient layer */}
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
         
-        {/* Dense collage grid — mood board style, overlapping artistic arrangement */}
+        {/* Dense collage grid — large anchors + small accents spiraling to center */}
         <div 
           className="absolute inset-0 z-1 grid grid-cols-12 grid-rows-10 gap-0"
           style={{ transform: `translateY(${collageOffset}px)` }}
         >
-          {/* SLOT 1 — Large hero anchor (left dominant) */}
-          {renderCollageSlot(0, 'col-span-6 row-span-5 relative overflow-hidden')}
+          {/* ═══════════════════════════════════════════════════════════════
+              LARGE ANCHORS (dominant, full-bleed)
+              ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 2 — Medium horizontal overlapping */}
-          {renderCollageSlot(1, 'col-span-4 row-span-3 relative overflow-hidden -ml-12 -mt-4')}
+          {/* SLOT 1 — Large left anchor (dominant, 40% of viewport) */}
+          {renderCollageSlot(0, 'col-span-5 row-span-7 relative overflow-hidden')}
           
-          {/* SLOT 3 — Tall vertical (right edge) */}
-          {renderCollageSlot(2, 'col-span-3 row-span-6 relative overflow-hidden -ml-6')}
+          {/* SLOT 2 — Large right anchor (dominant, 35% of viewport) */}
+          {renderCollageSlot(1, 'col-span-4 row-span-6 relative overflow-hidden -ml-16')}
           
-          {/* SLOT 4 — Small accent peeking */}
-          {renderCollageSlot(3, 'col-span-2 row-span-2 relative overflow-hidden -mt-16 ml-8')}
+          {/* ═══════════════════════════════════════════════════════════════
+              MEDIUM IMAGES (secondary anchors)
+              ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 5 — Wide horizontal (bottom) */}
-          {renderCollageSlot(4, 'col-span-5 row-span-2 relative overflow-hidden mt-4 -mr-8')}
+          {/* SLOT 3 — Medium top-center (overlaps left anchor) */}
+          {renderCollageSlot(2, 'col-span-3 row-span-4 relative overflow-hidden -ml-20 -mt-4')}
           
-          {/* SLOT 6 — Medium vertical */}
-          {renderCollageSlot(5, 'col-span-2 row-span-4 relative overflow-hidden -mt-8')}
+          {/* SLOT 4 — Medium bottom-left */}
+          {renderCollageSlot(3, 'col-span-3 row-span-3 relative overflow-hidden mt-8')}
           
-          {/* SLOT 7 — Text/quote card */}
-          {renderCollageSlot(6, 'col-span-2 row-span-2 relative overflow-hidden ml-10 mt-6')}
+          {/* SLOT 5 — Medium bottom-right */}
+          {renderCollageSlot(4, 'col-span-3 row-span-3 relative overflow-hidden -ml-12 mt-12')}
           
-          {/* SLOT 8 — Top-right small */}
-          {renderCollageSlot(7, 'col-span-2 row-span-2 relative overflow-hidden -mt-12')}
+          {/* ═══════════════════════════════════════════════════════════════
+              SMALL ACCENTS (spiral/leading towards center)
+              ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 9 — Center fill */}
-          {renderCollageSlot(8, 'col-span-3 row-span-3 relative overflow-hidden -ml-8 mt-2')}
+          {/* SLOT 6 — Small accent (top edge, spiral start) */}
+          {renderCollageSlot(5, 'col-span-2 row-span-2 relative overflow-hidden ml-8 -mt-8')}
           
-          {/* SLOT 10 — Bottom-left accent */}
-          {renderCollageSlot(9, 'col-span-2 row-span-2 relative overflow-hidden mt-8')}
+          {/* SLOT 7 — Small accent (right top) */}
+          {renderCollageSlot(6, 'col-span-2 row-span-2 relative overflow-hidden -ml-4')}
           
-          {/* SLOT 11 — Right edge fill */}
-          {renderCollageSlot(10, 'col-span-2 row-span-2 relative overflow-hidden -mt-8 ml-4')}
+          {/* SLOT 8 — Small accent (spiral inward) */}
+          {renderCollageSlot(7, 'col-span-2 row-span-2 relative overflow-hidden -ml-8 mt-4')}
           
-          {/* SLOT 12 — Extra center peek */}
-          {renderCollageSlot(11, 'col-span-2 row-span-2 relative overflow-hidden ml-12 -mt-4')}
+          {/* SLOT 9 — Small accent (approaching center) */}
+          {renderCollageSlot(8, 'col-span-2 row-span-2 relative overflow-hidden ml-12 mt-6')}
           
-          {/* SLOT 13 — Bottom accent */}
-          {renderCollageSlot(12, 'col-span-3 row-span-2 relative overflow-hidden -mr-6 mt-6')}
+          {/* SLOT 10 — Small accent */}
+          {renderCollageSlot(9, 'col-span-2 row-span-1 relative overflow-hidden -ml-6 mt-10')}
           
-          {/* SLOT 14 — Top fill */}
-          {renderCollageSlot(13, 'col-span-2 row-span-1 relative overflow-hidden mt-8')}
+          {/* ═══════════════════════════════════════════════════════════════
+              TINY ACCENTS (near center, fading)
+              ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 15 — Edge peek */}
-          {renderCollageSlot(14, 'col-span-2 row-span-1 relative overflow-hidden')}
+          {/* SLOT 11 — Tiny accent (center-left) */}
+          {renderCollageSlot(10, 'col-span-1 row-span-2 relative overflow-hidden ml-16 mt-4')}
           
-          {/* SLOT 16 — Extra bottom */}
-          {renderCollageSlot(15, 'col-span-2 row-span-2 relative overflow-hidden -ml-4 mt-4')}
+          {/* SLOT 12 — Tiny accent (center-right) */}
+          {renderCollageSlot(11, 'col-span-1 row-span-2 relative overflow-hidden -ml-8 mt-8')}
           
-          {/* SLOT 17 — Corner fill */}
-          {renderCollageSlot(16, 'col-span-2 row-span-2 relative overflow-hidden mt-10')}
+          {/* SLOT 13 — Tiny accent (center area) */}
+          {renderCollageSlot(12, 'col-span-1 row-span-1 relative overflow-hidden ml-20 mt-12')}
           
-          {/* SLOT 18 — Gap fill */}
-          {renderCollageSlot(17, 'col-span-2 row-span-1 relative overflow-hidden -mr-10')}
+          {/* SLOT 14 — Tiny accent (center area) */}
+          {renderCollageSlot(13, 'col-span-1 row-span-1 relative overflow-hidden -ml-10 mt-14')}
           
-          {/* SLOT 19 — Edge fill */}
-          {renderCollageSlot(18, 'col-span-2 row-span-2 relative overflow-hidden')}
+          {/* ═══════════════════════════════════════════════════════════════
+              GHOST ACCENTS (barely visible, center whispers)
+              ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 20 — Final background fill */}
-          {renderCollageSlot(19, 'col-span-2 row-span-1 relative overflow-hidden')}
+          {/* SLOT 15 — Ghost accent */}
+          {renderCollageSlot(14, 'col-span-1 row-span-1 relative overflow-hidden ml-24')}
+          
+          {/* SLOT 16 — Ghost accent */}
+          {renderCollageSlot(15, 'col-span-1 row-span-1 relative overflow-hidden -ml-12 mt-16')}
+          
+          {/* SLOT 17 — Ghost accent (bottom corner) */}
+          {renderCollageSlot(16, 'col-span-2 row-span-1 relative overflow-hidden mt-18')}
+          
+          {/* SLOT 18 — Ghost accent (edge) */}
+          {renderCollageSlot(17, 'col-span-1 row-span-1 relative overflow-hidden ml-28 -mt-8')}
+          
+          {/* SLOT 19 — Ghost accent (corner) */}
+          {renderCollageSlot(18, 'col-span-1 row-span-1 relative overflow-hidden')}
+          
+          {/* SLOT 20 — Ghost accent (center whisper) */}
+          {renderCollageSlot(19, 'col-span-1 row-span-1 relative overflow-hidden ml-32 mt-18')}
         </div>
         
         {/* Dark gradient overlay for title readability */}
