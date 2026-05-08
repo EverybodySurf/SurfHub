@@ -37,6 +37,8 @@ function saveHeroPool(data: HeroPoolData) {
 // Fetch from Unsplash API
 async function fetchUnsplash(query: string, maxResults: number): Promise<HeroImage[]> {
   const apiKey = process.env.UNSPLASH_ACCESS_KEY;
+  console.log('UNSPLASH_ACCESS_KEY check:', apiKey ? 'SET (length: ' + apiKey.length + ')' : 'NOT SET');
+  
   if (!apiKey) {
     console.log('UNSPLASH_ACCESS_KEY not set, skipping');
     return [];
@@ -44,7 +46,7 @@ async function fetchUnsplash(query: string, maxResults: number): Promise<HeroIma
 
   try {
     const res = await fetch(
-      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${maxResults}&orientation=any`,
+      `https://api.unsplash.com/search/photos?query=${encodeURIComponent(query)}&per_page=${maxResults}`,
       {
         headers: {
           Authorization: `Client-ID ${apiKey}`,
