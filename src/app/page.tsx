@@ -218,10 +218,10 @@ function renderVideoEmbed(item: GridItem) {
 function generateCollageLayout() {
   return {
     // Opacity: all images full visibility
-    opacities: Array(20).fill(1.0),
-    // Scale: subtle variations, all visible
+    opacities: Array(24).fill(1.0),
+    // Scale: subtle variations, all visible (24 slots)
     scaleVariations: [
-      1.02, // Slot 1 — Large (slightly bigger)
+      1.02, // Slot 1 — Large
       1.01, // Slot 2 — Large
       1.0,  // Slot 3 — Large
       1.01, // Slot 4 — Large
@@ -241,18 +241,23 @@ function generateCollageLayout() {
       0.80, // Slot 18 — Small
       0.80, // Slot 19 — Small
       0.82, // Slot 20 — Medium
+      0.89, // Slot 21 — Extra (upper-right)
+      0.87, // Slot 22 — Extra (lower-right)
+      0.85, // Slot 23 — Extra (mid-right)
+      0.83, // Slot 24 — Extra (bottom-edge)
     ],
   };
 }
 
 // Hero collage items — will be populated from live API data
 // Hero collage items — EXCLUDE video/reel items (only photos, quotes, text)
+// 24 slots for full coverage
 const heroCollageItemsStatic = [
   ...allItems.filter(item => item.id.startsWith('hero') && item.image && item.type !== 'video' && item.type !== 'reel'),
   ...allItems.filter(item => item.type === 'photo' && !item.id.startsWith('hero') && item.image),
   ...allItems.filter(item => item.type === 'quote' && !item.id.startsWith('hero')),
   ...allItems.filter(item => item.type === 'tweet' && !item.image).slice(0, 2),
-].slice(0, 20);
+].slice(0, 24);
 
 export default function HomePage() {
   const [activeFeed, setActiveFeed] = useState<FeedType>('feelgood');
@@ -274,6 +279,16 @@ export default function HomePage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
+  // Shuffle function for randomizing hero pool
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
   // Fetch hero pool photography
   useEffect(() => {
     const fetchHeroPool = async () => {
@@ -281,7 +296,8 @@ export default function HomePage() {
         const res = await fetch('/api/hero/fetch');
         const data = await res.json();
         if (data.success && data.images && data.images.length > 0) {
-          setHeroPoolImages(data.images);
+          // Shuffle images so they rotate on each refresh
+          setHeroPoolImages(shuffleArray(data.images));
         }
       } catch (e) {
         console.log('Hero pool API not ready, using static fallback');
@@ -319,8 +335,9 @@ export default function HomePage() {
   const filteredItems = mergedItems;
   
   // Hero collage items — use hero pool photography when available, fallback to static
+  // 24 slots for full coverage (no gaps)
   const heroCollageItems = heroPoolImages.length > 0 
-    ? heroPoolImages.slice(0, 20).map(img => ({
+    ? heroPoolImages.slice(0, 24).map(img => ({
         id: img.id,
         image: img.url,
         title: img.photographerName,
@@ -334,7 +351,7 @@ export default function HomePage() {
   const titleOffset = scrollY * 0.3;
   const collageOffset = scrollY * 0.15;
   
-  // Collage slot renderer
+  // Collage slot renderer (24 slots for full coverage)
   const renderCollageSlot = (index: number, className: string, styleOverrides = {}) => {
     const item = heroCollageItems[index];
     if (!item) return null;
@@ -498,6 +515,22 @@ export default function HomePage() {
           
           {/* SLOT 19 — Tiny bottom filler (cols 4-5, row 7) */}
           {renderCollageSlot(18, 'col-span-1 row-span-1 relative overflow-hidden', { zIndex: 46 })}
+          
+          {/* ═══════════════════════════════════════════════════════════════
+              EXTRA FILLERS (4) — cover remaining gaps on right side
+              ═══════════════════════════════════════════════════════════════ */}
+          
+          {/* SLOT 21 — Upper-right corner (cols 6-8, rows 1-2) */}
+          {renderCollageSlot(20, 'col-span-2 row-span-2 relative overflow-hidden -ml-4', { zIndex: 17 })}
+          
+          {/* SLOT 22 — Lower-right strip (cols 10-12, rows 7-9) */}
+          {renderCollageSlot(21, 'col-span-2 row-span-2 relative overflow-hidden', { zIndex: 19 })}
+          
+          {/* SLOT 23 — Mid-right accent (cols 8-10, rows 2-4) */}
+          {renderCollageSlot(22, 'col-span-2 row-span-2 relative overflow-hidden', { zIndex: 21 })}
+          
+          {/* SLOT 24 — Bottom-edge filler (cols 6-8, rows 9-10) */}
+          {renderCollageSlot(23, 'col-span-2 row-span-1 relative overflow-hidden', { zIndex: 43 })}
         </div>
         
         {/* Dark gradient overlay for title readability */}
