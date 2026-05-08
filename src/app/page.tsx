@@ -94,18 +94,18 @@ const sizeClasses: Record<CardSize, string> = {
 };
 
 const typeLabels: Record<string, string> = {
-  photo: '📷',
-  video: '🎬 YouTube',
+  photo: '',
+  video: '▶',
   quote: '💬',
   story: '📖',
-  spot: '🌊',
+  spot: '📍',
   event: '📅',
   news: '📰',
   travel: '✈️',
   culture: '🎭',
   gear: '🛹',
-  reel: '▶️ TikTok/IG',
-  tweet: '✕ X',
+  reel: '▶',
+  tweet: '',
 };
 
 // Extract video ID from various URL formats
@@ -213,13 +213,55 @@ function renderVideoEmbed(item: GridItem) {
   return null;
 }
 
-// Straight layout generator for 20 collage slots (no rotations)
-function generateStraightLayout() {
+// Collage layout generator — mood board style with varying opacity and scale
+function generateCollageLayout() {
   return {
-    rotations: Array(20).fill(0),
-    opacities: Array(20).fill(0).map(() => 0.6 + Math.random() * 0.25),
-    translates: Array(20).fill(0),
-    scaleVariations: Array(20).fill(0).map(() => 1.0),
+    // Varying opacity: some prominent (0.9), some faded (0.4)
+    opacities: [
+      0.85, // Slot 1 — anchor, prominent
+      0.55, // Slot 2 — faded background
+      0.70, // Slot 3 — medium
+      0.40, // Slot 4 — very faded
+      0.65, // Slot 5 — medium
+      0.50, // Slot 6 — faded
+      0.35, // Slot 7 — text, very faded
+      0.45, // Slot 8 — faded accent
+      0.60, // Slot 9 — medium
+      0.30, // Slot 10 — barely visible
+      0.55, // Slot 11
+      0.40, // Slot 12
+      0.50, // Slot 13
+      0.35, // Slot 14
+      0.45, // Slot 15
+      0.30, // Slot 16
+      0.40, // Slot 17
+      0.35, // Slot 18
+      0.30, // Slot 19
+      0.25, // Slot 20 — barely visible background fill
+    ],
+    // Scale variations for visual interest
+    scaleVariations: [
+      1.05, // Slot 1 — slightly larger anchor
+      0.95,
+      1.0,
+      0.90,
+      1.02,
+      0.95,
+      1.0,
+      0.92,
+      1.0,
+      0.88,
+      0.95,
+      0.90,
+      0.92,
+      0.85,
+      0.90,
+      0.85,
+      0.88,
+      0.85,
+      0.80,
+      0.75,
+    ],
   };
 }
 
@@ -234,7 +276,7 @@ const heroCollageItemsStatic = [
 export default function HomePage() {
   const [activeFeed, setActiveFeed] = useState<FeedType>('feelgood');
   const [scrollY, setScrollY] = useState(0);
-  const [layout, setLayout] = useState(generateStraightLayout());
+  const [layout, setLayout] = useState(generateCollageLayout());
   const [isHovered, setIsHovered] = useState<number | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
   
@@ -242,7 +284,7 @@ export default function HomePage() {
   const [heroPoolImages, setHeroPoolImages] = useState<any[]>([]);
   
   useEffect(() => {
-    setLayout(generateStraightLayout());
+    setLayout(generateCollageLayout());
   }, []);
   
   useEffect(() => {
@@ -322,6 +364,7 @@ export default function HomePage() {
     const baseStyle = {
       opacity: layout.opacities[index],
       zIndex: isHovered === index ? 50 : 10 + index,
+      transform: `scale(${layout.scaleVariations[index]})`,
     };
     
     const style = { ...baseStyle, ...styleOverrides };
@@ -379,8 +422,8 @@ export default function HomePage() {
         {/* Content overlay for larger slots */}
         {(item.title || (item.content && item.type !== 'quote')) && (
           <div className="absolute bottom-4 left-4 right-4">
-            <p className="text-xs text-white/50">{typeLabels[item.type]}</p>
-            {item.title && <p className="text-sm text-white/90 mt-1 line-clamp-1">{item.title}</p>}
+            <p className="text-xs text-white/30">{typeLabels[item.type]}</p>
+            {item.title && <p className="text-xs text-white/20 mt-1 line-clamp-1">{item.title}</p>}
           </div>
         )}
       </div>
@@ -398,69 +441,69 @@ export default function HomePage() {
         {/* Base background gradient layer */}
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
         
-        {/* Dense collage grid — 12x10, covers entire background */}
+        {/* Dense collage grid — mood board style, overlapping artistic arrangement */}
         <div 
           className="absolute inset-0 z-1 grid grid-cols-12 grid-rows-10 gap-0"
           style={{ transform: `translateY(${collageOffset}px)` }}
         >
-          {/* SLOT 1 — Large hero anchor (left) */}
-          {renderCollageSlot(0, 'col-span-5 row-span-4 relative overflow-hidden')}
+          {/* SLOT 1 — Large hero anchor (left dominant) */}
+          {renderCollageSlot(0, 'col-span-6 row-span-5 relative overflow-hidden')}
           
-          {/* SLOT 2 — 16:9 Horizontal (center-top) */}
-          {renderCollageSlot(1, 'col-span-4 row-span-2 relative overflow-hidden -ml-8')}
+          {/* SLOT 2 — Medium horizontal overlapping */}
+          {renderCollageSlot(1, 'col-span-4 row-span-3 relative overflow-hidden -ml-12 -mt-4')}
           
           {/* SLOT 3 — Tall vertical (right edge) */}
-          {renderCollageSlot(2, 'col-span-3 row-span-5 relative overflow-hidden')}
+          {renderCollageSlot(2, 'col-span-3 row-span-6 relative overflow-hidden -ml-6')}
           
-          {/* SLOT 4 — Medium square (center) */}
-          {renderCollageSlot(3, 'col-span-2 row-span-2 relative overflow-hidden -mt-6 ml-2')}
+          {/* SLOT 4 — Small accent peeking */}
+          {renderCollageSlot(3, 'col-span-2 row-span-2 relative overflow-hidden -mt-16 ml-8')}
           
-          {/* SLOT 5 — Wide horizontal (bottom-left) */}
-          {renderCollageSlot(4, 'col-span-5 row-span-2 relative overflow-hidden -mr-6')}
+          {/* SLOT 5 — Wide horizontal (bottom) */}
+          {renderCollageSlot(4, 'col-span-5 row-span-2 relative overflow-hidden mt-4 -mr-8')}
           
-          {/* SLOT 6 — Medium accent */}
-          {renderCollageSlot(5, 'col-span-2 row-span-3 relative overflow-hidden -mt-4')}
+          {/* SLOT 6 — Medium vertical */}
+          {renderCollageSlot(5, 'col-span-2 row-span-4 relative overflow-hidden -mt-8')}
           
-          {/* SLOT 7 — Small quote/text */}
-          {renderCollageSlot(6, 'col-span-2 row-span-2 relative overflow-hidden ml-6')}
+          {/* SLOT 7 — Text/quote card */}
+          {renderCollageSlot(6, 'col-span-2 row-span-2 relative overflow-hidden ml-10 mt-6')}
           
-          {/* SLOT 8 — Top-right accent */}
-          {renderCollageSlot(7, 'col-span-2 row-span-2 relative overflow-hidden -mt-4')}
+          {/* SLOT 8 — Top-right small */}
+          {renderCollageSlot(7, 'col-span-2 row-span-2 relative overflow-hidden -mt-12')}
           
-          {/* SLOT 9 — Bottom center */}
-          {renderCollageSlot(8, 'col-span-3 row-span-3 relative overflow-hidden -ml-4 mt-2')}
+          {/* SLOT 9 — Center fill */}
+          {renderCollageSlot(8, 'col-span-3 row-span-3 relative overflow-hidden -ml-8 mt-2')}
           
-          {/* SLOT 10 — Fill bottom-left */}
-          {renderCollageSlot(9, 'col-span-2 row-span-2 relative overflow-hidden')}
+          {/* SLOT 10 — Bottom-left accent */}
+          {renderCollageSlot(9, 'col-span-2 row-span-2 relative overflow-hidden mt-8')}
           
-          {/* SLOT 11 — Fill right edge */}
-          {renderCollageSlot(10, 'col-span-2 row-span-2 relative overflow-hidden -mt-4')}
+          {/* SLOT 11 — Right edge fill */}
+          {renderCollageSlot(10, 'col-span-2 row-span-2 relative overflow-hidden -mt-8 ml-4')}
           
-          {/* SLOT 12 — Extra center */}
-          {renderCollageSlot(11, 'col-span-2 row-span-2 relative overflow-hidden ml-4 -mt-2')}
+          {/* SLOT 12 — Extra center peek */}
+          {renderCollageSlot(11, 'col-span-2 row-span-2 relative overflow-hidden ml-12 -mt-4')}
           
           {/* SLOT 13 — Bottom accent */}
-          {renderCollageSlot(12, 'col-span-3 row-span-2 relative overflow-hidden -mr-4')}
+          {renderCollageSlot(12, 'col-span-3 row-span-2 relative overflow-hidden -mr-6 mt-6')}
           
           {/* SLOT 14 — Top fill */}
-          {renderCollageSlot(13, 'col-span-2 row-span-1 relative overflow-hidden mt-4')}
+          {renderCollageSlot(13, 'col-span-2 row-span-1 relative overflow-hidden mt-8')}
           
-          {/* SLOT 15 — Fill edge */}
+          {/* SLOT 15 — Edge peek */}
           {renderCollageSlot(14, 'col-span-2 row-span-1 relative overflow-hidden')}
           
           {/* SLOT 16 — Extra bottom */}
-          {renderCollageSlot(15, 'col-span-2 row-span-2 relative overflow-hidden -ml-2')}
+          {renderCollageSlot(15, 'col-span-2 row-span-2 relative overflow-hidden -ml-4 mt-4')}
           
           {/* SLOT 17 — Corner fill */}
-          {renderCollageSlot(16, 'col-span-2 row-span-2 relative overflow-hidden mt-2')}
+          {renderCollageSlot(16, 'col-span-2 row-span-2 relative overflow-hidden mt-10')}
           
           {/* SLOT 18 — Gap fill */}
-          {renderCollageSlot(17, 'col-span-2 row-span-1 relative overflow-hidden -mr-6')}
+          {renderCollageSlot(17, 'col-span-2 row-span-1 relative overflow-hidden -mr-10')}
           
           {/* SLOT 19 — Edge fill */}
           {renderCollageSlot(18, 'col-span-2 row-span-2 relative overflow-hidden')}
           
-          {/* SLOT 20 — Final fill */}
+          {/* SLOT 20 — Final background fill */}
           {renderCollageSlot(19, 'col-span-2 row-span-1 relative overflow-hidden')}
         </div>
         
