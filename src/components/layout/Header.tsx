@@ -88,8 +88,8 @@ export function Header() {
           {/* Logo */}
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Waves className="h-6 w-6 text-yellow-300 transition-colors duration-300" />
-            <span className={`font-bold sm:inline-block text-xl transition-colors duration-300 ${navTextClass}`}>
-              SurfHub
+            <span className={`font-black sm:inline-block transition-colors duration-300 ${navTextClass}`}>
+              SurfHub<span className="text-cyan-400 ml-1">GP</span>
             </span>
           </Link>
           
