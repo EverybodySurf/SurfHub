@@ -216,29 +216,8 @@ function renderVideoEmbed(item: GridItem) {
 // Collage layout generator — mood board style: large anchors + small accents spiraling to center
 function generateCollageLayout() {
   return {
-    // Opacity: large anchors prominent, small accents faded
-    opacities: [
-      0.90, // Slot 1 — Large left anchor (dominant)
-      0.85, // Slot 2 — Large right anchor (dominant)
-      0.75, // Slot 3 — Medium top-center
-      0.70, // Slot 4 — Medium bottom-left
-      0.65, // Slot 5 — Medium bottom-right
-      0.55, // Slot 6 — Small accent (spiral start)
-      0.50, // Slot 7 — Small accent
-      0.45, // Slot 8 — Small accent
-      0.40, // Slot 9 — Small accent (spiral inward)
-      0.35, // Slot 10 — Small accent
-      0.30, // Slot 11 — Tiny accent
-      0.25, // Slot 12 — Tiny accent
-      0.20, // Slot 13 — Tiny (near center)
-      0.15, // Slot 14 — Tiny (near center)
-      0.12, // Slot 15 — Almost invisible
-      0.10, // Slot 16 — Almost invisible
-      0.08, // Slot 17 — Barely visible
-      0.06, // Slot 18 — Barely visible
-      0.04, // Slot 19 — Ghost
-      0.03, // Slot 20 — Ghost (center whisper)
-    ],
+    // Opacity: all images full visibility
+    opacities: Array(20).fill(1.0),
     // Scale: large anchors bigger, small accents smaller
     scaleVariations: [
       1.08, // Slot 1 — Large anchor
