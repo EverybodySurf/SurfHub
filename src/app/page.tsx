@@ -238,6 +238,9 @@ export default function HomePage() {
   const [isHovered, setIsHovered] = useState<number | null>(null);
   const [playingId, setPlayingId] = useState<string | null>(null);
   
+  // Hero pool images (from curated photography API)
+  const [heroPoolImages, setHeroPoolImages] = useState<any[]>([]);
+  
   useEffect(() => {
     setLayout(generateStraightLayout());
   }, []);
@@ -246,6 +249,22 @@ export default function HomePage() {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+  
+  // Fetch hero pool photography
+  useEffect(() => {
+    const fetchHeroPool = async () => {
+      try {
+        const res = await fetch('/api/hero/fetch');
+        const data = await res.json();
+        if (data.success && data.images && data.images.length > 0) {
+          setHeroPoolImages(data.images);
+        }
+      } catch (e) {
+        console.log('Hero pool API not ready, using static fallback');
+      }
+    };
+    fetchHeroPool();
   }, []);
   
   // Fetch live feed content from API
@@ -276,9 +295,17 @@ export default function HomePage() {
   
   const filteredItems = mergedItems;
   
-  // Hero collage items — use live API data when available, fallback to static
-  const heroCollageItems = liveItems.length > 0 
-    ? liveItems.filter(item => item.image).slice(0, 20)
+  // Hero collage items — use hero pool photography when available, fallback to static
+  const heroCollageItems = heroPoolImages.length > 0 
+    ? heroPoolImages.slice(0, 20).map(img => ({
+        id: img.id,
+        image: img.url,
+        title: img.photographerName,
+        content: img.altDescription,
+        type: 'photo',
+        feed: 'feelgood',
+        size: img.orientation === 'landscape' ? 'horizontal' : img.orientation === 'portrait' ? 'tall' : 'square',
+      }))
     : heroCollageItemsStatic;
   
   const titleOffset = scrollY * 0.3;

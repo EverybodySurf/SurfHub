@@ -1,0 +1,13 @@
+{
+  "images": [],
+  "removedLog": [],
+  "lastFetch": null,
+  "fetchStats": {
+    "totalAdded": 0,
+    "totalRemoved": 0,
+    "sources": {
+      "unsplash": 0,
+      "pexels": 0
+    }
+  }
+}
