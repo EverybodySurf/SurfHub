@@ -401,7 +401,7 @@ export default function HomePage() {
           >
             {/* SurfHub — gradient, top-left */}
             <span 
-              className="absolute -top-12 left-0 text-[2.5rem] md:text-[3.2rem] font-black tracking-[-0.01em] bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
+              className="absolute -top-14 left-0 text-[2.5rem] md:text-[3.2rem] font-black tracking-[-0.01em] bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
             >
               SurfHub
             </span>
