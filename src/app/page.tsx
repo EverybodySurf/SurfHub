@@ -137,13 +137,25 @@ function addCropParams(url: string, className: string): string {
   const rows = parseInt(rowMatch[1]);
   
   // Grid is 12 cols x 10 rows. Approximate pixel dimensions.
-  // Assume ~100px per grid unit (rough estimate, actual varies by viewport)
   const width = cols * 120;
   const height = rows * 80;
   
+  // YouTube thumbnails: swap to maxresdefault (true 16:9, no black bars)
+  // hqdefault has baked-in black bars, maxresdefault/mqdefault are clean 16:9
+  if (url.includes('i.ytimg.com')) {
+    // Extract video ID and use maxresdefault (highest quality, true aspect ratio)
+    const match = url.match(/\/vi\/([a-zA-Z0-9_-]+)\/(?:hqdefault|maxresdefault|mqdefault|default|sddefault)/);
+    if (match) {
+      const videoId = match[1];
+      // maxresdefault is true 16:9, highest quality (may not exist for some videos)
+      // If it doesn't load, Next.js will fallback to original URL
+      return `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+    }
+    return url;
+  }
+  
   // Unsplash: add fit=crop with dimensions
   if (url.includes('unsplash.com')) {
-    // Remove existing params and add new ones
     const baseUrl = url.split('?')[0];
     return `${baseUrl}?w=${width}&h=${height}&fit=crop&auto=format`;
   }
@@ -151,10 +163,9 @@ function addCropParams(url: string, className: string): string {
   // Pexels: similar approach
   if (url.includes('pexels.com')) {
     const baseUrl = url.split('?')[0];
-    return `${baseUrl}?w=${width}&h=${height}&auto=compress&cs=tinysrgb`;
+    return `${baseUrl}?auto=compress&cs=tinysrgb&w=${Math.max(width, 800)}`;
   }
   
-  // YouTube thumbnails: already fixed aspect ratio, return unchanged
   // Other URLs: return unchanged
   return url;
 }
