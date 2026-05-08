@@ -4,6 +4,7 @@ import fs from 'fs';
 import path from 'path';
 
 const HERO_POOL_PATH = path.join(process.cwd(), 'data', 'hero-pool.json');
+const SEARCH_TERMS_PATH = path.join(process.cwd(), 'data', 'search-terms.json');
 
 interface HeroPoolData {
   images: HeroImage[];
@@ -32,6 +33,25 @@ function loadHeroPool(): HeroPoolData {
 
 function saveHeroPool(data: HeroPoolData) {
   fs.writeFileSync(HERO_POOL_PATH, JSON.stringify(data, null, 2));
+}
+
+// Load dynamic search terms
+function loadSearchTerms(): Record<string, { searchQuery: string; active: boolean }> {
+  try {
+    if (fs.existsSync(SEARCH_TERMS_PATH)) {
+      const data = JSON.parse(fs.readFileSync(SEARCH_TERMS_PATH, 'utf-8'));
+      return data.sources;
+    }
+  } catch {
+    // Fallback to defaults from heroSources
+  }
+  
+  // Default fallback
+  const defaults: Record<string, { searchQuery: string; active: boolean }> = {};
+  for (const source of heroSources) {
+    defaults[source.id] = { searchQuery: source.searchQuery, active: source.active };
+  }
+  return defaults;
 }
 
 // Fetch from Unsplash API
@@ -133,16 +153,18 @@ async function fetchPexels(query: string, maxResults: number): Promise<HeroImage
 
 export async function POST() {
   const pool = loadHeroPool();
+  const searchTerms = loadSearchTerms();
   const newImages: HeroImage[] = [];
 
   for (const source of heroSources) {
-    if (!source.active) continue;
+    const termConfig = searchTerms[source.id] || { searchQuery: source.searchQuery, active: source.active };
+    if (!termConfig.active) continue;
 
     let images: HeroImage[] = [];
     if (source.type === 'unsplash') {
-      images = await fetchUnsplash(source.searchQuery, source.maxResults);
+      images = await fetchUnsplash(termConfig.searchQuery, source.maxResults);
     } else if (source.type === 'pexels') {
-      images = await fetchPexels(source.searchQuery, source.maxResults);
+      images = await fetchPexels(termConfig.searchQuery, source.maxResults);
     }
 
     // Filter out duplicates (already in pool)
@@ -164,7 +186,7 @@ export async function POST() {
     success: true,
     added: newImages.length,
     total: pool.images.length,
-    message: `Added ${newImages.length} new hero images from ${heroSources.filter(s => s.active).map(s => s.name).join(', ')}`,
+    message: `Added ${newImages.length} new hero images from ${heroSources.filter(s => searchTerms[s.id]?.active).map(s => `${s.type}: "${searchTerms[s.id]?.searchQuery || s.searchQuery}"`).join(', ')}`,
   });
 }
 

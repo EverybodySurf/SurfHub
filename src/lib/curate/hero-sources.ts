@@ -25,7 +25,7 @@ export const heroSources: HeroSource[] = [
     id: 'pexels-surfing',
     name: 'Pexels Surfing & Ocean Style',
     type: 'pexels',
-    searchQuery: 'Surfing Ocean',
+    searchQuery: 'Surfing & Ocean Style',
     active: true,
     apiKeyEnv: 'PEXELS_API_KEY',
     maxResults: 30,

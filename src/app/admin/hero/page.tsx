@@ -33,23 +33,60 @@ interface HeroPoolResponse {
   };
 }
 
+interface SearchTermsResponse {
+  sources: Record<string, { searchQuery: string; active: boolean }>;
+  lastUpdated: string | null;
+}
+
 export default function HeroCuratePage() {
   const [pool, setPool] = useState<HeroPoolResponse | null>(null);
+  const [searchTerms, setSearchTerms] = useState<SearchTermsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [showRemoved, setShowRemoved] = useState(false);
+  const [editingTerms, setEditingTerms] = useState<Record<string, string>>({});
 
   const fetchPool = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/hero/fetch');
-      const data = await res.json();
-      setPool(data);
+      const [poolRes, termsRes] = await Promise.all([
+        fetch('/api/hero/fetch'),
+        fetch('/api/search-terms'),
+      ]);
+      const poolData = await poolRes.json();
+      const termsData = await termsRes.json();
+      setPool(poolData);
+      setSearchTerms(termsData);
+      // Initialize editing state with current terms
+      const editState: Record<string, string> = {};
+      for (const [id, config] of Object.entries(termsData.sources || {})) {
+        editState[id] = config.searchQuery;
+      }
+      setEditingTerms(editState);
     } catch (error) {
       console.error('Failed to fetch hero pool:', error);
     }
     setIsLoading(false);
+  };
+
+  const updateSearchTerm = async (sourceId: string) => {
+    const newQuery = editingTerms[sourceId];
+    if (!newQuery) return;
+    
+    try {
+      await fetch('/api/search-terms', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceId, searchQuery: newQuery }),
+      });
+      // Refresh search terms
+      const termsRes = await fetch('/api/search-terms');
+      const termsData = await termsRes.json();
+      setSearchTerms(termsData);
+    } catch (error) {
+      console.error('Failed to update search term:', error);
+    }
   };
 
   const fetchNewImages = async () => {
@@ -113,31 +150,59 @@ export default function HeroCuratePage() {
           </p>
         </div>
 
-        {/* Stats & Actions */}
+        {/* Stats & Search Terms */}
         <Card className="p-6 mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">
-                <span className="font-semibold">{pool?.total || 0}</span> approved images
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Last fetch: {pool?.lastFetch ? new Date(pool.lastFetch).toLocaleString() : 'Never'}
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Removed: {pool?.stats.totalRemoved || 0} | Unsplash: {pool?.stats.sources.unsplash || 0} | Pexels: {pool?.stats.sources.pexels || 0}
-              </p>
-              {/* Search terms */}
-              <p className="text-xs text-muted-foreground mt-2">
-                🔍 Search terms: <span className="text-emerald-400">Unsplash:</span> "Surfing & Ocean Style" | <span className="text-cyan-400">Pexels:</span> "Surfing Ocean"
-              </p>
+          <div className="space-y-4">
+            {/* Stats row */}
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">
+                  <span className="font-semibold">{pool?.total || 0}</span> approved images
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Last fetch: {pool?.lastFetch ? new Date(pool.lastFetch).toLocaleString() : 'Never'}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Removed: {pool?.stats.totalRemoved || 0} | Unsplash: {pool?.stats.sources.unsplash || 0} | Pexels: {pool?.stats.sources.pexels || 0}
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button onClick={fetchNewImages} disabled={isFetching}>
+                  {isFetching ? 'Fetching...' : 'Fetch New Photos'}
+                </Button>
+                <Button variant="outline" onClick={() => setShowRemoved(!showRemoved)}>
+                  {showRemoved ? 'Hide Removed Log' : 'View Removed Log'}
+                </Button>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <Button onClick={fetchNewImages} disabled={isFetching}>
-                {isFetching ? 'Fetching...' : 'Fetch New Photos'}
-              </Button>
-              <Button variant="outline" onClick={() => setShowRemoved(!showRemoved)}>
-                {showRemoved ? 'Hide Removed Log' : 'View Removed Log'}
-              </Button>
+            
+            {/* Search terms editor */}
+            <div className="border-t pt-4">
+              <p className="text-sm font-semibold mb-3">🔍 Search Terms</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {Object.entries(searchTerms?.sources || {}).map(([sourceId, config]) => (
+                  <div key={sourceId} className="flex items-center gap-2">
+                    <span className={`text-xs font-medium ${sourceId.includes('unsplash') ? 'text-emerald-400' : 'text-cyan-400'}`}>
+                      {sourceId.includes('unsplash') ? 'Unsplash' : 'Pexels'}:
+                    </span>
+                    <input
+                      type="text"
+                      value={editingTerms[sourceId] || config.searchQuery}
+                      onChange={(e) => setEditingTerms(prev => ({ ...prev, [sourceId]: e.target.value }))}
+                      className="flex-1 px-2 py-1 text-sm bg-muted rounded border border-border/50 focus:border-cyan-400 focus:outline-none"
+                      placeholder="Enter search query..."
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => updateSearchTerm(sourceId)}
+                      disabled={editingTerms[sourceId] === config.searchQuery}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </Card>
