@@ -41,8 +41,8 @@ export function Header() {
 
   // Dynamic text color based on scroll
   const navTextClass = scrolled
-    ? 'text-foreground opacity-80 transition-colors duration-300'
-    : 'text-white opacity-100 transition-colors duration-300';
+    ? 'text-foreground transition-colors duration-300'
+    : 'text-white transition-colors duration-300';
 
   const baseNavItems = [
     { href: '/', label: 'Home', icon: Waves },

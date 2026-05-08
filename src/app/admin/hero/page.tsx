@@ -106,7 +106,7 @@ export default function HeroCuratePage() {
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 pt-6">
           <h1 className="text-3xl font-bold mb-2">Hero Image Pool</h1>
           <p className="text-muted-foreground">
             Curate surfing photography for the hero collage. Photos from Unsplash & Pexels.
@@ -125,6 +125,10 @@ export default function HeroCuratePage() {
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Removed: {pool?.stats.totalRemoved || 0} | Unsplash: {pool?.stats.sources.unsplash || 0} | Pexels: {pool?.stats.sources.pexels || 0}
+              </p>
+              {/* Search terms */}
+              <p className="text-xs text-muted-foreground mt-2">
+                🔍 Search terms: <span className="text-emerald-400">Unsplash:</span> "Surfing & Ocean Style" | <span className="text-cyan-400">Pexels:</span> "Surfing Ocean"
               </p>
             </div>
             <div className="flex gap-3">
