@@ -430,14 +430,14 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════
           HERO — Dense Overlapping Collage (20 slots, full coverage)
           ═══════════════════════════════════════════════════════════════ */}
-      <section className="relative min-h-screen overflow-hidden bg-black">
+      <section className="relative h-[100dvh] md:min-h-screen overflow-hidden bg-black">
         
         {/* Base background gradient layer */}
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
         
         {/* Collage grid — EXPLICIT placement, full coverage, NO gaps */}
         <div 
-          className="absolute inset-0 z-1 grid grid-cols-12 grid-rows-10 gap-0"
+          className="absolute inset-0 z-1 grid grid-cols-12 grid-rows-10 gap-0 h-[100dvh] md:h-full"
           style={{ transform: `translateY(${collageOffset}px)` }}
         >
           {/* ═══════════════════════════════════════════════════════════════
@@ -523,7 +523,7 @@ export default function HomePage() {
         <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/20 via-black/10 to-black/25" />
         
         {/* Title overlay */}
-        <div className="relative z-30 h-screen flex flex-col items-center justify-center px-4">
+        <div className="relative z-30 h-[100dvh] md:h-screen flex flex-col items-center justify-center px-8 md:px-12">
           {/* Two-line brand + location */}
           <div 
             className="relative mb-4"
@@ -531,17 +531,17 @@ export default function HomePage() {
           >
             {/* SurfHub — gradient, top-left */}
             <span 
-              className="absolute -top-14 left-0 text-[2.5rem] md:text-[3.2rem] font-black tracking-[-0.01em] bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
+              className="absolute -top-10 md:-top-14 left-0 text-[1.8rem] md:text-[2.5rem] font-black tracking-[-0.01em] bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
             >
               SurfHub
             </span>
             {/* Guadeloupe — large, white, tight kerning */}
-            <h1 className="text-7xl md:text-9xl font-black tracking-[-0.08em] text-white">
+            <h1 className="text-5xl md:text-7xl lg:text-9xl font-black tracking-[-0.08em] text-white">
               Guadeloupe
             </h1>
           </div>
           <p 
-            className="text-lg md:text-xl text-white/50 max-w-md mx-auto mb-12 text-center"
+            className="text-base md:text-lg lg:text-xl text-white/50 max-w-md mx-auto mb-10 md:mb-12 text-center px-4"
             style={{ transform: `translateY(${titleOffset * 0.7}px)` }}
           >
             Surfing is one of the magical treasures this world has to offer. Dive in and be a part of it.
