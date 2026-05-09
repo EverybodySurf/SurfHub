@@ -430,14 +430,14 @@ export default function HomePage() {
       {/* ═══════════════════════════════════════════════════════════════
           HERO — Dense Overlapping Collage (20 slots, full coverage)
           ═══════════════════════════════════════════════════════════════ */}
-      <section className="relative h-[115dvh] md:min-h-screen overflow-hidden bg-black">
+      <section className="relative h-[120dvh] md:min-h-screen overflow-hidden bg-black">
         
         {/* Base background gradient layer */}
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
         
         {/* Collage grid — EXPLICIT placement, full coverage, NO gaps */}
         <div 
-          className="absolute inset-0 z-1 grid grid-cols-12 grid-rows-10 gap-0 h-[115dvh] md:h-full"
+          className="absolute inset-0 z-1 grid grid-cols-12 grid-rows-10 gap-0 h-[120dvh] md:h-full"
           style={{ transform: `translateY(${collageOffset}px)` }}
         >
           {/* ═══════════════════════════════════════════════════════════════
@@ -523,7 +523,7 @@ export default function HomePage() {
         <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/20 via-black/10 to-black/25" />
         
         {/* Title overlay */}
-        <div className="relative z-30 h-[115dvh] md:h-screen flex flex-col items-center justify-center px-8 md:px-12">
+        <div className="relative z-30 h-[120dvh] md:h-screen flex flex-col items-center justify-center px-8 md:px-12">
           {/* Two-line brand + location */}
           <div 
             className="relative mb-4"
