@@ -218,8 +218,8 @@ function renderVideoEmbed(item: GridItem) {
 function generateCollageLayout() {
   return {
     // Opacity: all images full visibility
-    opacities: Array(24).fill(1.0),
-    // Scale: subtle variations, all visible (24 slots)
+    opacities: Array(20).fill(1.0),
+    // Scale: subtle variations for depth (20 slots)
     scaleVariations: [
       1.02, // Slot 1 — Large
       1.01, // Slot 2 — Large
@@ -231,33 +231,29 @@ function generateCollageLayout() {
       0.97, // Slot 8 — Large
       0.96, // Slot 9 — Large
       0.95, // Slot 10 — Large
-      0.94, // Slot 11 — Large
+      0.94, // Slot 11 — Medium
       0.92, // Slot 12 — Medium
       0.90, // Slot 13 — Medium
       0.88, // Slot 14 — Medium
       0.86, // Slot 15 — Medium
-      0.84, // Slot 16 — Medium
+      0.84, // Slot 16 — Small
       0.80, // Slot 17 — Small
       0.80, // Slot 18 — Small
-      0.80, // Slot 19 — Small
-      0.82, // Slot 20 — Medium
-      0.89, // Slot 21 — Extra (upper-right)
-      0.87, // Slot 22 — Extra (lower-right)
-      0.85, // Slot 23 — Extra (mid-right)
-      0.83, // Slot 24 — Extra (bottom-edge)
+      0.82, // Slot 19 — Small
+      0.85, // Slot 20 — Medium
     ],
   };
 }
 
 // Hero collage items — will be populated from live API data
 // Hero collage items — EXCLUDE video/reel items (only photos, quotes, text)
-// 24 slots for full coverage
+// 20 slots for coverage
 const heroCollageItemsStatic = [
   ...allItems.filter(item => item.id.startsWith('hero') && item.image && item.type !== 'video' && item.type !== 'reel'),
   ...allItems.filter(item => item.type === 'photo' && !item.id.startsWith('hero') && item.image),
   ...allItems.filter(item => item.type === 'quote' && !item.id.startsWith('hero')),
   ...allItems.filter(item => item.type === 'tweet' && !item.image).slice(0, 2),
-].slice(0, 24);
+].slice(0, 20);
 
 export default function HomePage() {
   const [activeFeed, setActiveFeed] = useState<FeedType>('feelgood');
@@ -335,9 +331,9 @@ export default function HomePage() {
   const filteredItems = mergedItems;
   
   // Hero collage items — use hero pool photography when available, fallback to static
-  // 24 slots for full coverage (no gaps)
+  // 20 slots for coverage (no gaps)
   const heroCollageItems = heroPoolImages.length > 0 
-    ? heroPoolImages.slice(0, 24).map(img => ({
+    ? heroPoolImages.slice(0, 20).map(img => ({
         id: img.id,
         image: img.url,
         title: img.photographerName,
@@ -351,7 +347,7 @@ export default function HomePage() {
   const titleOffset = scrollY * 0.3;
   const collageOffset = scrollY * 0.15;
   
-  // Collage slot renderer (24 slots for full coverage)
+  // Collage slot renderer (20 slots for coverage)
   const renderCollageSlot = (index: number, className: string, styleOverrides = {}) => {
     const item = heroCollageItems[index];
     if (!item) return null;
@@ -507,10 +503,10 @@ export default function HomePage() {
           </div>
           
           {/* ═══════════════════════════════════════════════════════════════
-              FILLER SLOTS (14) — tiny accents, full coverage
+              FILLER SLOTS (10) — tiny accents, full coverage
               ═══════════════════════════════════════════════════════════════ */}
           
-          {/* SLOT 11-24 — Small fillers spread across */}
+          {/* SLOT 11-20 — Small fillers spread across */}
           <div className="col-[3_/_5] row-[3_/_5] h-full w-full">{renderCollageSlot(10, 'relative overflow-hidden h-full w-full', { zIndex: 30 })}</div>
           <div className="col-[4_/_6] row-[4_/_6] h-full w-full">{renderCollageSlot(11, 'relative overflow-hidden h-full w-full', { zIndex: 32 })}</div>
           <div className="col-[6_/_8] row-[3_/_4] h-full w-full">{renderCollageSlot(12, 'relative overflow-hidden h-full w-full', { zIndex: 34 })}</div>
@@ -521,10 +517,6 @@ export default function HomePage() {
           <div className="col-[8_/_9] row-[6_/_8] h-full w-full">{renderCollageSlot(17, 'relative overflow-hidden h-full w-full', { zIndex: 44 })}</div>
           <div className="col-[1_/_3] row-[8_/_10] h-full w-full">{renderCollageSlot(18, 'relative overflow-hidden h-full w-full', { zIndex: 46 })}</div>
           <div className="col-[6_/_7] row-[6_/_7] h-full w-full">{renderCollageSlot(19, 'relative overflow-hidden h-full w-full', { zIndex: 48 })}</div>
-          <div className="col-[2_/_4] row-[5_/_6] h-full w-full">{renderCollageSlot(20, 'relative overflow-hidden h-full w-full', { zIndex: 50 })}</div>
-          <div className="col-[11_/_12] row-[6_/_8] h-full w-full">{renderCollageSlot(21, 'relative overflow-hidden h-full w-full', { zIndex: 52 })}</div>
-          <div className="col-[4_/_5] row-[8_/_9] h-full w-full">{renderCollageSlot(22, 'relative overflow-hidden h-full w-full', { zIndex: 54 })}</div>
-          <div className="col-[7_/_8] row-[8_/_10] h-full w-full">{renderCollageSlot(23, 'relative overflow-hidden h-full w-full', { zIndex: 56 })}</div>
         </div>
         
         {/* Light gradient overlay for title readability — 80% transparent */}
