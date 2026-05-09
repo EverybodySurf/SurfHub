@@ -449,13 +449,13 @@ export default function HomePage() {
               ═══════════════════════════════════════════════════════════════ */}
           
           {/* SLOT 1 — Full left (cols 1-4, rows 1-10) */}
-          <div className="col-[1_/_5] row-[1_/_11]">
-            {renderCollageSlot(0, 'relative overflow-hidden', { zIndex: 5 })}
+          <div className="col-[1_/_5] row-[1_/_11] h-full w-full">
+            {renderCollageSlot(0, 'relative overflow-hidden h-full w-full', { zIndex: 5 })}
           </div>
           
           {/* SLOT 2 — Left top accent (cols 1-2, rows 1-5) */}
-          <div className="col-[1_/_3] row-[1_/_6]">
-            {renderCollageSlot(1, 'relative overflow-hidden', { zIndex: 10 })}
+          <div className="col-[1_/_3] row-[1_/_6] h-full w-full">
+            {renderCollageSlot(1, 'relative overflow-hidden h-full w-full', { zIndex: 10 })}
           </div>
           
           {/* ═══════════════════════════════════════════════════════════════
@@ -463,18 +463,18 @@ export default function HomePage() {
               ═══════════════════════════════════════════════════════════════ */}
           
           {/* SLOT 3 — Center top (cols 5-8, rows 1-5) */}
-          <div className="col-[5_/_9] row-[1_/_6]">
-            {renderCollageSlot(2, 'relative overflow-hidden', { zIndex: 15 })}
+          <div className="col-[5_/_9] row-[1_/_6] h-full w-full">
+            {renderCollageSlot(2, 'relative overflow-hidden h-full w-full', { zIndex: 15 })}
           </div>
           
           {/* SLOT 4 — Center middle (cols 5-8, rows 5-7) — fills behind text */}
-          <div className="col-[5_/_9] row-[5_/_8]">
-            {renderCollageSlot(3, 'relative overflow-hidden', { zIndex: 20 })}
+          <div className="col-[5_/_9] row-[5_/_8] h-full w-full">
+            {renderCollageSlot(3, 'relative overflow-hidden h-full w-full', { zIndex: 20 })}
           </div>
           
           {/* SLOT 5 — Center bottom (cols 5-8, rows 7-10) */}
-          <div className="col-[5_/_9] row-[7_/_11]">
-            {renderCollageSlot(4, 'relative overflow-hidden', { zIndex: 25 })}
+          <div className="col-[5_/_9] row-[7_/_11] h-full w-full">
+            {renderCollageSlot(4, 'relative overflow-hidden h-full w-full', { zIndex: 25 })}
           </div>
           
           {/* ═══════════════════════════════════════════════════════════════
@@ -482,28 +482,28 @@ export default function HomePage() {
               ═══════════════════════════════════════════════════════════════ */}
           
           {/* SLOT 6 — Right edge tall (cols 11-12, rows 1-10) — fills top-right strip */}
-          <div className="col-[11_/_13] row-[1_/_11]">
-            {renderCollageSlot(5, 'relative overflow-hidden', { zIndex: 8 })}
+          <div className="col-[11_/_13] row-[1_/_11] h-full w-full">
+            {renderCollageSlot(5, 'relative overflow-hidden h-full w-full', { zIndex: 8 })}
           </div>
           
           {/* SLOT 7 — Upper-right (cols 9-11, rows 1-5) */}
-          <div className="col-[9_/_12] row-[1_/_6]">
-            {renderCollageSlot(6, 'relative overflow-hidden', { zIndex: 12 })}
+          <div className="col-[9_/_12] row-[1_/_6] h-full w-full">
+            {renderCollageSlot(6, 'relative overflow-hidden h-full w-full', { zIndex: 12 })}
           </div>
           
           {/* SLOT 8 — Mid-right (cols 9-11, rows 5-7) */}
-          <div className="col-[9_/_12] row-[5_/_8]">
-            {renderCollageSlot(7, 'relative overflow-hidden', { zIndex: 18 })}
+          <div className="col-[9_/_12] row-[5_/_8] h-full w-full">
+            {renderCollageSlot(7, 'relative overflow-hidden h-full w-full', { zIndex: 18 })}
           </div>
           
           {/* SLOT 9 — Lower-right (cols 9-11, rows 7-10) — fills bottom-right block */}
-          <div className="col-[9_/_12] row-[7_/_11]">
-            {renderCollageSlot(8, 'relative overflow-hidden', { zIndex: 22 })}
+          <div className="col-[9_/_12] row-[7_/_11] h-full w-full">
+            {renderCollageSlot(8, 'relative overflow-hidden h-full w-full', { zIndex: 22 })}
           </div>
           
           {/* SLOT 10 — Top-right corner (cols 9-12, rows 1-3) */}
-          <div className="col-[9_/_13] row-[1_/_4]">
-            {renderCollageSlot(9, 'relative overflow-hidden', { zIndex: 28 })}
+          <div className="col-[9_/_13] row-[1_/_4] h-full w-full">
+            {renderCollageSlot(9, 'relative overflow-hidden h-full w-full', { zIndex: 28 })}
           </div>
           
           {/* ═══════════════════════════════════════════════════════════════
@@ -511,20 +511,20 @@ export default function HomePage() {
               ═══════════════════════════════════════════════════════════════ */}
           
           {/* SLOT 11-24 — Small fillers spread across */}
-          <div className="col-[3_/_5] row-[3_/_5]">{renderCollageSlot(10, 'relative overflow-hidden', { zIndex: 30 })}</div>
-          <div className="col-[4_/_6] row-[4_/_6]">{renderCollageSlot(11, 'relative overflow-hidden', { zIndex: 32 })}</div>
-          <div className="col-[6_/_8] row-[3_/_4]">{renderCollageSlot(12, 'relative overflow-hidden', { zIndex: 34 })}</div>
-          <div className="col-[7_/_9] row-[4_/_5]">{renderCollageSlot(13, 'relative overflow-hidden', { zIndex: 36 })}</div>
-          <div className="col-[8_/_10] row-[2_/_4]">{renderCollageSlot(14, 'relative overflow-hidden', { zIndex: 38 })}</div>
-          <div className="col-[10_/_12] row-[3_/_5]">{renderCollageSlot(15, 'relative overflow-hidden', { zIndex: 40 })}</div>
-          <div className="col-[3_/_4] row-[6_/_8]">{renderCollageSlot(16, 'relative overflow-hidden', { zIndex: 42 })}</div>
-          <div className="col-[8_/_9] row-[6_/_8]">{renderCollageSlot(17, 'relative overflow-hidden', { zIndex: 44 })}</div>
-          <div className="col-[1_/_3] row-[8_/_10]">{renderCollageSlot(18, 'relative overflow-hidden', { zIndex: 46 })}</div>
-          <div className="col-[6_/_7] row-[6_/_7]">{renderCollageSlot(19, 'relative overflow-hidden', { zIndex: 48 })}</div>
-          <div className="col-[2_/_4] row-[5_/_6]">{renderCollageSlot(20, 'relative overflow-hidden', { zIndex: 50 })}</div>
-          <div className="col-[11_/_12] row-[6_/_8]">{renderCollageSlot(21, 'relative overflow-hidden', { zIndex: 52 })}</div>
-          <div className="col-[4_/_5] row-[8_/_9]">{renderCollageSlot(22, 'relative overflow-hidden', { zIndex: 54 })}</div>
-          <div className="col-[7_/_8] row-[8_/_10]">{renderCollageSlot(23, 'relative overflow-hidden', { zIndex: 56 })}</div>
+          <div className="col-[3_/_5] row-[3_/_5] h-full w-full">{renderCollageSlot(10, 'relative overflow-hidden h-full w-full', { zIndex: 30 })}</div>
+          <div className="col-[4_/_6] row-[4_/_6] h-full w-full">{renderCollageSlot(11, 'relative overflow-hidden h-full w-full', { zIndex: 32 })}</div>
+          <div className="col-[6_/_8] row-[3_/_4] h-full w-full">{renderCollageSlot(12, 'relative overflow-hidden h-full w-full', { zIndex: 34 })}</div>
+          <div className="col-[7_/_9] row-[4_/_5] h-full w-full">{renderCollageSlot(13, 'relative overflow-hidden h-full w-full', { zIndex: 36 })}</div>
+          <div className="col-[8_/_10] row-[2_/_4] h-full w-full">{renderCollageSlot(14, 'relative overflow-hidden h-full w-full', { zIndex: 38 })}</div>
+          <div className="col-[10_/_12] row-[3_/_5] h-full w-full">{renderCollageSlot(15, 'relative overflow-hidden h-full w-full', { zIndex: 40 })}</div>
+          <div className="col-[3_/_4] row-[6_/_8] h-full w-full">{renderCollageSlot(16, 'relative overflow-hidden h-full w-full', { zIndex: 42 })}</div>
+          <div className="col-[8_/_9] row-[6_/_8] h-full w-full">{renderCollageSlot(17, 'relative overflow-hidden h-full w-full', { zIndex: 44 })}</div>
+          <div className="col-[1_/_3] row-[8_/_10] h-full w-full">{renderCollageSlot(18, 'relative overflow-hidden h-full w-full', { zIndex: 46 })}</div>
+          <div className="col-[6_/_7] row-[6_/_7] h-full w-full">{renderCollageSlot(19, 'relative overflow-hidden h-full w-full', { zIndex: 48 })}</div>
+          <div className="col-[2_/_4] row-[5_/_6] h-full w-full">{renderCollageSlot(20, 'relative overflow-hidden h-full w-full', { zIndex: 50 })}</div>
+          <div className="col-[11_/_12] row-[6_/_8] h-full w-full">{renderCollageSlot(21, 'relative overflow-hidden h-full w-full', { zIndex: 52 })}</div>
+          <div className="col-[4_/_5] row-[8_/_9] h-full w-full">{renderCollageSlot(22, 'relative overflow-hidden h-full w-full', { zIndex: 54 })}</div>
+          <div className="col-[7_/_8] row-[8_/_10] h-full w-full">{renderCollageSlot(23, 'relative overflow-hidden h-full w-full', { zIndex: 56 })}</div>
         </div>
         
         {/* Light gradient overlay for title readability — 80% transparent */}
