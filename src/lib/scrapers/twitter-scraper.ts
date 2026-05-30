@@ -24,12 +24,15 @@ export async function scrapeTwitter(query: string = 'surf waves'): Promise<Scrap
     };
   }
 
+  const createdPages: Page[] = [];
+
   try {
     // Try CDP path first (authenticated browser — logged into Twitter/X)
     let page: Page | null = await browserService.findExistingPage(browser, 'x.com/search');
 
     if (!page) {
       page = await browserService.getPage(browser);
+      createdPages.push(page);
       const searchUrl = `https://twitter.com/search?q=${encodeURIComponent(query)}&f=tweets`;
       console.log(`🐦 Navigating to Twitter: ${searchUrl}`);
       await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
@@ -54,7 +57,7 @@ export async function scrapeTwitter(query: string = 'surf waves'): Promise<Scrap
 
         const userLink = tweet.querySelector('a[href^="/"]');
         const userHref = userLink?.getAttribute('href') || '';
-        const author = userHref.replace('/', '@');
+        const author = '@' + (userHref.split('/').filter(Boolean)[0] || '');
 
         const statusLink = tweet.querySelector('a[href*="/status/"]');
         const tweetHref = statusLink?.getAttribute('href') || '';
@@ -101,6 +104,11 @@ export async function scrapeTwitter(query: string = 'surf waves'): Promise<Scrap
     console.error('Twitter CDP scrape failed:', error.message);
     // Try Nitter fallback
     return await scrapeTwitterViaNitter(query, browser, scrapedAt);
+  } finally {
+    // Close any pages we created during CDP scraping
+    for (const p of createdPages) {
+      try { await p.close(); } catch { /* page already closed */ }
+    }
   }
 }
 
@@ -112,15 +120,21 @@ async function scrapeTwitterViaNitter(
   browser: Browser,
   scrapedAt: string,
 ): Promise<ScrapeResult<TwitterPost>> {
+  const nitterPages: Page[] = [];
   let page: Page;
 
   try {
     page = await browserService.getPage(browser);
+    nitterPages.push(page);
     const nitterUrl = `https://nitter.net/search?q=${encodeURIComponent(query)}`;
     await page.goto(nitterUrl, { waitUntil: 'networkidle', timeout: 30000 });
     await page.waitForSelector('.timeline-item', { timeout: 15000 });
   } catch (error: any) {
     console.error('Nitter scrape failed:', error.message);
+    // Close any allocated Nitter pages before returning
+    for (const p of nitterPages) {
+      try { await p.close(); } catch { /* page already closed */ }
+    }
     return {
       success: true,
       method: 'twitter-none',
@@ -129,39 +143,46 @@ async function scrapeTwitterViaNitter(
     };
   }
 
-  const tweets = await page.evaluate(() => {
-    const elements = document.querySelectorAll('.timeline-item');
-    const results: Array<{ content: string; source: string; link: string }> = [];
+  try {
+    const tweets = await page.evaluate(() => {
+      const elements = document.querySelectorAll('.timeline-item');
+      const results: Array<{ content: string; source: string; link: string }> = [];
 
-    elements.forEach((tweet, index) => {
-      if (index >= 15) return;
-      const textEl = tweet.querySelector('.tweet-content');
-      const authorEl = tweet.querySelector('.username');
-      const linkEl = tweet.querySelector('.tweet-link');
-      if (textEl && authorEl) {
-        results.push({
-          content: textEl.textContent?.trim() || '',
-          source: authorEl.textContent?.trim() || '',
-          link: linkEl?.getAttribute('href') || '',
-        });
-      }
+      elements.forEach((tweet, index) => {
+        if (index >= 15) return;
+        const textEl = tweet.querySelector('.tweet-content');
+        const authorEl = tweet.querySelector('.username');
+        const linkEl = tweet.querySelector('.tweet-link');
+        if (textEl && authorEl) {
+          results.push({
+            content: textEl.textContent?.trim() || '',
+            source: authorEl.textContent?.trim() || '',
+            link: linkEl?.getAttribute('href') || '',
+          });
+        }
+      });
+
+      return results;
     });
 
-    return results;
-  });
-
-  return {
-    success: true,
-    method: 'twitter-nitter',
-    items: tweets.map((t, i) => ({
-      id: `tw_nitter_${i}`,
-      content: t.content,
-      source: t.source,
-      link: t.link,
-      timestamp: new Date().toISOString(),
-      hasValidTimestamp: false,
-      platform: 'twitter' as const,
-    })),
-    scrapedAt,
-  };
+    return {
+      success: true,
+      method: 'twitter-nitter',
+      items: tweets.map((t, i) => ({
+        id: `tw_nitter_${i}`,
+        content: t.content,
+        source: t.source,
+        link: t.link,
+        timestamp: new Date().toISOString(),
+        hasValidTimestamp: false,
+        platform: 'twitter' as const,
+      })),
+      scrapedAt,
+    };
+  } finally {
+    // Close Nitter pages after scraping
+    for (const p of nitterPages) {
+      try { await p.close(); } catch { /* page already closed */ }
+    }
+  }
 }

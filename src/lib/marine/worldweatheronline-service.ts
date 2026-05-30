@@ -6,6 +6,17 @@
 
 import type { MarineConditions, MarineDataSource } from './types';
 
+/**
+ * Compass direction lookup: string label → degrees.
+ * Reference: https://www.nhc.noaa.gov/aboutwindprofile.shtml
+ */
+const WIND_DIRECTIONS: Record<string, number> = {
+  'N': 0, 'NNE': 22.5, 'NE': 45, 'ENE': 67.5,
+  'E': 90, 'ESE': 112.5, 'SE': 135, 'SSE': 157.5,
+  'S': 180, 'SSW': 202.5, 'SW': 225, 'WSW': 247.5,
+  'W': 270, 'WNW': 292.5, 'NW': 315, 'NNW': 337.5,
+};
+
 export class WorldWeatherOnlineService implements MarineDataSource {
   readonly name = 'worldweatheronline';
   private baseUrl = 'https://api.worldweatheronline.com/premium/v1';
@@ -33,7 +44,7 @@ export class WorldWeatherOnlineService implements MarineDataSource {
         primarySwellDirection: parseFloat(marine.swellDir) || 225,
         windWaveHeight: parseFloat(marine.sigHeight_m) * 0.3 || 0.3,
         windWavePeriod: 4,
-        windWaveDirection: parseFloat(marine.winddir16Point) || 270,
+        windWaveDirection: WIND_DIRECTIONS[marine.winddir16Point] ?? parseFloat(marine.winddirDegree) ?? 270,
       },
       wind: {
         speed: parseFloat(marine.windspeedKmph) * 0.277778,

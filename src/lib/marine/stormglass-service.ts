@@ -30,6 +30,11 @@ export class StormglassMarineService implements MarineDataSource {
     }
 
     const data = await response.json();
+
+    if (!data.hours?.length) {
+      throw new Error('Stormglass returned no hourly data');
+    }
+
     const current = data.hours[0];
 
     const pick = (field: any, preferred: string = 'noaa') =>

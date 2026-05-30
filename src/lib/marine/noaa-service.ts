@@ -45,15 +45,7 @@ export class NoaaMarineService implements MarineDataSource {
 
         return {
           location: { name: locationName, lat, lon, country: 'US' },
-          waves: {
-            significantHeight: 1.5,
-            primarySwellHeight: 1.2,
-            primarySwellPeriod: 8,
-            primarySwellDirection: 225,
-            windWaveHeight: 0.5,
-            windWavePeriod: 4,
-            windWaveDirection: 270,
-          },
+          waves: await this.tryFetchWaves(lat, lon),
           wind: {
             speed: this.parseWindSpeed(currentPeriod.windSpeed),
             direction: this.parseWindDirection(currentPeriod.windDirection),
@@ -74,6 +66,80 @@ export class NoaaMarineService implements MarineDataSource {
     } catch (error) {
       throw new Error(`NOAA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
+  }
+
+  /**
+   * Attempt to fetch wave data from NOAA Wave Watch III / marine endpoints.
+   * Falls back to sensible defaults with a warning if wave data is unavailable.
+   *
+   * NOTE: NOAA's REST API (api.weather.gov) does not natively expose WW3 model
+   * output (wave height, swell period/direction, wind wave data). The values
+   * returned here are placeholder defaults. Proper NOAA WW3 integration would
+   * require ingesting GRIB2 files from https://nomads.ncep.noaa.gov/ or using
+   * a dedicated marine data provider (e.g. Stormglass, Spire, Sofar Ocean).
+   */
+  private async tryFetchWaves(lat: number, lon: number): Promise<MarineConditions['waves']> {
+    try {
+      // Attempt to fetch wave data from the NWS marine forecast if available for this grid
+      const gridResponse = await fetch(`${this.noaaBaseUrl}/gridpoints/${lat},${lon}`);
+      if (!gridResponse.ok) {
+        throw new Error('Grid data unavailable');
+      }
+      const gridData = await gridResponse.json();
+      const gridId = gridData.properties?.gridId;
+      const gridX = gridData.properties?.gridX;
+      const gridY = gridData.properties?.gridY;
+
+      if (gridId && gridX != null && gridY != null) {
+        // Some NWS grid forecasts include wave/water state parameters
+        try {
+          const marineResponse = await fetch(
+            `${this.noaaBaseUrl}/gridpoints/${gridId}/${gridX},${gridY}/forecast`
+          );
+          if (marineResponse.ok) {
+            const marineData = await marineResponse.json();
+            const periods = marineData.properties?.periods;
+            if (periods?.length) {
+              // Attempt to parse wave-height-like values from detailed forecasts
+              // This is best-effort; NOAA WW3 GRIB ingestion would be more accurate
+              const first = periods[0];
+              // Some coastal grids expose wave height in detailedForecast
+              const detailed = first.detailedForecast || first.shortForecast || '';
+              const waveMatch = detailed.match(/(\d+(\.\d+)?)\s*(foot|feet)/i);
+              const waveHeight = waveMatch ? parseFloat(waveMatch[1]) * 0.3048 : 1.5;
+              return {
+                significantHeight: waveHeight,
+                primarySwellHeight: waveHeight * 0.8,
+                primarySwellPeriod: 8,
+                primarySwellDirection: 225,
+                windWaveHeight: waveHeight * 0.3,
+                windWavePeriod: 4,
+                windWaveDirection: 270,
+              };
+            }
+          }
+        } catch {
+          // Fall through to defaults below
+        }
+      }
+    } catch {
+      // Fall through to defaults below
+    }
+
+    console.warn(
+      `[NOAA] Wave data unavailable for ${lat},${lon} — using placeholder defaults. ` +
+      'Integrate NOAA WW3 GRIB ingestion or a dedicated wave provider for real values.'
+    );
+
+    return {
+      significantHeight: 1.5,
+      primarySwellHeight: 1.2,
+      primarySwellPeriod: 8,
+      primarySwellDirection: 225,
+      windWaveHeight: 0.5,
+      windWavePeriod: 4,
+      windWaveDirection: 270,
+    };
   }
 
   private parseWindSpeed(windSpeed: string): number {
