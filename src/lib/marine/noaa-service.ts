@@ -80,18 +80,19 @@ export class NoaaMarineService implements MarineDataSource {
    */
   private async tryFetchWaves(lat: number, lon: number): Promise<MarineConditions['waves']> {
     try {
-      // Attempt to fetch wave data from the NWS marine forecast if available for this grid
-      const gridResponse = await fetch(`${this.noaaBaseUrl}/gridpoints/${lat},${lon}`);
-      if (!gridResponse.ok) {
-        throw new Error('Grid data unavailable');
+      // Attempt to fetch wave data from NWS by first getting grid info via /points endpoint
+      const pointResponse = await fetch(`${this.noaaBaseUrl}/points/${lat},${lon}`);
+      if (!pointResponse.ok) {
+        throw new Error('Point data unavailable');
       }
-      const gridData = await gridResponse.json();
-      const gridId = gridData.properties?.gridId;
-      const gridX = gridData.properties?.gridX;
-      const gridY = gridData.properties?.gridY;
+      const pointData = await pointResponse.json();
+      const gridId = pointData.properties?.gridId;
+      const gridX = pointData.properties?.gridX;
+      const gridY = pointData.properties?.gridY;
 
       if (gridId && gridX != null && gridY != null) {
-        // Some NWS grid forecasts include wave/water state parameters
+        // Fetch the NWS forecast for this grid point
+        // Some coastal grid forecasts include wave/water state data in detailedForecast
         try {
           const marineResponse = await fetch(
             `${this.noaaBaseUrl}/gridpoints/${gridId}/${gridX},${gridY}/forecast`
@@ -100,11 +101,9 @@ export class NoaaMarineService implements MarineDataSource {
             const marineData = await marineResponse.json();
             const periods = marineData.properties?.periods;
             if (periods?.length) {
-              // Attempt to parse wave-height-like values from detailed forecasts
-              // This is best-effort; NOAA WW3 GRIB ingestion would be more accurate
               const first = periods[0];
-              // Some coastal grids expose wave height in detailedForecast
               const detailed = first.detailedForecast || first.shortForecast || '';
+              // Parse wave heights from descriptive text (e.g. "waves 4 to 6 feet")
               const waveMatch = detailed.match(/(\d+(\.\d+)?)\s*(foot|feet)/i);
               const waveHeight = waveMatch ? parseFloat(waveMatch[1]) * 0.3048 : 1.5;
               return {

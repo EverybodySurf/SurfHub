@@ -23,8 +23,8 @@ export class OpenWeatherFallbackService implements MarineDataSource {
     }
 
     const data = await response.json();
-    const windSpeed = data.wind?.speed || 5;
-    const windDeg = data.wind?.deg || 270;
+    const windSpeed = data.wind?.speed ?? 5;
+    const windDeg = data.wind?.deg ?? 270;
 
     // Estimate wave conditions from wind
     const estimatedWaveHeight = Math.max(0.3, windSpeed * 0.15);
@@ -49,10 +49,10 @@ export class OpenWeatherFallbackService implements MarineDataSource {
         direction: windDeg,
       },
       weather: {
-        temperature: data.main?.temp || 20,
-        pressure: data.main?.pressure || 1013,
-        humidity: data.main?.humidity || 70,
-        visibility: data.visibility || 10000,
+        temperature: data.main?.temp ?? 20,
+        pressure: data.main?.pressure ?? 1013,
+        humidity: data.main?.humidity ?? 70,
+        visibility: data.visibility ?? 10000,
         description: data.weather?.[0]?.description || 'Clear conditions',
       },
       dataSource: 'openweather',

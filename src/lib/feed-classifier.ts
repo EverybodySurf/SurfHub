@@ -15,10 +15,25 @@ const LOCAL_PATTERNS = [
 ];
 
 const GLOBAL_PATTERNS = [
-  'wsl', 'world surf league', 'championship tour', 'ct ',
-  'pro ', 'competition', 'tournament', 'championship',
+  'wsl', 'world surf league', 'championship tour',
+  'competition', 'tournament', 'championship',
   'olympic', 'qualifying series',
 ];
+
+// Patterns that need word-boundary matching to avoid false positives
+// e.g. 'ct ' matches 'contact', 'ct' matches 'act'
+const GLOBAL_WORD_PATTERNS = [
+  ' ct ', ' ct,', ' ct.', ' ct-',
+  ' pro ', ' pro,', ' pro.', ' pro-',
+];
+
+/**
+ * Check if text contains a word from wordPatterns safely (word-boundary).
+ */
+function matchesWordPattern(text: string, patterns: string[]): boolean {
+  const normalized = ` ${text.toLowerCase()} `;
+  return patterns.some(p => normalized.includes(p));
+}
 
 /**
  * Classify a content item into a feed category based on its title/content/source.
@@ -35,6 +50,9 @@ export function classifyFeed(
 
   const isGlobal = GLOBAL_PATTERNS.some(p => text.includes(p));
   if (isGlobal) return 'global';
+
+  const isGlobalWord = matchesWordPattern(text, GLOBAL_WORD_PATTERNS);
+  if (isGlobalWord) return 'global';
 
   return 'feelgood';
 }
