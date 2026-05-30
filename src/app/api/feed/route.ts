@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { scrapeYouTubeAPI } from '@/lib/scraper-cdp';
+import { scrapeYouTube } from '@/lib/scrapers';
 
 // Filter items to only those within last 72 hours (3 days for broader content)
 function filterBy72Hours(items: any[]): { filtered: any[], warnings: string[] } {
@@ -67,26 +67,27 @@ export async function GET(request: Request) {
     // Run YouTube queries (parallel or sequential to conserve quota)
     for (const { query, feed: targetFeed } of queriesToRun) {
       try {
-        const videos = await scrapeYouTubeAPI(query, 10);
-        console.log(`🎥 "${query}" → ${videos.length} videos for ${targetFeed}`);
-        
-        const mappedVideos = videos.map((v: any) => ({
-          id: `yt_${v.id}`,
-          feed: targetFeed, // Use the query's target feed
-          size: 'horizontal',
-          type: 'video',
-          title: v.title || '',
-          content: v.title?.slice(0, 100) || '',
-          source: v.source || '',
-          videoUrl: v.videoUrl || '',
-          image: v.image || `https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg`,
-          timestamp: v.timestamp,
-          hasValidTimestamp: v.hasValidTimestamp,
-          publishedAt: v.publishedAt,
-          platform: 'youtube',
-        }));
-        
-        youtubeItems.push(...mappedVideos);
+        const result = await scrapeYouTube(query, 10);
+        if (result.success && result.items.length > 0) {
+          console.log(`🎥 "${query}" → ${result.items.length} videos for ${targetFeed}`);
+          const mappedVideos = result.items.map((v: any) => ({
+            id: `yt_${v.id}`,
+            feed: targetFeed,
+            size: 'horizontal',
+            type: 'video',
+            title: v.title || '',
+            content: v.title?.slice(0, 100) || '',
+            source: v.source || '',
+            videoUrl: v.videoUrl || '',
+            image: v.image || `https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg`,
+            timestamp: v.timestamp,
+            hasValidTimestamp: v.hasValidTimestamp,
+            platform: 'youtube',
+          }));
+          youtubeItems.push(...mappedVideos);
+        } else {
+          console.log(`🎥 "${query}" → no results`);
+        }
       } catch (e) {
         console.log(`YouTube query "${query}" failed:`, e);
       }

@@ -1,4 +1,6 @@
-// Marine Data Service - NOAA + Global Sources
+// @ts-nocheck
+// ⚠️ DEPRECATED — use @/lib/marine instead
+// This file is kept for reference only. All active code uses the new per-source marine services.
 import { z } from 'zod';
 import { fetchWeatherApi } from 'openmeteo';
 
