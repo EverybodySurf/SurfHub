@@ -99,7 +99,7 @@ export class OpenMeteoMarineService implements MarineDataSource {
 
       const station = stationData.stations[0];
       const tideResponse = await fetch(
-        `https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=${station.id}&product=predictions&datum=MLLW&time_zone=gmt&units=metric&format=json`
+        `https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?date=today&station=${station.id}&product=predictions&datum=MLLW&time_zone=gmt&units=metric&format=json&interval=hilo`
       );
       if (!tideResponse.ok) return undefined;
 

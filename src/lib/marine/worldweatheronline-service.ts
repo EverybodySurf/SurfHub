@@ -17,6 +17,26 @@ const WIND_DIRECTIONS: Record<string, number> = {
   'W': 270, 'WNW': 292.5, 'NW': 315, 'NNW': 337.5,
 };
 
+/**
+ * Parse a numeric value, falling back to default if undefined, null, or NaN.
+ * Unlike `||`, this preserves valid 0 values (0° wind, 0°C, 0m waves).
+ */
+function parseNumeric(val: any, fallback: number): number {
+  if (val == null) return fallback;
+  const n = parseFloat(val);
+  return isNaN(n) ? fallback : n;
+}
+
+/**
+ * Compute a derived numeric value, falling back if the input is null/NaN.
+ */
+function computeNumeric(val: any, fn: (n: number) => number, fallback: number): number {
+  if (val == null) return fallback;
+  const n = parseFloat(val);
+  if (isNaN(n)) return fallback;
+  return fn(n);
+}
+
 export class WorldWeatherOnlineService implements MarineDataSource {
   readonly name = 'worldweatheronline';
   private baseUrl = 'https://api.worldweatheronline.com/premium/v1';
@@ -38,23 +58,23 @@ export class WorldWeatherOnlineService implements MarineDataSource {
     return {
       location: { name: locationName, lat, lon },
       waves: {
-        significantHeight: parseFloat(marine.sigHeight_m) || 1.0,
-        primarySwellHeight: parseFloat(marine.swellHeight_m) || 0.8,
-        primarySwellPeriod: parseFloat(marine.swellPeriod_secs) || 8,
-        primarySwellDirection: parseFloat(marine.swellDir) || 225,
-        windWaveHeight: parseFloat(marine.sigHeight_m) * 0.3 || 0.3,
+        significantHeight: parseNumeric(marine.sigHeight_m, 1.0),
+        primarySwellHeight: parseNumeric(marine.swellHeight_m, 0.8),
+        primarySwellPeriod: parseNumeric(marine.swellPeriod_secs, 8),
+        primarySwellDirection: parseNumeric(marine.swellDir, 225),
+        windWaveHeight: computeNumeric(marine.sigHeight_m, h => h * 0.3, 0.3),
         windWavePeriod: 4,
-        windWaveDirection: WIND_DIRECTIONS[marine.winddir16Point] ?? parseFloat(marine.winddirDegree) ?? 270,
+        windWaveDirection: WIND_DIRECTIONS[marine.winddir16Point] ?? parseNumeric(marine.winddirDegree, 270),
       },
       wind: {
         speed: parseFloat(marine.windspeedKmph) * 0.277778,
-        direction: parseFloat(marine.winddirDegree) || 270,
+        direction: parseNumeric(marine.winddirDegree, 270),
       },
       weather: {
-        temperature: parseFloat(marine.tempC) || 20,
-        pressure: parseFloat(marine.pressure) || 1013,
-        humidity: parseFloat(marine.humidity) || 70,
-        visibility: parseFloat(marine.visibility) * 1000 || 10000,
+        temperature: parseNumeric(marine.tempC, 20),
+        pressure: parseNumeric(marine.pressure, 1013),
+        humidity: parseNumeric(marine.humidity, 70),
+        visibility: computeNumeric(marine.visibility, v => v * 1000, 10000),
         description: marine.weatherDesc[0]?.value || 'Marine conditions',
       },
       dataSource: 'worldweatheronline',
