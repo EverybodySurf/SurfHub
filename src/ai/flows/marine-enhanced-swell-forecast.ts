@@ -20,10 +20,10 @@ const MarineEnhancedOutputSchema = z.object({
   
   // Real marine data
       marineData: z.object({
-        waveHeight: z.number().describe('Significant wave height in meters'),
-        primarySwellHeight: z.number().describe('Primary swell height in meters'),
-        primarySwellPeriod: z.number().describe('Primary swell period in seconds'), 
-        primarySwellDirection: z.number().describe('Primary swell direction in degrees'),
+        waveHeight: z.number().optional().describe('Significant wave height in meters'),
+        primarySwellHeight: z.number().optional().describe('Primary swell height in meters'),
+        primarySwellPeriod: z.number().optional().describe('Primary swell period in seconds'), 
+        primarySwellDirection: z.number().optional().describe('Primary swell direction in degrees'),
         secondarySwellHeight: z.number().optional().describe('Secondary swell height in meters'),
         secondarySwellPeriod: z.number().optional().describe('Secondary swell period in seconds'),
         secondarySwellDirection: z.number().optional().describe('Secondary swell direction in degrees'),
@@ -31,8 +31,8 @@ const MarineEnhancedOutputSchema = z.object({
         windWavePeriod: z.number().optional().describe('Wind wave period in seconds'),
         windWaveDirection: z.number().optional().describe('Wind wave direction in degrees'),
         seaTemperature: z.number().optional().describe('Sea surface temperature in Celsius'),
-        windSpeed: z.number().describe('Wind speed in m/s'),
-        windDirection: z.number().describe('Wind direction in degrees'),
+        windSpeed: z.number().optional().describe('Wind speed in m/s'),
+        windDirection: z.number().optional().describe('Wind direction in degrees'),
         // New oceanographic data
         currentHeight: z.number().optional().describe('Current tide height in meters'),
         nextHighTide: z.string().optional().describe('Time of next high tide'),
@@ -65,11 +65,11 @@ const MarineEnhancedOutputSchema = z.object({
 // Function to convert marine data to surf conditions
 function marineDataToSurfConditions(marine: MarineConditions): SurfConditions {
   return {
-    waveHeight: marine.waves.significantHeight,
-    wavePeriod: marine.waves.primarySwellPeriod,
-    swellDirection: marine.waves.primarySwellDirection,
-    windSpeed: marine.wind.speed,
-    windDirection: marine.wind.direction,
+    waveHeight: marine.waves.significantHeight ?? 0,
+    wavePeriod: marine.waves.primarySwellPeriod ?? 0,
+    swellDirection: marine.waves.primarySwellDirection ?? 0,
+    windSpeed: marine.wind.speed ?? 0,
+    windDirection: marine.wind.direction ?? 0,
     location: marine.location.name,
   };
 }
@@ -189,15 +189,16 @@ export const marineEnhancedSwellForecastFlow = ai.defineFlow(
       );
       
       // Generate enhanced AI analysis
+      const fmt = (v: number | undefined | null, decimals = 1) => v != null ? v.toFixed(decimals) : 'N/A';
       const prompt = `
         Analyze the surf conditions for ${input.location} using real marine data:
         
         MARINE CONDITIONS (from ${marineConditions.dataSource.toUpperCase()}):
-        - Significant Wave Height: ${marineConditions.waves.significantHeight.toFixed(1)}m
-        - Primary Swell: ${marineConditions.waves.primarySwellHeight.toFixed(1)}m @ ${marineConditions.waves.primarySwellPeriod}s from ${marineConditions.waves.primarySwellDirection}°
-        - Wind Waves: ${marineConditions.waves.windWaveHeight.toFixed(1)}m @ ${marineConditions.waves.windWavePeriod}s
-        - Wind: ${marineConditions.wind.speed.toFixed(1)} m/s from ${marineConditions.wind.direction}°
-        - Weather: ${marineConditions.weather.description}, ${marineConditions.weather.temperature}°C
+        - Significant Wave Height: ${fmt(marineConditions.waves.significantHeight)}m
+        - Primary Swell: ${fmt(marineConditions.waves.primarySwellHeight)}m @ ${fmt(marineConditions.waves.primarySwellPeriod)}s from ${fmt(marineConditions.waves.primarySwellDirection)}°
+        - Wind Waves: ${fmt(marineConditions.waves.windWaveHeight)}m @ ${fmt(marineConditions.waves.windWavePeriod)}s
+        - Wind: ${fmt(marineConditions.wind.speed)} m/s from ${fmt(marineConditions.wind.direction)}°
+        - Weather: ${marineConditions.weather.description}, ${fmt(marineConditions.weather.temperature)}°C
         
         SURF SPOT ANALYSIS:
         - Spot Type: ${spotConfig.type}
@@ -225,8 +226,8 @@ export const marineEnhancedSwellForecastFlow = ai.defineFlow(
         location: input.location,
         conditions: aiResponse.text,
         recommendation: surfQuality.description,
-        windConditions: `${marineConditions.wind.speed.toFixed(1)} m/s from ${marineConditions.wind.direction}° (${surfQuality.breakdown.wind > 0.7 ? 'Favorable' : surfQuality.breakdown.wind > 0.4 ? 'Marginal' : 'Poor'})`,
-        weatherSummary: `${marineConditions.weather.description}, ${marineConditions.weather.temperature}°C`,
+        windConditions: `${fmt(marineConditions.wind.speed)} m/s from ${fmt(marineConditions.wind.direction)}° (${surfQuality.breakdown.wind > 0.7 ? 'Favorable' : surfQuality.breakdown.wind > 0.4 ? 'Marginal' : 'Poor'})`,
+        weatherSummary: `${marineConditions.weather.description}, ${fmt(marineConditions.weather.temperature)}°C`,
         surfabilityScore: surfQuality.overallScore,
         
         marineData: {
@@ -279,12 +280,12 @@ export const marineEnhancedSwellForecastFlow = ai.defineFlow(
         surfabilityScore: 5,
         
         marineData: {
-          waveHeight: 1.0,
-          primarySwellHeight: 0.8,
-          primarySwellPeriod: 8,
-          primarySwellDirection: 180,
-          windSpeed: 5,
-          windDirection: 270,
+          waveHeight: undefined,
+          primarySwellHeight: undefined,
+          primarySwellPeriod: undefined,
+          primarySwellDirection: undefined,
+          windSpeed: undefined,
+          windDirection: undefined,
           dataSource: 'unavailable',
         },
         

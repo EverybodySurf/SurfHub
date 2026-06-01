@@ -10,27 +10,27 @@ export interface MarineConditions {
     country?: string;
   };
   waves: {
-    significantHeight: number;
-    primarySwellHeight: number;
-    primarySwellPeriod: number;
-    primarySwellDirection: number;
-    secondarySwellHeight?: number;
-    secondarySwellPeriod?: number;
-    secondarySwellDirection?: number;
-    windWaveHeight: number;
-    windWavePeriod: number;
-    windWaveDirection: number;
+    significantHeight: number | undefined;
+    primarySwellHeight: number | undefined;
+    primarySwellPeriod: number | undefined;
+    primarySwellDirection: number | undefined;
+    secondarySwellHeight?: number | undefined;
+    secondarySwellPeriod?: number | undefined;
+    secondarySwellDirection?: number | undefined;
+    windWaveHeight: number | undefined;
+    windWavePeriod: number | undefined;
+    windWaveDirection: number | undefined;
   };
   wind: {
-    speed: number;
-    direction: number;
-    gusts?: number;
+    speed: number | undefined;
+    direction: number | undefined;
+    gusts?: number | undefined;
   };
   weather: {
-    temperature: number;
-    pressure: number;
-    humidity: number;
-    visibility: number;
+    temperature: number | undefined;
+    pressure: number | undefined;
+    humidity: number | undefined;
+    visibility: number | undefined;
     description: string;
   };
   tides?: {
@@ -39,8 +39,8 @@ export interface MarineConditions {
     nextLow?: { time: string; height: number };
   };
   oceanCurrent?: {
-    velocity: number;
-    direction: number;
+    velocity: number | undefined;
+    direction: number | undefined;
   };
   dataSource: 'noaa' | 'stormglass' | 'worldweatheronline' | 'openweather' | 'openmeteo';
   timestamp: string;
