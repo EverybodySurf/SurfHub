@@ -38,7 +38,10 @@ async function scrapeYouTubeAPI(query: string, maxResults: number, scrapedAt: st
 
   try {
     const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=${maxResults}&order=date&key=${API_KEY}`;
-    const response = await fetch(url);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
 
     if (!response.ok) {
       throw new Error(`YouTube API error: ${response.status}`);

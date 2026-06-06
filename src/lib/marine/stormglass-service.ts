@@ -38,26 +38,26 @@ export class StormglassMarineService implements MarineDataSource {
     const current = data.hours[0];
 
     const pick = (field: any, preferred: string = 'noaa') =>
-      field?.[preferred] ?? field?.sg ?? 0;
+      field?.[preferred] ?? field?.sg;  // returns undefined when no provider has data
 
     return {
       location: { name: locationName, lat, lon },
       waves: {
-        significantHeight: pick(current.waveHeight) || 1.0,
-        primarySwellHeight: pick(current.swellHeight) || 0.8,
-        primarySwellPeriod: pick(current.swellPeriod) || 8,
-        primarySwellDirection: pick(current.swellDirection) || 225,
-        windWaveHeight: pick(current.windWaveHeight) || 0.3,
-        windWavePeriod: pick(current.windWavePeriod) || 4,
-        windWaveDirection: pick(current.windWaveDirection) || 270,
+        significantHeight: pick(current.waveHeight) ?? 1.0,
+        primarySwellHeight: pick(current.swellHeight) ?? 0.8,
+        primarySwellPeriod: pick(current.swellPeriod) ?? 8,
+        primarySwellDirection: pick(current.swellDirection) ?? 225,
+        windWaveHeight: pick(current.windWaveHeight) ?? 0.3,
+        windWavePeriod: pick(current.windWavePeriod) ?? 4,
+        windWaveDirection: pick(current.windWaveDirection) ?? 270,
       },
       wind: {
-        speed: pick(current.windSpeed) || 5,
-        direction: pick(current.windDirection) || 270,
+        speed: pick(current.windSpeed) ?? 5,
+        direction: pick(current.windDirection) ?? 270,
       },
       weather: {
-        temperature: pick(current.airTemperature) || 20,
-        pressure: pick(current.pressure) || 1013,
+        temperature: pick(current.airTemperature) ?? 20,
+        pressure: pick(current.pressure) ?? 1013,
         humidity: 70,
         visibility: 10000,
         description: 'Marine conditions from Stormglass',

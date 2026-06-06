@@ -4,7 +4,7 @@
  * Extracted from duplicated inline logic across scraper-cdp.ts
  */
 
-const RELATIVE_TIME_RE = /(\d+)([hdm])/;
+const RELATIVE_TIME_RE = /(\d+)([hdm])/i;
 
 /**
  * Parse a relative time string like "2h", "1d", "3m" into an absolute timestamp

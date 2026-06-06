@@ -16,6 +16,8 @@ const VPS_CDP_URL = process.env.VPS_CDP_URL || 'http://127.0.0.1:9224';
 export class BrowserService {
   private cdpBrowser: Browser | null = null;
   private headlessBrowser: Browser | null = null;
+  private pendingBrowser: Promise<Browser | null> | null = null;
+  private createdPages: Set<Page> = new Set();
 
   /**
    * Connect to an existing VPS browser via CDP (authenticated, cookies preserved)
@@ -61,14 +63,25 @@ export class BrowserService {
    * Returns null only if both methods fail.
    */
   async getBrowser(): Promise<Browser | null> {
-    const cdp = await this.connectCDP();
-    if (cdp) return cdp;
+    // Return in-flight promise to prevent concurrent bootstrap races
+    if (this.pendingBrowser) return this.pendingBrowser;
+
+    this.pendingBrowser = (async (): Promise<Browser | null> => {
+      const cdp = await this.connectCDP();
+      if (cdp) return cdp;
+
+      try {
+        return await this.launchHeadless();
+      } catch (error: any) {
+        console.error('❌ BrowserService: failed to launch any browser:', error.message);
+        return null;
+      }
+    })();
 
     try {
-      return await this.launchHeadless();
-    } catch (error: any) {
-      console.error('❌ BrowserService: failed to launch any browser:', error.message);
-      return null;
+      return await this.pendingBrowser;
+    } finally {
+      this.pendingBrowser = null;
     }
   }
 
@@ -79,13 +92,43 @@ export class BrowserService {
    */
   async getPage(browser: Browser): Promise<Page> {
     const contexts = browser.contexts();
+    let page: Page;
     if (contexts.length > 0) {
-      return contexts[0].newPage();
+      page = await contexts[0].newPage();
+    } else {
+      const context = await browser.newContext({
+        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      });
+      page = await context.newPage();
     }
-    const context = await browser.newContext({
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    });
-    return context.newPage();
+    this.createdPages.add(page);
+    return page;
+  }
+
+  /**
+   * Close a page and remove it from the ownership tracking set.
+   */
+  async closePage(page: Page): Promise<void> {
+    this.createdPages.delete(page);
+    try {
+      await page.close();
+    } catch {
+      // page already closed
+    }
+  }
+
+  /**
+   * Close all tracked pages created via getPage().
+   */
+  async closeAllCreatedPages(): Promise<void> {
+    for (const page of this.createdPages) {
+      try {
+        await page.close();
+      } catch {
+        // page already closed
+      }
+    }
+    this.createdPages.clear();
   }
 
   /**
@@ -96,9 +139,16 @@ export class BrowserService {
     if (contexts.length > 0) {
       const pages = contexts[0].pages();
       for (const page of pages) {
-        if (page.url().includes(urlPattern)) {
-          console.log(`🔄 BrowserService: reusing existing page for: ${urlPattern}`);
-          return page;
+        try {
+          const url = page.url();
+          // URL-aware matching: check that the pattern matches both host and path
+          if (url.includes(urlPattern)) {
+            console.log(`🔄 BrowserService: reusing existing page for: ${urlPattern}`);
+            return page;
+          }
+        } catch {
+          // Page might be closed or navigating; skip it
+          continue;
         }
       }
     }

@@ -36,33 +36,44 @@ export class NoaaMarineService implements MarineDataSource {
   async getConditions(lat: number, lon: number, locationName: string): Promise<MarineConditions> {
     try {
       const pointResponse = await fetch(`${this.noaaBaseUrl}/points/${lat},${lon}`);
+      if (!pointResponse.ok) {
+        throw new Error(`NOAA point API error: ${pointResponse.status}`);
+      }
       const pointData = await pointResponse.json();
 
-      if (pointData.properties?.forecast) {
-        const forecastResponse = await fetch(pointData.properties.forecast);
-        const forecastData = await forecastResponse.json();
-        const currentPeriod = forecastData.properties.periods[0];
-
-        return {
-          location: { name: locationName, lat, lon, country: 'US' },
-          waves: await this.tryFetchWaves(lat, lon),
-          wind: {
-            speed: this.parseWindSpeed(currentPeriod.windSpeed),
-            direction: this.parseWindDirection(currentPeriod.windDirection),
-          },
-          weather: {
-            temperature: currentPeriod.temperature,
-            pressure: 1013,
-            humidity: 70,
-            visibility: 10000,
-            description: currentPeriod.shortForecast,
-          },
-          dataSource: 'noaa',
-          timestamp: new Date().toISOString(),
-        };
+      if (!pointData.properties?.forecast) {
+        throw new Error('No NOAA forecast URL in point response');
       }
 
-      throw new Error('No NOAA forecast data available');
+      const forecastResponse = await fetch(pointData.properties.forecast);
+      if (!forecastResponse.ok) {
+        throw new Error(`NOAA forecast API error: ${forecastResponse.status}`);
+      }
+      const forecastData = await forecastResponse.json();
+
+      const periods = forecastData.properties?.periods;
+      if (!periods?.length) {
+        throw new Error('NOAA forecast returned no periods');
+      }
+      const currentPeriod = periods[0];
+
+      return {
+        location: { name: locationName, lat, lon, country: 'US' },
+        waves: await this.tryFetchWaves(lat, lon),
+        wind: {
+          speed: this.parseWindSpeed(currentPeriod.windSpeed),
+          direction: this.parseWindDirection(currentPeriod.windDirection),
+        },
+        weather: {
+          temperature: currentPeriod.temperature,
+          pressure: 1013,
+          humidity: 70,
+          visibility: 10000,
+          description: currentPeriod.shortForecast,
+        },
+        dataSource: 'noaa',
+        timestamp: new Date().toISOString(),
+      };
     } catch (error) {
       throw new Error(`NOAA API error: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -147,6 +158,6 @@ export class NoaaMarineService implements MarineDataSource {
   }
 
   private parseWindDirection(windDirection: string): number {
-    return WIND_DIRECTIONS[windDirection] || 270;
+    return WIND_DIRECTIONS[windDirection] ?? 270;
   }
 }

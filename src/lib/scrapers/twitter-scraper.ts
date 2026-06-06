@@ -148,6 +148,13 @@ async function scrapeTwitterViaNitter(
       const elements = document.querySelectorAll('.timeline-item');
       const results: Array<{ content: string; source: string; link: string }> = [];
 
+      const normalizeHref = (href: string | null): string => {
+        if (!href) return '';
+        // Nitter returns relative paths like /user/status/123 — make them absolute
+        if (href.startsWith('/')) return `https://nitter.net${href}`;
+        return href;
+      };
+
       elements.forEach((tweet, index) => {
         if (index >= 15) return;
         const textEl = tweet.querySelector('.tweet-content');
@@ -157,7 +164,7 @@ async function scrapeTwitterViaNitter(
           results.push({
             content: textEl.textContent?.trim() || '',
             source: authorEl.textContent?.trim() || '',
-            link: linkEl?.getAttribute('href') || '',
+            link: normalizeHref(linkEl?.getAttribute('href') || null),
           });
         }
       });

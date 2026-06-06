@@ -37,21 +37,21 @@ export class OpenMeteoMarineService implements MarineDataSource {
       throw new Error('No current data from Open-Meteo');
     }
 
-    const waveHeight = current.wave_height || 1.0;
-    const waveDirection = current.wave_direction || 225;
-    const wavePeriod = current.wave_period || 8;
+    const waveHeight = current.wave_height ?? 1.0;
+    const waveDirection = current.wave_direction ?? 225;
+    const wavePeriod = current.wave_period ?? 8;
 
-    const swellHeight = current.swell_wave_height || waveHeight * 0.7;
-    const swellDirection = current.swell_wave_direction || waveDirection;
-    const swellPeriod = current.swell_wave_period || wavePeriod;
+    const swellHeight = current.swell_wave_height ?? waveHeight * 0.7;
+    const swellDirection = current.swell_wave_direction ?? waveDirection;
+    const swellPeriod = current.swell_wave_period ?? wavePeriod;
 
-    const secondarySwellHeight = current.secondary_swell_wave_height || 0;
-    const secondarySwellPeriod = current.secondary_swell_wave_period || 0;
-    const secondarySwellDirection = current.secondary_swell_wave_direction || 0;
+    const secondarySwellHeight = current.secondary_swell_wave_height ?? 0;
+    const secondarySwellPeriod = current.secondary_swell_wave_period ?? 0;
+    const secondarySwellDirection = current.secondary_swell_wave_direction ?? 0;
 
-    const seaTemperature = current.sea_surface_temperature || 20;
-    const oceanCurrentVelocity = current.ocean_current_velocity || 0;
-    const oceanCurrentDirection = current.ocean_current_direction || 0;
+    const seaTemperature = current.sea_surface_temperature ?? 20;
+    const oceanCurrentVelocity = current.ocean_current_velocity ?? 0;
+    const oceanCurrentDirection = current.ocean_current_direction ?? 0;
 
     return {
       location: { name: locationName, lat, lon },
@@ -63,9 +63,9 @@ export class OpenMeteoMarineService implements MarineDataSource {
         secondarySwellHeight: secondarySwellHeight > 0 ? secondarySwellHeight : undefined,
         secondarySwellPeriod: secondarySwellPeriod > 0 ? secondarySwellPeriod : undefined,
         secondarySwellDirection: secondarySwellDirection > 0 ? secondarySwellDirection : undefined,
-        windWaveHeight: current.wind_wave_height || waveHeight * 0.3,
-        windWavePeriod: current.wind_wave_period || 4,
-        windWaveDirection: current.wind_wave_direction || waveDirection,
+        windWaveHeight: current.wind_wave_height ?? waveHeight * 0.3,
+        windWavePeriod: current.wind_wave_period ?? 4,
+        windWaveDirection: current.wind_wave_direction ?? waveDirection,
       },
       wind: { speed: 5, direction: 270 },
       weather: {
