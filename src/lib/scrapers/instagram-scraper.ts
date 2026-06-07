@@ -23,10 +23,12 @@ export async function scrapeInstagram(query: string = 'surf'): Promise<ScrapeRes
     };
   }
 
+  let page: Page | null = null;
+
   try {
     const hashtag = query.replace(/\s+/g, '').toLowerCase();
 
-    let page: Page | null = await browserService.findExistingPage(browser, 'instagram.com/explore/search');
+    page = await browserService.findExistingPage(browser, 'instagram.com/explore/search');
 
     if (!page) {
       page = await browserService.getPage(browser);
@@ -96,5 +98,7 @@ export async function scrapeInstagram(query: string = 'surf'): Promise<ScrapeRes
       items: [],
       scrapedAt,
     };
+  } finally {
+    if (page) await browserService.closePage(page);
   }
 }

@@ -23,8 +23,10 @@ export async function scrapeTikTok(query: string = 'surf waves'): Promise<Scrape
     };
   }
 
+  let page: Page | null = null;
+
   try {
-    let page: Page | null = await browserService.findExistingPage(browser, 'tiktok.com/search');
+    page = await browserService.findExistingPage(browser, 'tiktok.com/search');
 
     if (!page) {
       page = await browserService.getPage(browser);
@@ -102,5 +104,7 @@ export async function scrapeTikTok(query: string = 'surf waves'): Promise<Scrape
       items: [],
       scrapedAt,
     };
+  } finally {
+    if (page) await browserService.closePage(page);
   }
 }
