@@ -1,53 +1,52 @@
 import { NextResponse } from 'next/server';
-import { scrapeYouTubeAPI } from '@/lib/scraper-cdp';
+import { scrapeYouTube } from '@/lib/scrapers';
+import { classifyFeed } from '@/lib/feed-classifier';
+import { getMockItems } from '@/lib/mock-data';
 
-// YouTube scraper — uses YouTube Data API v3 (FREE, real timestamps)
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get('q') || 'Surfing today';
-  const maxResults = parseInt(searchParams.get('max') || '10');
-  
-  // Try YouTube Data API first
-  const videos = await scrapeYouTubeAPI(query, maxResults);
-  
-  if (videos.length > 0) {
-    return NextResponse.json({
-      success: true,
-      source: 'youtube',
-      query,
-      method: 'youtube-data-api-v3',
-      real: true,
-      items: videos.map((v: any) => ({
-        id: `yt_${v.id}`,
-        feed: v.title?.toLowerCase().includes('guadeloupe') || v.source?.toLowerCase().includes('gwada') ? 'local' :
-              v.title?.toLowerCase().includes('wsl') || v.title?.toLowerCase().includes('championship') ? 'global' : 'feelgood',
-        size: 'horizontal',
-        type: 'video',
-        title: v.title,
-        content: v.title?.slice(0, 100),
-        source: v.source,
-        videoUrl: v.videoUrl,
-        image: v.image,
-        timestamp: v.timestamp,
-        hasValidTimestamp: v.hasValidTimestamp,
-        publishedAt: v.publishedAt,
-        platform: 'youtube',
-      })),
-      scrapedAt: new Date().toISOString(),
-      note: 'YouTube Data API v3 — requires YOUTUBE_API_KEY env var',
-    });
+  const query = searchParams.get('q') || 'surf waves 2024';
+  const forceMock = searchParams.get('mock') === 'true';
+
+  if (!forceMock) {
+    const result = await scrapeYouTube(query);
+
+    if (result.success && result.items.length > 0) {
+      return NextResponse.json({
+        success: true,
+        source: 'youtube',
+        query,
+        method: result.method,
+        real: true,
+        items: result.items.map(v => ({
+          id: `yt_${v.id}`,
+          feed: classifyFeed(v.content, v.source, v.title),
+          size: 'horizontal',
+          type: 'video',
+          title: v.title,
+          content: v.content,
+          source: v.source,
+          videoUrl: v.videoUrl,
+          image: v.image,
+          timestamp: v.timestamp,
+          hasValidTimestamp: v.hasValidTimestamp,
+          platform: 'youtube',
+        })),
+        scrapedAt: result.scrapedAt,
+      });
+    }
   }
-  
-  // No API key or API failed
+
+  // Mock fallback
+  const mockItems = getMockItems('youtube');
   return NextResponse.json({
-    success: false,
+    success: true,
     source: 'youtube',
     query,
-    method: 'none',
+    method: forceMock ? 'mock' : 'api-fallback',
     real: false,
-    items: [],
-    error: 'YouTube Data API failed or YOUTUBE_API_KEY not set',
-    help: 'Get free API key: https://console.cloud.google.com/apis/api/youtube.googleapis.com',
+    items: mockItems,
     scrapedAt: new Date().toISOString(),
+    note: forceMock ? 'Mock data requested' : 'YouTube API unavailable — using mock fallback',
   });
 }

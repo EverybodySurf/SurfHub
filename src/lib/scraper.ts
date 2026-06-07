@@ -1,3 +1,6 @@
+// @ts-nocheck
+// ⚠️ DEPRECATED — use @/lib/scrapers instead
+// This file is kept for reference only. All active code uses the new scraper services.
 import puppeteer from 'puppeteer';
 
 // Browser instance cache

@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { ai } from '../genkit';
 import { SurfQualityCalculator, SURF_SPOTS, type SurfConditions, type SpotConfiguration } from '../../lib/surf-quality-calculator';
-import GlobalMarineDataService, { type MarineConditions } from '../../lib/global-marine-data';
+import { MarineDataManager, type MarineConditions } from '../../lib/marine';
 
 // Input schema - just needs location
 const MarineEnhancedInputSchema = z.object({
@@ -160,7 +160,7 @@ export const marineEnhancedSwellForecastFlow = ai.defineFlow(
         throw new Error('OpenWeather API key not configured');
       }
       
-      const marineService = new GlobalMarineDataService(
+      const marineService = new MarineDataManager(
         openWeatherApiKey,
         stormglassApiKey,
         worldWeatherApiKey
