@@ -30,7 +30,13 @@ export async function scrapeTikTok(query: string = 'surf waves'): Promise<Scrape
       page = await browserService.getPage(browser);
       const searchUrl = `https://www.tiktok.com/search?q=${encodeURIComponent(query)}&t=1`;
       console.log(`🎬 Navigating to TikTok: ${searchUrl}`);
-      await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      await page.goto(searchUrl, { waitUntil: 'networkidle', timeout: 30000 });
+      // Wait for video content to render (TikTok is JS-heavy SPA)
+      try {
+        await page.waitForSelector('a[href*="/video/"]', { timeout: 10000 });
+      } catch {
+        console.log('⚠️ TikTok: video selector timeout, continuing with current DOM');
+      }
     }
 
     const videos = await page.evaluate(() => {

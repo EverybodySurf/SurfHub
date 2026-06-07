@@ -88,8 +88,9 @@ async function scrapeYouTubeHeadless(query: string, maxResults: number, scrapedA
     return { success: true, method: 'youtube-none', items: [], scrapedAt };
   }
 
+  let page: Page | null = null;
   try {
-    const page: Page = await browserService.getPage(browser);
+    page = await browserService.getPage(browser);
     await page.goto(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`, {
       waitUntil: 'networkidle',
       timeout: 30000,
@@ -137,5 +138,7 @@ async function scrapeYouTubeHeadless(query: string, maxResults: number, scrapedA
   } catch (error: any) {
     console.error('YouTube headless scrape failed:', error.message);
     return { success: true, method: 'youtube-none', items: [], scrapedAt };
+  } finally {
+    if (page) await browserService.closePage(page);
   }
 }
