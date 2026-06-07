@@ -11,27 +11,27 @@ export interface MarineConditions {
     country?: string;
   };
   waves: {
-    significantHeight: number; // meters
-    primarySwellHeight: number;
-    primarySwellPeriod: number;
-    primarySwellDirection: number;
-    secondarySwellHeight?: number;
-    secondarySwellPeriod?: number;
-    secondarySwellDirection?: number;
-    windWaveHeight: number;
-    windWavePeriod: number;
-    windWaveDirection: number;
+    significantHeight: number | undefined; // meters
+    primarySwellHeight: number | undefined;
+    primarySwellPeriod: number | undefined;
+    primarySwellDirection: number | undefined;
+    secondarySwellHeight?: number | undefined;
+    secondarySwellPeriod?: number | undefined;
+    secondarySwellDirection?: number | undefined;
+    windWaveHeight: number | undefined;
+    windWavePeriod: number | undefined;
+    windWaveDirection: number | undefined;
   };
   wind: {
-    speed: number; // m/s
-    direction: number; // degrees
-    gusts?: number;
+    speed: number | undefined; // m/s
+    direction: number | undefined; // degrees
+    gusts?: number | undefined;
   };
   weather: {
-    temperature: number;
-    pressure: number;
-    humidity: number;
-    visibility: number;
+    temperature: number | undefined;
+    pressure: number | undefined;
+    humidity: number | undefined;
+    visibility: number | undefined;
     description: string;
   };
   tides?: {
@@ -40,8 +40,8 @@ export interface MarineConditions {
     nextLow?: { time: string; height: number };
   };
   oceanCurrent?: {
-    velocity: number; // m/s
-    direction: number; // degrees
+    velocity: number | undefined; // m/s
+    direction: number | undefined; // degrees
   };
   dataSource: 'noaa' | 'stormglass' | 'worldweatheronline' | 'openweather' | 'openmeteo';
   timestamp: string;
@@ -141,13 +141,13 @@ export class GlobalMarineDataService {
         return {
           location: { name: locationName, lat, lon, country: 'US' },
           waves: {
-            significantHeight: 1.5, // Default - would parse from GRIB2
-            primarySwellHeight: 1.2,
-            primarySwellPeriod: 8,
-            primarySwellDirection: 225,
-            windWaveHeight: 0.5,
-            windWavePeriod: 4,
-            windWaveDirection: 270
+            significantHeight: undefined, // Would parse from GRIB2 — no real data yet
+            primarySwellHeight: undefined,
+            primarySwellPeriod: undefined,
+            primarySwellDirection: undefined,
+            windWaveHeight: undefined,
+            windWavePeriod: undefined,
+            windWaveDirection: undefined
           },
           wind: {
             speed: this.parseWindSpeed(currentPeriod.windSpeed),
@@ -155,9 +155,9 @@ export class GlobalMarineDataService {
           },
           weather: {
             temperature: currentPeriod.temperature,
-            pressure: 1013, // Default
-            humidity: 70,
-            visibility: 10000,
+            pressure: undefined,
+            humidity: undefined,
+            visibility: undefined,
             description: currentPeriod.shortForecast
           },
           dataSource: 'noaa',
@@ -266,26 +266,26 @@ export class GlobalMarineDataService {
             return {
               location: { name: locationName, lat, lon },
               waves: {
-                significantHeight: current.wave_height || 1.0,
-                primarySwellHeight: current.swell_wave_height || current.wave_height * 0.7 || 0.7,
-                primarySwellPeriod: current.swell_wave_period || current.wave_period || 8,
-                primarySwellDirection: current.swell_wave_direction || current.wave_direction || 225,
+                significantHeight: current.wave_height || undefined,
+                primarySwellHeight: current.swell_wave_height || current.wave_height * 0.7 || undefined,
+                primarySwellPeriod: current.swell_wave_period || current.wave_period || undefined,
+                primarySwellDirection: current.swell_wave_direction || current.wave_direction || undefined,
                 secondarySwellHeight: current.secondary_swell_wave_height > 0 ? current.secondary_swell_wave_height : undefined,
                 secondarySwellPeriod: current.secondary_swell_wave_period > 0 ? current.secondary_swell_wave_period : undefined,
                 secondarySwellDirection: current.secondary_swell_wave_direction > 0 ? current.secondary_swell_wave_direction : undefined,
-                windWaveHeight: current.wind_wave_height || current.wave_height * 0.3 || 0.3,
-                windWavePeriod: current.wind_wave_period || 4,
-                windWaveDirection: current.wind_wave_direction || current.wave_direction || 270
+                windWaveHeight: current.wind_wave_height || current.wave_height * 0.3 || undefined,
+                windWavePeriod: current.wind_wave_period || undefined,
+                windWaveDirection: current.wind_wave_direction || current.wave_direction || undefined
               },
               wind: {
-                speed: 5, // Open-Meteo marine API focuses on waves, not wind
-                direction: 270
+                speed: undefined, // Open-Meteo marine API focuses on waves, not wind
+                direction: undefined
               },
               weather: {
-                temperature: current.sea_surface_temperature || 20,
-                pressure: 1013,
-                humidity: 70,
-                visibility: 10000,
+                temperature: current.sea_surface_temperature || undefined,
+                pressure: undefined,
+                humidity: undefined,
+                visibility: undefined,
                 description: 'Marine conditions from Open-Meteo'
               },
               dataSource: 'openmeteo',
@@ -337,25 +337,25 @@ export class GlobalMarineDataService {
       }
 
       // Extract current marine data using the variable indices
-      const waveHeight = current.variables(0)?.value() || 1.0;
-      const waveDirection = current.variables(1)?.value() || 225;
-      const wavePeriod = current.variables(2)?.value() || 8;
+      const waveHeight = current.variables(0)?.value();
+      const waveDirection = current.variables(1)?.value();
+      const wavePeriod = current.variables(2)?.value();
       
-      const windWaveHeight = current.variables(3)?.value() || waveHeight * 0.3;
-      const windWaveDirection = current.variables(4)?.value() || waveDirection;
-      const windWavePeriod = current.variables(5)?.value() || 4;
+      const windWaveHeight = current.variables(3)?.value();
+      const windWaveDirection = current.variables(4)?.value();
+      const windWavePeriod = current.variables(5)?.value();
       
-      const swellHeight = current.variables(6)?.value() || waveHeight * 0.7;
-      const swellDirection = current.variables(7)?.value() || waveDirection;
-      const swellPeriod = current.variables(8)?.value() || wavePeriod;
+      const swellHeight = current.variables(6)?.value();
+      const swellDirection = current.variables(7)?.value();
+      const swellPeriod = current.variables(8)?.value();
       
-      const secondarySwellHeight = current.variables(9)?.value() || 0;
-      const secondarySwellPeriod = current.variables(10)?.value() || 0;
-      const secondarySwellDirection = current.variables(11)?.value() || 0;
+      const secondarySwellHeight = current.variables(9)?.value();
+      const secondarySwellPeriod = current.variables(10)?.value();
+      const secondarySwellDirection = current.variables(11)?.value();
       
-      const seaTemperature = current.variables(12)?.value() || 20;
-      const oceanCurrentVelocity = current.variables(13)?.value() || 0;
-      const oceanCurrentDirection = current.variables(14)?.value() || 0;
+      const seaTemperature = current.variables(12)?.value();
+      const oceanCurrentVelocity = current.variables(13)?.value();
+      const oceanCurrentDirection = current.variables(14)?.value();
 
       // Fetch tide data in parallel (optional, may not be available for all locations)
       const tideDataPromise = this.getTideData(lat, lon);
@@ -368,26 +368,26 @@ export class GlobalMarineDataService {
           primarySwellHeight: swellHeight,
           primarySwellPeriod: swellPeriod,
           primarySwellDirection: swellDirection,
-          secondarySwellHeight: secondarySwellHeight > 0 ? secondarySwellHeight : undefined,
-          secondarySwellPeriod: secondarySwellPeriod > 0 ? secondarySwellPeriod : undefined,
-          secondarySwellDirection: secondarySwellDirection > 0 ? secondarySwellDirection : undefined,
+          secondarySwellHeight: secondarySwellHeight && secondarySwellHeight > 0 ? secondarySwellHeight : undefined,
+          secondarySwellPeriod: secondarySwellPeriod && secondarySwellPeriod > 0 ? secondarySwellPeriod : undefined,
+          secondarySwellDirection: secondarySwellDirection && secondarySwellDirection > 0 ? secondarySwellDirection : undefined,
           windWaveHeight: windWaveHeight,
           windWavePeriod: windWavePeriod,
           windWaveDirection: windWaveDirection
         },
         wind: {
-          speed: 5, // Would need separate weather API call for wind data
-          direction: 270
+          speed: undefined, // Would need separate weather API call for wind data
+          direction: undefined
         },
         weather: {
           temperature: seaTemperature,
-          pressure: 1013,
-          humidity: 70,
-          visibility: 10000,
+          pressure: undefined,
+          humidity: undefined,
+          visibility: undefined,
           description: 'Marine conditions from Open-Meteo'
         },
         tides: tideData,
-        oceanCurrent: oceanCurrentVelocity > 0 ? {
+        oceanCurrent: oceanCurrentVelocity && oceanCurrentVelocity > 0 ? {
           velocity: oceanCurrentVelocity,
           direction: oceanCurrentDirection
         } : undefined,
@@ -438,28 +438,31 @@ export class GlobalMarineDataService {
       }
 
       const data = await response.json();
+      if (!data.hours?.length) {
+        throw new Error('Stormglass returned no hourly data');
+      }
       const current = data.hours[0];
 
       return {
         location: { name: locationName, lat, lon },
         waves: {
-          significantHeight: current.waveHeight?.noaa || current.waveHeight?.sg || 1.0,
-          primarySwellHeight: current.swellHeight?.noaa || current.swellHeight?.sg || 0.8,
-          primarySwellPeriod: current.swellPeriod?.noaa || current.swellPeriod?.sg || 8,
-          primarySwellDirection: current.swellDirection?.noaa || current.swellDirection?.sg || 225,
-          windWaveHeight: current.windWaveHeight?.noaa || current.windWaveHeight?.sg || 0.3,
-          windWavePeriod: current.windWavePeriod?.noaa || current.windWavePeriod?.sg || 4,
-          windWaveDirection: current.windWaveDirection?.noaa || current.windWaveDirection?.sg || 270
+          significantHeight: current.waveHeight?.noaa || current.waveHeight?.sg || undefined,
+          primarySwellHeight: current.swellHeight?.noaa || current.swellHeight?.sg || undefined,
+          primarySwellPeriod: current.swellPeriod?.noaa || current.swellPeriod?.sg || undefined,
+          primarySwellDirection: current.swellDirection?.noaa || current.swellDirection?.sg || undefined,
+          windWaveHeight: current.windWaveHeight?.noaa || current.windWaveHeight?.sg || undefined,
+          windWavePeriod: current.windWavePeriod?.noaa || current.windWavePeriod?.sg || undefined,
+          windWaveDirection: current.windWaveDirection?.noaa || current.windWaveDirection?.sg || undefined
         },
         wind: {
-          speed: current.windSpeed?.noaa || current.windSpeed?.sg || 5,
-          direction: current.windDirection?.noaa || current.windDirection?.sg || 270
+          speed: current.windSpeed?.noaa || current.windSpeed?.sg || undefined,
+          direction: current.windDirection?.noaa || current.windDirection?.sg || undefined
         },
         weather: {
-          temperature: current.airTemperature?.noaa || current.airTemperature?.sg || 20,
-          pressure: current.pressure?.noaa || current.pressure?.sg || 1013,
-          humidity: 70,
-          visibility: 10000,
+          temperature: current.airTemperature?.noaa || current.airTemperature?.sg || undefined,
+          pressure: current.pressure?.noaa || current.pressure?.sg || undefined,
+          humidity: undefined,
+          visibility: undefined,
           description: 'Marine conditions'
         },
         dataSource: 'stormglass',
@@ -493,23 +496,23 @@ export class GlobalMarineDataService {
       return {
         location: { name: locationName, lat, lon },
         waves: {
-          significantHeight: parseFloat(marine.sigHeight_m) || 1.0,
-          primarySwellHeight: parseFloat(marine.swellHeight_m) || 0.8,
-          primarySwellPeriod: parseFloat(marine.swellPeriod_secs) || 8,
-          primarySwellDirection: parseFloat(marine.swellDir) || 225,
-          windWaveHeight: parseFloat(marine.sigHeight_m) * 0.3 || 0.3,
-          windWavePeriod: 4,
-          windWaveDirection: parseFloat(marine.winddir16Point) || 270
+          significantHeight: parseFloat(marine.sigHeight_m) || undefined,
+          primarySwellHeight: parseFloat(marine.swellHeight_m) || undefined,
+          primarySwellPeriod: parseFloat(marine.swellPeriod_secs) || undefined,
+          primarySwellDirection: parseFloat(marine.swellDir) || undefined,
+          windWaveHeight: parseFloat(marine.sigHeight_m) * 0.3 || undefined,
+          windWavePeriod: undefined,
+          windWaveDirection: parseFloat(marine.winddir16Point) || undefined
         },
         wind: {
-          speed: parseFloat(marine.windspeedKmph) * 0.277778, // Convert km/h to m/s
-          direction: parseFloat(marine.winddirDegree) || 270
+          speed: parseFloat(marine.windspeedKmph) * 0.277778 || undefined, // km/h → m/s
+          direction: parseFloat(marine.winddirDegree) || undefined
         },
         weather: {
-          temperature: parseFloat(marine.tempC) || 20,
-          pressure: parseFloat(marine.pressure) || 1013,
-          humidity: parseFloat(marine.humidity) || 70,
-          visibility: parseFloat(marine.visibility) * 1000 || 10000, // Convert km to m
+          temperature: parseFloat(marine.tempC) || undefined,
+          pressure: parseFloat(marine.pressure) || undefined,
+          humidity: parseFloat(marine.humidity) || undefined,
+          visibility: parseFloat(marine.visibility) * 1000 || undefined, // Convert km to m
           description: marine.weatherDesc[0].value || 'Marine conditions'
         },
         dataSource: 'worldweatheronline',
@@ -535,31 +538,31 @@ export class GlobalMarineDataService {
 
       const data = await response.json();
 
-      // Estimate marine conditions from weather data
-      const windSpeed = data.wind?.speed || 5;
-      const estimatedWaveHeight = Math.max(0.3, windSpeed * 0.15);
-      const estimatedPeriod = Math.min(12, Math.max(4, windSpeed * 0.4 + 4));
+      // Estimate marine conditions from weather data (real wind → honest estimate)
+      const windSpeed = data.wind?.speed;
+      const estimatedWaveHeight = windSpeed != null ? Math.max(0.3, windSpeed * 0.15) : undefined;
+      const estimatedPeriod = windSpeed != null ? Math.min(12, Math.max(4, windSpeed * 0.4 + 4)) : undefined;
 
       return {
         location: { name: locationName, lat, lon, country: data.sys?.country },
         waves: {
           significantHeight: estimatedWaveHeight,
-          primarySwellHeight: estimatedWaveHeight * 0.7,
+          primarySwellHeight: estimatedWaveHeight != null ? estimatedWaveHeight * 0.7 : undefined,
           primarySwellPeriod: estimatedPeriod,
-          primarySwellDirection: ((data.wind?.deg || 270) + 180) % 360,
-          windWaveHeight: estimatedWaveHeight * 0.3,
-          windWavePeriod: Math.max(3, estimatedPeriod * 0.5),
-          windWaveDirection: data.wind?.deg || 270
+          primarySwellDirection: data.wind?.deg != null ? (data.wind.deg + 180) % 360 : undefined,
+          windWaveHeight: estimatedWaveHeight != null ? estimatedWaveHeight * 0.3 : undefined,
+          windWavePeriod: estimatedPeriod != null ? Math.max(3, estimatedPeriod * 0.5) : undefined,
+          windWaveDirection: data.wind?.deg || undefined
         },
         wind: {
           speed: windSpeed,
-          direction: data.wind?.deg || 270
+          direction: data.wind?.deg || undefined
         },
         weather: {
-          temperature: data.main?.temp || 20,
-          pressure: data.main?.pressure || 1013,
-          humidity: data.main?.humidity || 70,
-          visibility: data.visibility || 10000,
+          temperature: data.main?.temp || undefined,
+          pressure: data.main?.pressure || undefined,
+          humidity: data.main?.humidity || undefined,
+          visibility: data.visibility || undefined,
           description: data.weather?.[0]?.description || 'Clear conditions'
         },
         dataSource: 'openweather',
