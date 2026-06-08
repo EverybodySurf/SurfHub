@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Globe, Trophy, Plane, Newspaper, Waves } from 'lucide-react';
 import { useFeed, type FeedItem } from '@/hooks/use-feed';
+import { YouTubePlayer } from '@/components/feeds/YouTubePlayer';
 
 interface GlobalItem {
   id: string;
@@ -187,6 +188,12 @@ function GlobalCard({ item }: { item: GlobalItem }) {
 export function GlobalSurfFeed() {
   const { items: apiItems, loading, error } = useFeed('global');
 
+  // Extract videoId from YouTube URLs
+  const extractYoutubeVideoId = (url: string): string | null => {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
+  };
+
   // Graceful degradation: fallback to mock data when API fails
   const displayItems: GlobalItem[] = (apiItems.length > 0)
     ? apiItems.map(mapApiToGlobalItem)
@@ -198,9 +205,33 @@ export function GlobalSurfFeed() {
 
   const finalItems = displayItems.length > 0 ? displayItems : fallbackData;
 
+  // Separate YouTube items for inline playback
+  const youtubeItems = apiItems.filter(
+    (item) => item.platform === 'youtube' && item.videoUrl
+  );
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {/* YouTube player cards */}
+        {youtubeItems.map((item) => {
+          const videoId = item.videoUrl
+            ? extractYoutubeVideoId(item.videoUrl)
+            : null;
+          if (!videoId) return null;
+          return (
+            <YouTubePlayer
+              key={item.id}
+              videoId={videoId}
+              title={item.title || ''}
+              channelTitle={item.channelTitle || item.source || ''}
+              channelId={item.channelId || ''}
+              thumbnail={item.image || `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`}
+            />
+          );
+        })}
+
+        {/* Non-YouTube cards */}
         {finalItems.map((item) => (
           <GlobalCard key={item.id} item={item} />
         ))}

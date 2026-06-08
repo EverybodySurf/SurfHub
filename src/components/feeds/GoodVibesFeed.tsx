@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import { Play, Heart, Quote, Sparkles, Loader2 } from 'lucide-react';
 import { useFeed, type FeedItem } from '@/hooks/use-feed';
+import { YouTubePlayer } from '@/components/feeds/YouTubePlayer';
 
 interface VibesItem {
   id: string;
@@ -112,6 +113,12 @@ function LoadingSkeleton() {
   );
 }
 
+// Extract videoId from YouTube URLs
+function extractYoutubeVideoId(url: string): string | null {
+  const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([a-zA-Z0-9_-]+)/);
+  return match ? match[1] : null;
+}
+
 function VibesCard({ item }: { item: VibesItem }) {
   return (
     <Card className="relative overflow-hidden p-6 bg-card border-border hover:border-primary/40 transition-all duration-500 group min-h-[280px]">
@@ -184,10 +191,41 @@ export function GoodVibesFeed() {
   // If zero items after load, use fallback
   const finalItems = displayItems.length > 0 ? displayItems : fallbackData;
 
+  // Separate YouTube items for inline playback
+  const youtubeItems = apiItems.filter(
+    (item) => item.platform === 'youtube' && item.videoUrl
+  );
+
+  const nonYoutubeItems = finalItems.filter(
+    (item) =>
+      !youtubeItems.some(
+        (yt) => yt.id === item.id || `yt_${item.id}` === yt.id
+      )
+  );
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {finalItems.map((item) => (
+        {/* YouTube player cards */}
+        {youtubeItems.map((item) => {
+          const videoId = item.videoUrl
+            ? extractYoutubeVideoId(item.videoUrl)
+            : null;
+          if (!videoId) return null;
+          return (
+            <YouTubePlayer
+              key={item.id}
+              videoId={videoId}
+              title={item.title || ''}
+              channelTitle={item.channelTitle || item.source || ''}
+              channelId={item.channelId || ''}
+              thumbnail={item.image || `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`}
+            />
+          );
+        })}
+
+        {/* Non-YouTube fallback cards */}
+        {nonYoutubeItems.map((item) => (
           <VibesCard key={item.id} item={item} />
         ))}
       </div>

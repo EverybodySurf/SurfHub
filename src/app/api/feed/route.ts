@@ -41,11 +41,8 @@ export async function GET(request: Request) {
   const useMock = searchParams.get('mock') === 'true';
   const filter24h = searchParams.get('filter24h') !== 'false'; // Default: true
   
-  // Try real scraping from all platforms
+  // YouTube scraping only — browser scrapers removed for reliability
   let youtubeItems: any[] = [];
-  let tiktokItems: any[] = [];
-  let instagramItems: any[] = [];
-  let twitterItems: any[] = [];
   
   if (!useMock) {
     // YouTube - use YouTube Data API v3 (FREE, real timestamps)
@@ -83,6 +80,8 @@ export async function GET(request: Request) {
             timestamp: v.timestamp,
             hasValidTimestamp: v.hasValidTimestamp,
             platform: 'youtube',
+            channelId: v.channelId || '',
+            channelTitle: v.channelTitle || v.source || '',
           }));
           youtubeItems.push(...mappedVideos);
         } else {
@@ -91,39 +90,6 @@ export async function GET(request: Request) {
       } catch (e) {
         console.log(`YouTube query "${query}" failed:`, e);
       }
-    }
-    
-    // TikTok - try real
-    try {
-      const ttRes = await fetch(`http://localhost:3002/api/scrape/tiktok`);
-      const ttData = await ttRes.json();
-      if (ttData.success && ttData.items) {
-        tiktokItems = ttData.real ? ttData.items : []; // Only use if real
-      }
-    } catch (e) {
-      console.log('TikTok scraper failed');
-    }
-    
-    // Instagram - try real
-    try {
-      const igRes = await fetch(`http://localhost:3002/api/scrape/instagram`);
-      const igData = await igRes.json();
-      if (igData.success && igData.items) {
-        instagramItems = igData.real ? igData.items : []; // Only use if real
-      }
-    } catch (e) {
-      console.log('Instagram scraper failed');
-    }
-    
-    // Twitter - try real
-    try {
-      const twRes = await fetch(`http://localhost:3002/api/scrape/twitter`);
-      const twData = await twRes.json();
-      if (twData.success && twData.items) {
-        twitterItems = twData.real ? twData.items : []; // Only use if real
-      }
-    } catch (e) {
-      console.log('Twitter scraper failed');
     }
   }
   
@@ -175,72 +141,68 @@ export async function GET(request: Request) {
       platform: 'twitter',
     },
     
-    // INSTAGRAM REELS (if real scraping failed)
-    ...(instagramItems.length === 0 ? [
-      {
-        id: 'mock_ig_1',
-        feed: 'feelgood',
-        size: 'horizontal',
-        type: 'reel',
-        title: 'First Wave Forever',
-        content: 'That magical first wave moment. Pure joy. 🎬 Instagram',
-        source: '@surfstories',
-        image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=800&auto=format',
-        timestamp: new Date().toISOString(),
-        hasValidTimestamp: false,
-        platform: 'instagram',
-      },
-      {
-        id: 'mock_ig_2',
-        feed: 'local',
-        size: 'horizontal',
-        type: 'reel',
-        title: 'Anse Bertrand Raw',
-        content: 'North coast powerhouse. Fast, hollow waves. 🎬 Instagram',
-        location: 'Anse-Bertrand',
-        source: '@gwadasurf',
-        image: 'https://images.unsplash.com/photo-1455729552865-3658e0c677dd?w=800&auto=format',
-        timestamp: new Date().toISOString(),
-        hasValidTimestamp: false,
-        platform: 'instagram',
-      },
-    ] : []),
+    // INSTAGRAM REELS (fallback)
+    {
+      id: 'mock_ig_1',
+      feed: 'feelgood',
+      size: 'horizontal',
+      type: 'reel',
+      title: 'First Wave Forever',
+      content: 'That magical first wave moment. Pure joy. 🎬 Instagram',
+      source: '@surfstories',
+      image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=800&auto=format',
+      timestamp: new Date().toISOString(),
+      hasValidTimestamp: false,
+      platform: 'instagram',
+    },
+    {
+      id: 'mock_ig_2',
+      feed: 'local',
+      size: 'horizontal',
+      type: 'reel',
+      title: 'Anse Bertrand Raw',
+      content: 'North coast powerhouse. Fast, hollow waves. 🎬 Instagram',
+      location: 'Anse-Bertrand',
+      source: '@gwadasurf',
+      image: 'https://images.unsplash.com/photo-1455729552865-3658e0c677dd?w=800&auto=format',
+      timestamp: new Date().toISOString(),
+      hasValidTimestamp: false,
+      platform: 'instagram',
+    },
     
-    // TIKTOK REELS (if real scraping failed)
-    ...(tiktokItems.length === 0 ? [
-      {
-        id: 'mock_tt_1',
-        feed: 'feelgood',
-        size: 'horizontal',
-        type: 'reel',
-        title: 'Zen Surfer Tips',
-        content: 'Paddle out. Catch waves. Reset mind. 🎬 TikTok',
-        source: '@zensurfer',
-        image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format',
-        timestamp: new Date().toISOString(),
-        hasValidTimestamp: false,
-        platform: 'tiktok',
-      },
-      {
-        id: 'mock_tt_2',
-        feed: 'local',
-        size: 'horizontal',
-        type: 'reel',
-        title: 'Gwada Dawn Patrol',
-        content: '5AM sessions. Empty waves. Pure bliss. 🎬 TikTok',
-        location: 'Le Moule',
-        source: '@gwadasurfer',
-        image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=800&auto=format',
-        timestamp: new Date().toISOString(),
-        hasValidTimestamp: false,
-        platform: 'tiktok',
-      },
-    ] : []),
+    // TIKTOK REELS (fallback)
+    {
+      id: 'mock_tt_1',
+      feed: 'feelgood',
+      size: 'horizontal',
+      type: 'reel',
+      title: 'Zen Surfer Tips',
+      content: 'Paddle out. Catch waves. Reset mind. 🎬 TikTok',
+      source: '@zensurfer',
+      image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format',
+      timestamp: new Date().toISOString(),
+      hasValidTimestamp: false,
+      platform: 'tiktok',
+    },
+    {
+      id: 'mock_tt_2',
+      feed: 'local',
+      size: 'horizontal',
+      type: 'reel',
+      title: 'Gwada Dawn Patrol',
+      content: '5AM sessions. Empty waves. Pure bliss. 🎬 TikTok',
+      location: 'Le Moule',
+      source: '@gwadasurfer',
+      image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=800&auto=format',
+      timestamp: new Date().toISOString(),
+      hasValidTimestamp: false,
+      platform: 'tiktok',
+    },
   ];
   
   // Merge: real scraped + mock fallback
-  const allContent = [...youtubeItems, ...tiktokItems, ...instagramItems, ...twitterItems, ...mockContent];
-  console.log(`📊 Merge: yt=${youtubeItems.length}, tt=${tiktokItems.length}, ig=${instagramItems.length}, tw=${twitterItems.length}, mock=${mockContent.length}, total=${allContent.length}`);
+  const allContent = [...youtubeItems, ...mockContent];
+  console.log(`📊 Merge: yt=${youtubeItems.length}, mock=${mockContent.length}, total=${allContent.length}`);
   
   // Apply 24hr filter
   let filteredContent = allContent;
@@ -257,7 +219,7 @@ export async function GET(request: Request) {
     filteredContent = filteredContent.filter(item => item.feed === feed);
   }
   
-  const hasReal = youtubeItems.length > 0 || tiktokItems.length > 0 || instagramItems.length > 0 || twitterItems.length > 0;
+  const hasReal = youtubeItems.length > 0;
   const itemsWithoutTimestamp = filteredContent.filter(item => !item.hasValidTimestamp).length;
   
   return NextResponse.json({
@@ -269,9 +231,6 @@ export async function GET(request: Request) {
     count: filteredContent.length,
     counts: {
       youtube: youtubeItems.length,
-      tiktok: tiktokItems.length,
-      instagram: instagramItems.length,
-      twitter: twitterItems.length,
       mock: mockContent.length,
     },
     warnings: warnings.length > 0 ? warnings : undefined,

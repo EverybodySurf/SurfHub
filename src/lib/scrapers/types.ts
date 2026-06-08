@@ -43,6 +43,8 @@ export interface YouTubeVideo extends ScrapedPost {
   image: string;
   videoUrl: string;
   hasValidTimestamp: boolean;
+  channelId?: string;
+  channelTitle?: string;
 }
 
 export type ScrapeResult<T> = {

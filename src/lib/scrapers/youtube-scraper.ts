@@ -68,6 +68,8 @@ async function scrapeYouTubeAPI(query: string, maxResults: number, scrapedAt: st
           platform: 'youtube' as const,
           image: `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
           videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
+          channelId: item.snippet.channelId,
+          channelTitle: item.snippet.channelTitle,
         };
       }),
       scrapedAt,

@@ -17,6 +17,8 @@ export interface FeedItem {
   timestamp?: string;
   hasValidTimestamp?: boolean;
   platform?: string;
+  channelId?: string;
+  channelTitle?: string;
 }
 
 interface UseFeedResult {
