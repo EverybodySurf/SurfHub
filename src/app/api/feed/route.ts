@@ -34,6 +34,47 @@ function filterBy72Hours(items: any[]): { filtered: any[], warnings: string[] } 
   return { filtered, warnings };
 }
 
+/**
+ * Detect whether YouTube videos are Shorts by querying the videos API
+ * with part=player and checking embed height vs width.
+ */
+async function detectShorts(videoIds: string[]): Promise<Map<string, boolean>> {
+  const shortsMap = new Map<string, boolean>();
+  if (videoIds.length === 0) return shortsMap;
+
+  const API_KEY = process.env.YOUTUBE_API_KEY;
+  if (!API_KEY) return shortsMap;
+
+  try {
+    // YouTube API accepts up to 50 IDs per request
+    const chunkSize = 50;
+    for (let i = 0; i < videoIds.length; i += chunkSize) {
+      const chunk = videoIds.slice(i, i + chunkSize);
+      const url = `https://www.googleapis.com/youtube/v3/videos?part=player&id=${chunk.join(',')}&key=${API_KEY}`;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(url, { signal: controller.signal });
+      clearTimeout(timeout);
+
+      if (!res.ok) continue;
+
+      const data = await res.json();
+      if (!data.items) continue;
+
+      for (const video of data.items) {
+        const player = video.player;
+        // If embed height > width, it's a portrait/short video
+        const isShort = player?.embedHeight > player?.embedWidth;
+        shortsMap.set(video.id, !!isShort);
+      }
+    }
+  } catch (e) {
+    console.log('Failed to detect shorts:', e);
+  }
+
+  return shortsMap;
+}
+
 // Unified feed endpoint — aggregates all scraped content with 24hr filter
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -46,25 +87,30 @@ export async function GET(request: Request) {
   
   if (!useMock) {
     // YouTube - use YouTube Data API v3 (FREE, real timestamps)
-    // Feed-specific queries for targeted content
+    // Feed-specific queries for targeted content — more queries & more results per query
+    const MAX_RESULTS = 30;
     const youtubeQueries: Record<string, { query: string, feed: string }> = {
       feelgood: { query: 'Soul surfing', feed: 'feelgood' },
+      feelgoodNature: { query: 'surfing nature ocean relaxation', feed: 'feelgood' },
       global: { query: 'Surfing', feed: 'global' },
       globalFresh: { query: 'Surfing today', feed: 'global' },
+      globalBig: { query: 'big wave surfing', feed: 'global' },
+      globalTravel: { query: 'surf travel vlog', feed: 'global' },
       local: { query: 'Surfing guadeloupe', feed: 'local' },
+      localGwada: { query: 'Guadeloupe surf', feed: 'local' },
     };
     
     // Determine which queries to run based on feed param
     const queriesToRun = feed === 'all' 
       ? Object.values(youtubeQueries) 
-      : [youtubeQueries[feed] || youtubeQueries['feelgood']];
+      : Object.values(youtubeQueries).filter(q => q.feed === feed);
     
     console.log(`🎥 YouTube queries: ${queriesToRun.map(q => q.query).join(', ')}`);
     
     // Run YouTube queries (parallel or sequential to conserve quota)
     for (const { query, feed: targetFeed } of queriesToRun) {
       try {
-        const result = await scrapeYouTube(query, 10);
+        const result = await scrapeYouTube(query, MAX_RESULTS);
         if (result.success && result.items.length > 0) {
           console.log(`🎥 "${query}" → ${result.items.length} videos for ${targetFeed}`);
           const mappedVideos = result.items.map((v: any) => ({
@@ -90,6 +136,36 @@ export async function GET(request: Request) {
       } catch (e) {
         console.log(`YouTube query "${query}" failed:`, e);
       }
+    }
+    
+    // Deduplicate by video ID (same video may appear in multiple queries)
+    const seenIds = new Set<string>();
+    youtubeItems = youtubeItems.filter(item => {
+      if (seenIds.has(item.id)) return false;
+      seenIds.add(item.id);
+      return true;
+    });
+    console.log(`🎥 After dedup: ${youtubeItems.length} unique videos`);
+
+    // Detect shorts via batch videos API
+    if (youtubeItems.length > 0) {
+      const videoIds = youtubeItems
+        .map(item => item.id.replace(/^yt_/, ''))
+        .filter(Boolean) as string[];
+
+      const shortsMap = await detectShorts(videoIds);
+
+      youtubeItems = youtubeItems.map(item => {
+        const videoId = item.id.replace(/^yt_/, '');
+        let isShort = shortsMap.get(videoId);
+
+        // Fallback: check title for #Shorts if API didn't return info
+        if (isShort === undefined) {
+          isShort = (item.title || '').toLowerCase().includes('#shorts');
+        }
+
+        return { ...item, isShort: !!isShort };
+      });
     }
   }
   
@@ -204,7 +280,7 @@ export async function GET(request: Request) {
   const allContent = [...youtubeItems, ...mockContent];
   console.log(`📊 Merge: yt=${youtubeItems.length}, mock=${mockContent.length}, total=${allContent.length}`);
   
-  // Apply 24hr filter
+  // Apply 72hr filter
   let filteredContent = allContent;
   let warnings: string[] = [];
   

@@ -19,6 +19,7 @@ export interface FeedItem {
   platform?: string;
   channelId?: string;
   channelTitle?: string;
+  isShort?: boolean;
 }
 
 interface UseFeedResult {

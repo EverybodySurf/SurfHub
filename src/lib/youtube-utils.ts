@@ -56,6 +56,7 @@ export function toYoutubePlayerProps(item: FeedItem): {
   channelTitle: string;
   channelId: string;
   thumbnail: string;
+  isShort?: boolean;
 } | null {
   if (!isYoutubeItem(item) || !item.videoUrl) return null;
 
@@ -68,5 +69,6 @@ export function toYoutubePlayerProps(item: FeedItem): {
     channelTitle: (item as any).channelTitle || item.source || 'YouTube',
     channelId: (item as any).channelId || '',
     thumbnail: item.image || `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`,
+    isShort: item.isShort,
   };
 }

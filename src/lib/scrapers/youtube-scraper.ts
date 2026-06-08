@@ -12,7 +12,7 @@ import type { Browser, Page } from 'playwright';
 import { browserService } from './browser-service';
 import type { YouTubeVideo, ScrapeResult } from './types';
 
-export async function scrapeYouTube(query: string = 'surf waves 2024', maxResults: number = 10): Promise<ScrapeResult<YouTubeVideo>> {
+export async function scrapeYouTube(query: string = 'surf waves 2024', maxResults: number = 30): Promise<ScrapeResult<YouTubeVideo>> {
   const scrapedAt = new Date().toISOString();
 
   // Try official API first (fastest, highest quality data)
