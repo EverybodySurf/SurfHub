@@ -25,7 +25,7 @@ export function Header() {
   const isAdminRoute = pathname?.startsWith('/admin');
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
+    const onScroll = () => setScrolled(window.scrollY > window.innerHeight);
     window.addEventListener('scroll', onScroll);
     onScroll();
     return () => window.removeEventListener('scroll', onScroll);
@@ -34,8 +34,11 @@ export function Header() {
   // Close menu on route change
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
-  const isSolid = scrolled || isAdminRoute || !isHomePage;
-  const textColor = isSolid ? 'text-foreground' : 'text-white';
+  // Solid background only when scrolled — always overlay otherwise
+  const isScrolled = scrolled || isAdminRoute;
+  // Text: dark on scrollable pages, white on fullscreen pages (like home, surf-map) when not scrolled
+  const isFullscreenPage = isHomePage || pathname?.startsWith('/surf-map');
+  const textColor = isScrolled || !isFullscreenPage ? 'text-foreground' : 'text-white';
 
   const navItems = [
     { href: '/', label: 'Home', icon: Waves },
@@ -59,7 +62,7 @@ export function Header() {
         className={`
           fixed top-0 left-0 right-0 z-50 h-16
           transition-all duration-500 ease-out
-          ${isSolid ? 'bg-background/80 backdrop-blur-xl shadow-sm border-b border-border/20' : 'bg-transparent'}
+          ${isScrolled ? 'bg-background/5 backdrop-blur-sm' : 'bg-transparent'}
         `}
       >
         <div className="flex h-16 items-center justify-between px-4 max-w-screen-2xl mx-auto">
@@ -74,7 +77,7 @@ export function Header() {
           {/* Right section */}
           <div className="flex items-center gap-2">
             {/* Theme toggle always visible */}
-            <ThemeToggleButton scrolled={isSolid} />
+            <ThemeToggleButton scrolled={isScrolled} />
 
             {/* Desktop quick actions: Login/Sign Out */}
             <div className="hidden md:flex items-center gap-2">

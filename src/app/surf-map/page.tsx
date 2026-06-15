@@ -168,7 +168,7 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-background overflow-hidden">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Top Bar — hidden on all screens, FAB replaces it */}
       <header className="hidden">
         <div className="flex items-center gap-3 px-4 py-2.5">
