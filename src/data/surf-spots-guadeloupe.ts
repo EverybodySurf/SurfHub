@@ -155,8 +155,8 @@ export const guadeloupeSurfSpots: SurfSpot[] = [
   },
   {
     id: 'spot-11',
-    name: 'Saint-François Harbour',
-    aliases: ['St Francois Harbour', 'Port St-François'],
+    name: 'Port de St-François',
+    aliases: ['St Francois Harbour', 'Saint-François Harbour'],
     location: { lat: 16.2510, lon: -61.2740, region: 'Grande-Terre' },
     beachName: 'Saint-François Marina',
     waveType: 'reef-break',
@@ -186,7 +186,7 @@ export const guadeloupeSurfSpots: SurfSpot[] = [
     bestSeason: 'November - April',
     swellDirection: 'N, NW',
     hazards: 'Rip currents, submerged rocks',
-    description: 'Golden sand beach on Basse-Terre\'s northwest coast with offshore reef protection. Works on north swells. More sheltered than Grande-Terre spots. Also known for snorkeling and as a filming location for Death in Paradise. Sea turtle nesting site.',
+    description: 'Golden sand beach on Basse-Terre\'s northwest coast. Works on north swells with offshore reef protection. Surrounded by Chez Loulous, Le Madras, and Langley Resort Fort Royal at nearby Plage de Bas Vent.',
   },
   {
     id: 'spot-14',
@@ -213,14 +213,16 @@ export const guadeloupeSurfSpots: SurfSpot[] = [
   },
   {
     id: 'spot-16',
-    name: 'Rivière Sens',
-    location: { lat: 16.0333, lon: -61.7000, region: 'Basse-Terre' },
-    beachName: 'Rivière Sens Beach',
+    name: 'Bananier',
+    aliases: ['Plage Salée de Bananier'],
+    location: { lat: 15.9997, lon: -61.6031, region: 'Basse-Terre' },
+    beachName: 'Plage Salée de Bananier',
     waveType: 'beach-break',
-    difficulty: 'beginner',
+    difficulty: 'intermediate',
     bestSeason: 'June - December',
-    swellDirection: 'S, SW',
-    description: 'Sheltered beach break near Basse-Terre city on the southwest coast. Good for beginners with smaller W swells. Protected from the trade winds. Best in summer when Atlantic spots are flat.',
+    swellDirection: 'S, W',
+    hazards: 'Strong currents, powerful waves — swimming not recommended',
+    description: 'Black volcanic sand beach on Basse-Terre\'s southeast coast in Capesterre-Belle-Eau. Popular with surfers and bodyboarders for regular waves. Unobstructed view of Marie-Galante. Surf schools available nearby.',
   },
 ];
 

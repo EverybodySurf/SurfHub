@@ -297,31 +297,21 @@ export const guadeloupeAmenities: Amenity[] = [
   {
     id: 'amen-lp-1',
     spotId: 'spot-13',
-    name: "Chez Loulouse",
+    name: "Chez Loulous",
     type: 'restaurant',
-    location: { lat: 16.3420, lon: -61.7800 },
+    location: { lat: 16.3410, lon: -61.7790 },
     address: 'Plage de la Perle, Deshaies',
-    distanceFromSpot: '100m',
-    notes: 'Beachside restaurant with Creole cuisine',
+    distanceFromSpot: '50m',
+    notes: 'Popular beachside restaurant on the sand at La Perle',
   },
   {
     id: 'amen-lp-2',
     spotId: 'spot-13',
-    name: 'Hotel Fort Royal',
-    type: 'lodging',
-    location: { lat: 16.3380, lon: -61.7830 },
-    address: 'Deshaies',
-    distanceFromSpot: '1km',
-    notes: 'Beachfront resort with surf school',
-  },
-  {
-    id: 'amen-lp-3',
-    spotId: 'spot-13',
     name: 'Le Madras',
     type: 'cafe',
-    location: { lat: 16.3410, lon: -61.7810 },
+    location: { lat: 16.3415, lon: -61.7793 },
     address: 'Plage de la Perle',
-    distanceFromSpot: '200m',
+    distanceFromSpot: '100m',
     notes: 'Snack bar and café on the beach',
   },
 
@@ -376,6 +366,29 @@ export const guadeloupeAmenities: Amenity[] = [
     location: { lat: 16.2500, lon: -61.2780 },
     address: 'Saint-François',
     distanceFromSpot: '500m',
+  },
+
+  {
+    id: 'amen-de-7',
+    spotId: 'spot-14',
+    name: 'Langley Resort Fort Royal',
+    type: 'lodging',
+    location: { lat: 16.3200, lon: -61.7800 },
+    address: 'Pointe du Petit-Bas-Vent, Deshaies',
+    distanceFromSpot: '1.5km',
+    notes: 'Beachfront resort at Plage de Bas Vent with surf school',
+  },
+
+  // ========== BANANIER (spot-16) ==========
+  {
+    id: 'amen-ba-1',
+    spotId: 'spot-16',
+    name: 'Surf School Bananier',
+    type: 'surf-shop',
+    location: { lat: 16.0000, lon: -61.6020 },
+    address: 'Plage Salée de Bananier, Capesterre-Belle-Eau',
+    distanceFromSpot: '100m',
+    notes: 'Local surf school with board rentals and lessons',
   },
 
   // ========== ANSE SALABOUELLE (spot-4) ==========
