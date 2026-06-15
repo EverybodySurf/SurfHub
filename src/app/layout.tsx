@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Inter, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
-import { Sidebar } from '@/components/layout/Sidebar';
 import { Footer } from '@/components/layout/Footer';
 import { Toaster } from "@/components/ui/toaster";
 import { cn } from '@/lib/utils';
@@ -43,10 +42,7 @@ export default function RootLayout({
             disableTransitionOnChange
         >
           <Header />
-          <div className="flex">
-            <Sidebar />
-            <main className="flex-1 min-w-0">{children}</main>
-          </div>
+          <main className="flex-1 min-w-0 pt-16">{children}</main>
           <Footer />
           <Toaster />
         </ThemeProvider>

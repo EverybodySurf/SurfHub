@@ -168,9 +168,9 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Top Bar — hidden on mobile, visible on md+ */}
-      <header className="hidden md:block border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shrink-0">
+    <div className="h-full flex flex-col bg-background overflow-hidden">
+      {/* Top Bar — hidden on all screens, FAB replaces it */}
+      <header className="hidden">
         <div className="flex items-center gap-3 px-4 py-2.5">
           <MapPin className="h-5 w-5 text-cyan-400 shrink-0" />
           <h1 className="text-lg font-bold tracking-tight hidden sm:block">
@@ -265,8 +265,8 @@ export default function ExplorePage() {
         )}
       </header>
 
-      {/* Mobile FAB — visible only on small screens */}
-      <div className="md:hidden fixed bottom-6 right-4 z-50 flex flex-col items-end gap-2">
+      {/* Map Menu FAB — visible on all screens */}
+      <div className="fixed bottom-6 right-4 z-50 flex flex-col items-end gap-2">
         {/* Active filter indicator */}
         {(viewMode !== 'all' || amenityFilter !== 'all' || searchQuery) && (
           <button
@@ -284,9 +284,9 @@ export default function ExplorePage() {
         </button>
       </div>
 
-      {/* Mobile Filter Sheet */}
+      {/* Filter Sheet — works on all screens */}
       <div className={cn(
-        'md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200',
+        'fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200',
         menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
       )} onClick={() => setMenuOpen(false)}>
         <div 
@@ -400,11 +400,8 @@ export default function ExplorePage() {
 
       {/* Main Content — Map + Sidebar */}
       <main className="flex-1 flex overflow-hidden">
-        {/* Map */}
-        <div className={cn(
-          'flex-1 relative',
-          selectedSpot || selectedAmenity ? 'hidden lg:block' : '',
-        )}>
+        {/* Map — always full width on all screens */}
+        <div className="flex-1 relative">
           {mounted ? (
             <UnifiedMap
               spots={spots}
@@ -426,10 +423,18 @@ export default function ExplorePage() {
           )}
         </div>
 
-        {/* Sidebar */}
+        {/* Detail panel backdrop */}
+        {(selectedSpot || selectedAmenity) && (
+          <div
+            className="fixed inset-0 top-16 z-20 bg-black/20 backdrop-blur-[1px]"
+            onClick={handleClearSelection}
+          />
+        )}
+
+        {/* Detail Panel — overlays map when something is selected */}
         <aside className={cn(
-          'w-full lg:w-96 border-l border-border bg-card/50 overflow-y-auto',
-          selectedSpot || selectedAmenity ? 'block' : 'hidden lg:block',
+          'fixed right-0 top-16 bottom-0 z-30 w-full sm:w-96 bg-card/95 backdrop-blur-lg border-l border-border shadow-2xl overflow-y-auto transition-transform duration-300',
+          selectedSpot || selectedAmenity ? 'translate-x-0' : 'translate-x-full',
         )}>
           {/* Detail View */}
           {selectedSpot && (
