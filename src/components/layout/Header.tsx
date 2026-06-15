@@ -13,6 +13,7 @@ export function Header() {
   const [session, setSession] = useState<Session | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const supabase = createClient();
   const pathname = usePathname();
   const router = useRouter();
@@ -43,7 +44,7 @@ export function Header() {
   const navItems = [
     { href: '/', label: 'Home', icon: Waves },
     { href: '/swell-forecaster', label: 'Surf Reports', icon: BarChart3 },
-    { href: '/surf-map', label: 'Surf Map', icon: MapPin },
+    { href: '/surf-map', label: 'Surf/Amenities Map', icon: MapPin },
     { href: '/directory', label: 'Directory', icon: List },
     { href: '/forum', label: 'Forum', icon: Users },
     { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
@@ -57,11 +58,13 @@ export function Header() {
   };
 
   return (
-    <header className="relative z-50">
+    <>
+    <header className="relative z-[1200]">
       <nav
         className={`
-          fixed top-0 left-0 right-0 z-50 h-16
-          transition-all duration-500 ease-out
+          fixed top-0 left-0 right-0 z-[1200] h-16
+          transition-all duration-300 ease-out
+          ${headerHidden ? '-translate-y-full' : 'translate-y-0'}
           ${isScrolled ? 'bg-background/5 backdrop-blur-sm' : 'bg-transparent'}
         `}
       >
@@ -69,7 +72,7 @@ export function Header() {
           {/* Logo — home button */}
           <Link href="/" className="flex items-center space-x-2">
             <Waves className="h-6 w-6 text-pink-500 shrink-0" />
-            <span className="font-black text-lg text-yellow-300 dark:text-foreground transition-colors duration-300">
+            <span className="font-black text-lg text-neutral-800 dark:text-neutral-200 transition-colors duration-300">
               SurfHub<span className="text-cyan-400 ml-1">GP</span>
             </span>
           </Link>
@@ -141,5 +144,19 @@ export function Header() {
         </div>
       </nav>
     </header>
+
+      {/* Header toggle button — appears when header is hidden */}
+      <button
+        onClick={() => setHeaderHidden(!headerHidden)}
+        className={`fixed top-0 left-1/2 -translate-x-1/2 z-[1200] transition-all duration-300 ${
+          headerHidden
+            ? 'translate-y-2 opacity-80 hover:opacity-100'
+            : '-translate-y-full opacity-0 pointer-events-none'
+        } bg-background/80 backdrop-blur-sm border border-border/40 rounded-b-xl px-4 py-1 text-xs text-muted-foreground hover:text-foreground shadow-sm`}
+        aria-label={headerHidden ? 'Show header' : 'Hide header'}
+      >
+        SurfHub GP ▾
+      </button>
+    </>
   );
 }

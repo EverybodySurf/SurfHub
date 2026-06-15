@@ -198,7 +198,7 @@ export default function ExplorePage() {
 
       {/* Filter Sheet — works on all screens */}
       <div className={cn(
-        'fixed inset-0 z-[1100] bg-black/40 backdrop-blur-sm transition-opacity duration-200',
+        'fixed inset-0 z-[1100] bg-black/40 backdrop-blur-sm transition-opacity duration-300',
         menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
       )} onClick={() => setMenuOpen(false)}>
         <div 
@@ -206,15 +206,25 @@ export default function ExplorePage() {
             'absolute bottom-0 left-0 right-0 bg-card rounded-t-2xl p-5 pb-8 max-h-[70vh] overflow-y-auto',
             menuOpen ? 'translate-y-0' : 'translate-y-full',
           )}
-          style={sheetOffset > 0 ? { transform: `translateY(${sheetOffset}px)` } : undefined}
+          style={{ 
+            overscrollBehavior: 'contain',
+            transition: 'transform 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+            ...(sheetOffset > 0 ? { transform: `translateY(${sheetOffset}px)` } : {})
+          }}
           onClick={(e) => e.stopPropagation()}
           onTouchStart={(e) => { sheetStartY.current = e.touches[0].clientY; }}
           onTouchMove={(e) => {
             const dy = e.touches[0].clientY - sheetStartY.current;
-            if (dy > 0) setSheetOffset(dy);
+            if (dy > 0) {
+              e.preventDefault();
+              setSheetOffset(dy);
+            }
           }}
           onTouchEnd={() => {
-            if (sheetOffset > 100) setMenuOpen(false);
+            if (sheetOffset > 80) {
+              navigator.vibrate?.(10);
+              setMenuOpen(false);
+            }
             setSheetOffset(0);
           }}
         >
@@ -327,7 +337,7 @@ export default function ExplorePage() {
                 setSelectedTypes(new Set());
                 setMenuOpen(false);
               }}
-              className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors"
+              className="flex-1 py-2.5 rounded-xl border-2 border-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
             >
               Clear all
             </button>
@@ -369,14 +379,14 @@ export default function ExplorePage() {
         {/* Detail panel backdrop */}
         {(selectedSpot || selectedAmenity) && (
           <div
-            className="fixed inset-0 top-16 z-20 bg-black/20 backdrop-blur-[1px]"
+            className="fixed inset-0 top-0 z-20 bg-black/20 backdrop-blur-[1px]"
             onClick={handleClearSelection}
           />
         )}
 
         {/* Detail Panel — overlays map when something is selected */}
         <aside className={cn(
-          'fixed right-0 top-16 bottom-0 z-30 w-full sm:w-96 bg-card/95 backdrop-blur-lg border-l border-border shadow-2xl overflow-y-auto transition-transform duration-300',
+          'fixed right-0 top-0 bottom-0 z-30 w-full sm:w-96 bg-card/95 backdrop-blur-lg border-l border-border shadow-2xl overflow-y-auto transition-transform duration-300',
           selectedSpot || selectedAmenity ? 'translate-x-0' : 'translate-x-full',
         )}>
           {/* Detail View */}
