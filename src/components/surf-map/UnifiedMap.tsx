@@ -125,7 +125,7 @@ export default function UnifiedMap({
   return (
     <div className="relative h-full w-full">
       {/* Custom zoom controls */}
-      <div ref={zoomContainerRef} className="absolute top-4 left-4 z-[1000] flex flex-col gap-1 shadow-lg">
+      <div ref={zoomContainerRef} className="absolute top-24 left-4 z-[1000] flex flex-col gap-1">
         <button className="custom-zoom-in h-10 w-10 rounded-xl bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white flex items-center justify-center text-xl font-bold transition-colors shadow-md cursor-pointer border-none" aria-label="Zoom in">+</button>
         <button className="custom-zoom-out h-10 w-10 rounded-xl bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white flex items-center justify-center text-xl font-bold transition-colors shadow-md cursor-pointer border-none" aria-label="Zoom out">−</button>
       </div>
