@@ -174,7 +174,7 @@ export default function ExplorePage() {
         <div className="flex items-center gap-3 px-4 py-2.5">
           <MapPin className="h-5 w-5 text-cyan-400 shrink-0" />
           <h1 className="text-lg font-bold tracking-tight hidden sm:block">
-            Explore Guadeloupe
+            Surf & Amenities Map
           </h1>
 
           {/* Search */}
