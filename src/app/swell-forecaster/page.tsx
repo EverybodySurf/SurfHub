@@ -17,7 +17,7 @@ export default function SwellForecasterPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
+    <div className="container mx-auto px-4 pt-24 md:pt-28 pb-8 md:pb-12">
       {/* Page title - conditional rendering based on forecast state */}
       {!hasForecast ? (
         <div className="flex flex-col items-center text-center mb-12">

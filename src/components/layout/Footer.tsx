@@ -11,7 +11,7 @@ export function Footer() {
           </p>
         </div>
         <p className="text-sm text-muted-foreground">
-          Built with <span className="text-pink-400">♥</span> for the love of waves.
+          built for the love of waves
         </p>
       </div>
     </footer>

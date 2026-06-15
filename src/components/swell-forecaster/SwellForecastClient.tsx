@@ -142,7 +142,7 @@ export default function SwellForecastClient({
                       placeholder="Enter surf spot or location..."
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="w-full"
+                      className="w-full bg-muted/60 border-0 rounded-xl focus:ring-2 focus:ring-teal-400/50"
                       disabled={isLoading}
                     />
                     <Button type="submit" disabled={isLoading} variant="gradient" className="w-full">
@@ -205,10 +205,10 @@ export default function SwellForecastClient({
                 placeholder="Enter surf spot or location..."
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="flex-1"
+                className="flex-1 bg-muted/60 border-0 rounded-xl focus:ring-2 focus:ring-teal-400/50"
                 disabled={isLoading}
               />
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="bg-gradient-to-r from-pink-400 to-purple-500 text-white hover:from-pink-500 hover:to-purple-600">
                 <Search className="h-4 w-4 mr-2" />
                 {isLoading ? 'Searching...' : 'Search'}
               </Button>

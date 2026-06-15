@@ -92,12 +92,12 @@ function mapApiToVibesItem(api: FeedItem): VibesItem {
 /** Simple loading skeleton matching the card grid layout */
 function LoadingSkeleton() {
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {Array.from({ length: 4 }).map((_, i) => (
+    <div className="w-full max-w-full mx-auto">
+      <div className="grid grid-cols-4 gap-4">
+        {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="relative overflow-hidden rounded-xl min-h-[280px] bg-card/60 border border-border/40 animate-pulse"
+            className="relative overflow-hidden rounded-xl min-h-[280px] bg-card/60 border border-border/40 animate-pulse col-span-1"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-gray-800/20 to-gray-900/40" />
             <div className="relative z-10 p-6 flex flex-col gap-3">
@@ -116,7 +116,7 @@ function LoadingSkeleton() {
 
 function VibesCard({ item }: { item: VibesItem }) {
   return (
-    <Card className="relative overflow-hidden p-6 bg-card border-border hover:border-primary/40 transition-all duration-500 group min-h-[280px]">
+    <Card className="relative overflow-hidden p-6 bg-card border-border hover:border-primary/40 transition-all duration-500 group min-h-[280px] col-span-1">
       {/* Background image */}
       {item.image && (
         <div className="absolute inset-0 z-0 opacity-20 dark:opacity-30 group-hover:opacity-30 dark:group-hover:opacity-40 transition-opacity duration-500">
@@ -186,25 +186,33 @@ export function GoodVibesFeed() {
   // If zero items after load, use fallback
   const finalItems = displayItems.length > 0 ? displayItems : fallbackData;
 
-  // YouTube items → inline player; non-YouTube → vibe cards
+  // Always [landscape → short] per row, not alternating.
+  // Extra shorts → packed into full rows of 4.
   const youtubeItems = apiItems.filter(isYoutubeItem);
-  const youtubeIds = new Set(youtubeItems.map((yt) => yt.id));
-  const nonYoutubeItems = finalItems.filter((item) => !youtubeIds.has(item.id));
+  const landscapes = youtubeItems.filter(i => !i.isShort);
+  const shorts = youtubeItems.filter(i => i.isShort);
+
+  // Build ordered items: always [landscape, short] [landscape, short]...
+  // then remaining landscapes, then remaining shorts (4 per row)
+  const orderedItems = [];
+  let li = 0, si = 0;
+  while (li < landscapes.length && si < shorts.length) {
+    orderedItems.push(landscapes[li++]);
+    orderedItems.push(shorts[si++]);
+  }
+  // Remaining landscapes (no short to pair)
+  while (li < landscapes.length) orderedItems.push(landscapes[li++]);
+  // Remaining shorts — packed into rows of 4 naturally by col-span-1
+  while (si < shorts.length) orderedItems.push(shorts[si++]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* YouTube player cards */}
-        {youtubeItems.map((item) => {
+    <div className="w-full max-w-full mx-auto">
+      <div className="grid grid-cols-4 gap-4 auto-rows-auto">
+        {orderedItems.map((item) => {
           const props = toYoutubePlayerProps(item);
           if (!props) return null;
           return <YouTubePlayer key={item.id} {...props} />;
         })}
-
-        {/* Non-YouTube fallback cards */}
-        {nonYoutubeItems.map((item) => (
-          <VibesCard key={item.id} item={item} />
-        ))}
       </div>
 
       {/* Refresh hint */}

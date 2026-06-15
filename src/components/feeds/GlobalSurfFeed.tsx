@@ -105,12 +105,12 @@ function mapApiToGlobalItem(api: FeedItem): GlobalItem {
 /** Loading skeleton matching the 3-column card grid */
 function LoadingSkeleton() {
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="w-full max-w-full mx-auto">
+      <div className="grid grid-cols-4 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
           <div
             key={i}
-            className="relative overflow-hidden rounded-xl min-h-[160px] bg-card/60 border border-border/40 animate-pulse"
+            className="relative overflow-hidden rounded-xl min-h-[160px] bg-card/60 border border-border/40 animate-pulse col-span-1"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-gray-800/20 to-gray-900/40" />
             <div className="relative z-10 p-4 flex flex-col gap-2">
@@ -129,7 +129,7 @@ function LoadingSkeleton() {
 
 function GlobalCard({ item }: { item: GlobalItem }) {
   return (
-    <Card className="relative overflow-hidden p-4 bg-card border-border hover:border-primary/40 transition-all duration-500 group min-h-[160px]">
+    <Card className="relative overflow-hidden p-4 bg-card border-border hover:border-primary/40 transition-all duration-500 group min-h-[160px] col-span-1">
       {/* Background image */}
       {item.image && (
         <div className="absolute inset-0 z-0 opacity-10 dark:opacity-20 group-hover:opacity-20 dark:group-hover:opacity-30 transition-opacity duration-500">
@@ -189,34 +189,36 @@ function GlobalCard({ item }: { item: GlobalItem }) {
 export function GlobalSurfFeed() {
   const { items: apiItems, loading, error } = useFeed('global');
 
-  // Graceful degradation: fallback to mock data when API fails
-  const displayItems: GlobalItem[] = (apiItems.length > 0)
-    ? apiItems.map(mapApiToGlobalItem)
-    : (error ? fallbackData : []);
-
   if (loading) {
     return <LoadingSkeleton />;
   }
 
-  const finalItems = displayItems.length > 0 ? displayItems : fallbackData;
-
-  // YouTube items → inline player; non-YouTube → regular cards
+  // Consistent pairs: always [landscape → short].
+  // Extra shorts → packed into rows of 4 naturally by col-span-1.
   const youtubeItems = apiItems.filter(isYoutubeItem);
+  const landscapes = youtubeItems.filter(i => !i.isShort);
+  const shorts = youtubeItems.filter(i => i.isShort);
+
+  // Build ordered items
+  const orderedItems: any[] = [];
+  let li = 0, si = 0;
+  while (li < landscapes.length && si < shorts.length) {
+    orderedItems.push(landscapes[li++]);
+    orderedItems.push(shorts[si++]);
+  }
+  // Remaining landscapes (no short to pair)
+  while (li < landscapes.length) orderedItems.push(landscapes[li++]);
+  // Remaining shorts — packed into rows of 4 naturally by col-span-1
+  while (si < shorts.length) orderedItems.push(shorts[si++]);
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* YouTube player cards */}
-        {youtubeItems.map((item) => {
+    <div className="w-full max-w-full mx-auto">
+      <div className="grid grid-cols-4 gap-4 auto-rows-auto">
+        {orderedItems.map((item) => {
           const props = toYoutubePlayerProps(item);
           if (!props) return null;
           return <YouTubePlayer key={item.id} {...props} />;
         })}
-
-        {/* Non-YouTube cards */}
-        {finalItems.map((item) => (
-          <GlobalCard key={item.id} item={item} />
-        ))}
       </div>
 
       {/* Feed source hint */}

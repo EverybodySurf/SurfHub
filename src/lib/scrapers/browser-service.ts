@@ -9,7 +9,7 @@
  * falls back to headless Playwright when CDP unavailable.
  */
 
-import { chromium, type Browser, type Page, type BrowserContext } from 'playwright';
+import type { Browser, Page, BrowserContext } from 'playwright';
 
 const VPS_CDP_URL = process.env.VPS_CDP_URL || 'http://127.0.0.1:9224';
 
@@ -19,6 +19,12 @@ export class BrowserService {
   private pendingBrowser: Promise<Browser | null> | null = null;
   private createdPages: Set<Page> = new Set();
 
+  /** Lazily import chromium (prevents SSR crash from Playwright initialization) */
+  private async getChromium() {
+    const { chromium } = await import('playwright');
+    return chromium;
+  }
+
   /**
    * Connect to an existing VPS browser via CDP (authenticated, cookies preserved)
    */
@@ -26,6 +32,7 @@ export class BrowserService {
     if (this.cdpBrowser?.isConnected()) return this.cdpBrowser;
 
     try {
+      const chromium = await this.getChromium();
       const browser = await chromium.connectOverCDP(VPS_CDP_URL);
       console.log('✅ BrowserService: connected to VPS browser via CDP');
       this.cdpBrowser = browser;
@@ -42,6 +49,7 @@ export class BrowserService {
   async launchHeadless(): Promise<Browser> {
     if (this.headlessBrowser?.isConnected()) return this.headlessBrowser;
 
+    const chromium = await this.getChromium();
     const browser = await chromium.launch({
       headless: true,
       args: [

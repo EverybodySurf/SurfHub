@@ -1,21 +1,25 @@
 // Guadeloupe Surf Spots Data
-// Coordinates verified from Wikipedia/official sources
-// Note: Coordinates are for commune centers; actual surf beaches may be nearby
+// Coordinates sourced from Wave Safari, WannaSurf, Surfline, and surf-forecast.com
+// Last updated: 2026-06-15
 
 export interface SurfSpot {
   id: string;
   name: string;
+  aliases?: string[];
   location: {
     lat: number;
     lon: number;
     city?: string;
-    region?: string;
+    region: string; // 'Grande-Terre' | 'Basse-Terre'
   };
   beachName?: string;
   waveType: 'beach-break' | 'reef-break' | 'point-break';
   difficulty: 'beginner' | 'intermediate' | 'advanced' | 'expert';
   bestSeason?: string;
   description: string;
+  swellDirection?: string;
+  windDirection?: string;
+  hazards?: string;
   amenities?: {
     parking?: boolean;
     showers?: boolean;
@@ -25,78 +29,97 @@ export interface SurfSpot {
   };
 }
 
-// Verified surf spots data - Grande-Terre & Basse-Terre
-// Coordinates sourced from Wikipedia commune data
 export const guadeloupeSurfSpots: SurfSpot[] = [
+  // ===================== GRANDE-TERRE (East Island) =====================
+
   {
     id: 'spot-1',
     name: 'Anse Bertrand',
-    location: { lat: 16.47, lon: -61.51, region: 'Grande-Terre' },
-    beachName: 'Anse Bertrand Beach',
-    waveType: 'reef-break',
+    aliases: ['Anse de la Chapelle', 'La Chapelle'],
+    location: { lat: 16.4727, lon: -61.5119, region: 'Grande-Terre' },
+    beachName: 'Plage de la Chapelle',
+    waveType: 'beach-break',
     difficulty: 'intermediate',
     bestSeason: 'November - April',
-    description: 'Popular spot on Grande-Terre\'s Atlantic coast with consistent NNE swells. Works best with offshore winds.',
+    swellDirection: 'N, NE, E, SE',
+    windDirection: 'N (offshore)',
+    hazards: 'Sea urchins, wind picks up quickly',
+    description: 'Popular beach break on Grande-Terre\'s northern tip. Left-hand waves on sandy bottom. Fun mellow waves for progression. Can get crowded on weekends.',
   },
   {
     id: 'spot-2',
     name: 'Port Louis',
-    location: { lat: 16.4167, lon: -61.5333, region: 'Grande-Terre' },
-    beachName: 'Port Louis Beach',
+    aliases: ['Le Souffleur', 'Anse du Souffleur'],
+    location: { lat: 16.4222, lon: -61.5335, region: 'Grande-Terre' },
+    beachName: 'Anse du Souffleur',
     waveType: 'reef-break',
     difficulty: 'intermediate',
     bestSeason: 'November - April',
-    description: 'Located near Anse Bertrand, offers good reef breaks with NNE swells. Offshore wind conditions.',
+    swellDirection: 'N, NE',
+    windDirection: 'SE, S (offshore)',
+    hazards: 'Coral reef at low tide',
+    description: 'Popular spot with A-frame reef break offering lefts and rights. Very popular with surf schools and beginners in smaller swell. Le Souffleur has gentle waves up to 1m; larger swells produce more power.',
   },
   {
     id: 'spot-3',
     name: 'Le Moule',
-    location: { lat: 16.3306, lon: -61.3444, region: 'Grande-Terre' },
-    beachName: 'Le Moule Beach',
-    waveType: 'beach-break',
-    difficulty: 'beginner',
+    aliases: ['Damencourt'],
+    location: { lat: 16.3372, lon: -61.3620, region: 'Grande-Terre' },
+    beachName: 'Damencourt Beach',
+    waveType: 'reef-break',
+    difficulty: 'expert',
     bestSeason: 'November - April',
-    description: 'Sandy beach break suitable for beginners. Consistent E swells, cross-shore winds common.',
+    swellDirection: 'E, NE, NNE',
+    windDirection: 'E, S, light wind (morning)',
+    hazards: 'Sharp coral reef, sea urchins, localism, crowded',
+    description: 'THE surf capital of Guadeloupe. Powerfull left-hand reef break with fast hollow sections and tube potential. Hosts WSL events and French championships. Long, workable walls on the left; softer right on north swell. Best at mid-to-high tide. Booties recommended.',
   },
   {
     id: 'spot-4',
+    name: 'Anse Salabouelle',
+    aliases: ['La Bouelle'],
+    location: { lat: 16.2950, lon: -61.3230, region: 'Grande-Terre' },
+    beachName: 'Anse Salabouelle',
+    waveType: 'reef-break',
+    difficulty: 'advanced',
+    bestSeason: 'September - April',
+    swellDirection: 'E, NE',
+    windDirection: 'E, S (offshore)',
+    hazards: 'Sharp coral, sea urchins, strong currents',
+    description: 'Reef break south of Le Moule with fast, hollow lefts and longer mellower rights. Less crowded than Damencourt. Coral reef bottom with submerged rocks — booties strongly recommended. Works best with E/NE swell 0.8-2m+.',
+  },
+  {
+    id: 'spot-5',
     name: 'La Station',
     location: { lat: 16.2833, lon: -61.5333, region: 'Grande-Terre' },
     beachName: 'La Station Beach',
     waveType: 'beach-break',
     difficulty: 'beginner',
     bestSeason: 'November - April',
-    description: 'Beginner-friendly beach break with consistent E swells. Good for learning.',
+    description: 'Beginner-friendly beach break with consistent E swells. Sandy bottom, easy paddling. Good for learning and longboarding.',
   },
   {
-    id: 'spot-5',
+    id: 'spot-6',
     name: 'Plombier',
     location: { lat: 16.2667, lon: -61.5167, region: 'Grande-Terre' },
     beachName: 'Plombier Beach',
     waveType: 'reef-break',
     difficulty: 'intermediate',
     bestSeason: 'November - April',
-    description: 'Reef break with ENE swells. Cross-offshore winds make it favorable for intermediate surfers.',
-  },
-  {
-    id: 'spot-6',
-    name: 'La Perle',
-    location: { lat: 16.25, lon: -61.5, region: 'Grande-Terre' },
-    beachName: 'La Perle Beach',
-    waveType: 'reef-break',
-    difficulty: 'intermediate',
-    bestSeason: 'November - April',
-    description: 'Smaller reef break working on NNE swells. Cross-offshore conditions, good for intermediates.',
+    description: 'Reef break with ENE swells. Cross-offshore winds. Tubular and shallow at the end — experienced surfers recommended.',
   },
   {
     id: 'spot-7',
     name: 'Petit Havre',
-    location: { lat: 16.2333, lon: -61.4833, region: 'Grande-Terre' },
+    location: { lat: 16.2080, lon: -61.4270, region: 'Grande-Terre' },
     beachName: 'Petit Havre Beach',
-    waveType: 'beach-break',
-    difficulty: 'beginner',
+    waveType: 'reef-break',
+    difficulty: 'advanced',
     bestSeason: 'November - April',
-    description: 'Beach break with E swells. Cross-onshore winds, suitable for beginners.',
+    swellDirection: 'S, SE, E',
+    windDirection: 'N (offshore)',
+    hazards: 'Shallow coral reef, fire coral, sea urchins',
+    description: 'Quality left-hand reef break on Le Gosier\'s south coast. Ledgy barrels when conditions line up. Very shallow at the end with fire coral present — intermediate to advanced only. Booties essential. Few crowds on weekdays.',
   },
   {
     id: 'spot-8',
@@ -106,49 +129,100 @@ export const guadeloupeSurfSpots: SurfSpot[] = [
     waveType: 'beach-break',
     difficulty: 'beginner',
     bestSeason: 'November - April',
-    description: 'Sandy beach break with consistent E swells. Cross-shore winds, good for all levels.',
+    description: 'Sandy beach break with consistent E swells. Cross-shore winds. Good for all levels — dependable option when other spots are too big.',
   },
   {
     id: 'spot-9',
     name: 'Antigues Cape',
-    location: { lat: 16.35, lon: -61.5667, region: 'Grande-Terre' },
+    aliases: ['Cap d\'Antigues', 'Pointe d\'Antigues'],
+    location: { lat: 16.3500, lon: -61.5667, region: 'Grande-Terre' },
     beachName: 'Antigues Cape Point',
-    waveType: 'point-break',
-    difficulty: 'advanced',
-    bestSeason: 'November - April',
-    description: 'Point break with ENE swells. Cross-offshore conditions, more suitable for experienced surfers.',
+    waveType: 'reef-break',
+    difficulty: 'expert',
+    bestSeason: 'December - March',
+    swellDirection: 'N, NE',
+    description: 'Expert reef break at the northern tip near Port Louis. Powerful right-hander on deep reef, barrels on big north swells. Handles larger swell without closing out. Tow-in and big-wave potential. Not for the faint-hearted.',
   },
   {
     id: 'spot-10',
-    name: 'Deshaies',
-    location: { lat: 16.3, lon: -61.8, region: 'Basse-Terre' },
-    beachName: 'Deshaies Beach',
-    waveType: 'beach-break',
+    name: 'La Caravelle',
+    location: { lat: 16.2650, lon: -61.3870, region: 'Grande-Terre' },
+    beachName: 'La Caravelle Beach',
+    waveType: 'reef-break',
     difficulty: 'intermediate',
     bestSeason: 'November - April',
-    description: 'Located on Basse-Terre\'s west coast. More sheltered, works with W/NW swells.',
+    description: 'Left-hand reef break on coral bottom. Located between Le Moule and Sainte-Anne. Consistent E swell exposure. Works best at mid-tide.',
   },
   {
     id: 'spot-11',
+    name: 'Saint-François Harbour',
+    aliases: ['St Francois Harbour', 'Port St-François'],
+    location: { lat: 16.2510, lon: -61.2740, region: 'Grande-Terre' },
+    beachName: 'Saint-François Marina',
+    waveType: 'reef-break',
+    difficulty: 'beginner',
+    bestSeason: 'December - April',
+    description: 'Sheltered right-hand reef break near the marina at Saint-François. Beginner-friendly waves in protected waters. Good option on windy days when other spots are blown out.',
+  },
+  {
+    id: 'spot-12',
+    name: 'Anse à la Gourde',
+    location: { lat: 16.2300, lon: -61.1830, region: 'Grande-Terre' },
+    waveType: 'reef-break',
+    difficulty: 'intermediate',
+    bestSeason: 'December - April',
+    description: 'Right-hand reef break on Grande-Terre\'s eastern tip. Coral bottom with crystal clear water. Works on E swells. Nearby Pointe des Châteaux offers incredible scenery.',
+  },
+
+  // ===================== BASSE-TERRE (West Island) =====================
+
+  {
+    id: 'spot-13',
+    name: 'La Perle',
+    location: { lat: 16.3409, lon: -61.7796, region: 'Basse-Terre' },
+    beachName: 'Plage de la Perle',
+    waveType: 'beach-break',
+    difficulty: 'intermediate',
+    bestSeason: 'November - April',
+    swellDirection: 'N, NW',
+    hazards: 'Rip currents, submerged rocks',
+    description: 'Golden sand beach on Basse-Terre\'s northwest coast with offshore reef protection. Works on north swells. More sheltered than Grande-Terre spots. Also known for snorkeling and as a filming location for Death in Paradise. Sea turtle nesting site.',
+  },
+  {
+    id: 'spot-14',
+    name: 'Deshaies',
+    location: { lat: 16.3096, lon: -61.7944, region: 'Basse-Terre' },
+    beachName: 'Grande Anse des Deshaies',
+    waveType: 'beach-break',
+    difficulty: 'intermediate',
+    bestSeason: 'November - April',
+    swellDirection: 'W, NW',
+    hazards: 'Strong currents at certain beaches',
+    description: 'Northwest Basse-Terre spot with consistent waves year-round. The stretch from Plage Riflet to Grande Anse offers several peaks. Best surf is near Hotel Fort Royal / Bas Vent area. More beginner-friendly options than Grande-Terre\'s heavy reef breaks.',
+  },
+  {
+    id: 'spot-15',
     name: 'Grande Anse',
     location: { lat: 16.0167, lon: -61.6833, region: 'Basse-Terre' },
     beachName: 'Grande Anse Beach',
     waveType: 'beach-break',
     difficulty: 'intermediate',
-    bestSeason: 'November - April',
-    description: 'Large beach on Basse-Terre\'s west coast. Good for intermediate surfers with W swells.',
+    bestSeason: 'June - December',
+    swellDirection: 'S, SW, W',
+    description: 'Large sandy beach on Basse-Terre\'s west coast near Trois-Rivières. Works best during cyclone season with S/SW swells. More exposed to the Caribbean Sea. Good intermediate option when Atlantic coast is flat.',
   },
   {
-    id: 'spot-12',
+    id: 'spot-16',
     name: 'Rivière Sens',
-    location: { lat: 16.0333, lon: -61.7, region: 'Basse-Terre' },
+    location: { lat: 16.0333, lon: -61.7000, region: 'Basse-Terre' },
     beachName: 'Rivière Sens Beach',
     waveType: 'beach-break',
     difficulty: 'beginner',
-    bestSeason: 'November - April',
-    description: 'Sheltered beach break near Basse-Terre. Good for beginners with smaller W swells.',
+    bestSeason: 'June - December',
+    swellDirection: 'S, SW',
+    description: 'Sheltered beach break near Basse-Terre city on the southwest coast. Good for beginners with smaller W swells. Protected from the trade winds. Best in summer when Atlantic spots are flat.',
   },
 ];
 
-// Legacy seed spots (deprecated - use guadeloupeSurfSpots)
+// Legacy export
 export const seedSpots = guadeloupeSurfSpots;

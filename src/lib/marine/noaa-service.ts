@@ -11,7 +11,7 @@ export const NOAA_COVERAGE: CoverageZone[] = [
   { name: 'Continental US', latMin: 24, latMax: 50, lonMin: -125, lonMax: -66 },
   { name: 'Alaska', latMin: 54, latMax: 72, lonMin: -180, lonMax: -129 },
   { name: 'Hawaii', latMin: 18, latMax: 23, lonMin: -161, lonMax: -154 },
-  { name: 'Puerto Rico', latMin: 17, latMax: 19, lonMin: -68, lonMax: -65 },
+  { name: 'Puerto Rico & US Virgin Islands', latMin: 17, latMax: 19, lonMin: -68, lonMax: -64 },
   { name: 'Pacific Territories', latMin: -15, latMax: 25, lonMin: 140, lonMax: 180 },
 ];
 

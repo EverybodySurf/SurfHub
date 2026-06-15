@@ -35,8 +35,13 @@ function filterBy72Hours(items: any[]): { filtered: any[], warnings: string[] } 
 }
 
 /**
- * Detect whether YouTube videos are Shorts by querying the videos API
- * with part=player and checking embed height vs width.
+ * Detect YouTube Shorts using duration + tags. No extra API calls.
+ * Avoids YouTube rate limiting entirely.
+ *
+ * Heuristic:
+ * - Duration < 60s AND (title has #shorts OR duration < 40s)
+ * - Under 40s without #shorts tag is still likely a short
+ * - Over 60s = definitely not a short
  */
 async function detectShorts(videoIds: string[]): Promise<Map<string, boolean>> {
   const shortsMap = new Map<string, boolean>();
@@ -46,39 +51,66 @@ async function detectShorts(videoIds: string[]): Promise<Map<string, boolean>> {
   if (!API_KEY) return shortsMap;
 
   try {
-    // YouTube API accepts up to 50 IDs per request
     const chunkSize = 50;
     for (let i = 0; i < videoIds.length; i += chunkSize) {
       const chunk = videoIds.slice(i, i + chunkSize);
-      const url = `https://www.googleapis.com/youtube/v3/videos?part=player&id=${chunk.join(',')}&key=${API_KEY}`;
+      const url = `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${chunk.join(',')}&key=${API_KEY}`;
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 10000);
       const res = await fetch(url, { signal: controller.signal });
       clearTimeout(timeout);
-
       if (!res.ok) continue;
 
       const data = await res.json();
       if (!data.items) continue;
 
       for (const video of data.items) {
-        const player = video.player;
-        // If embed height > width, it's a portrait/short video
-        const isShort = player?.embedHeight > player?.embedWidth;
-        shortsMap.set(video.id, !!isShort);
+        const title = video.snippet?.title || '';
+        const hasShortTag = title.toLowerCase().includes('#shorts');
+
+        const duration = video.contentDetails?.duration || 'PT0S';
+        const match = duration.match(/PT(?:(\d+)M)?(?:(\d+)S)?/);
+        const totalSeconds = (parseInt(match?.[1] || '0') * 60) + parseInt(match?.[2] || '0');
+
+        // Short = under 60s AND (has #shorts OR under 40s)
+        // Under 40s without tag is still very likely a short
+        const isShort = totalSeconds < 60 && (hasShortTag || totalSeconds < 40);
+        shortsMap.set(video.id, isShort);
       }
     }
   } catch (e) {
     console.log('Failed to detect shorts:', e);
+    videoIds.forEach(id => shortsMap.set(id, false));
   }
 
   return shortsMap;
+}
+// ── Simple in-memory cache (10 minute TTL) ──
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+const feedCache = new Map<string, { data: any; timestamp: number }>();
+
+function getCachedFeed(feed: string): any | null {
+  const cached = feedCache.get(feed);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+  return null;
+}
+
+function setCachedFeed(feed: string, data: any) {
+  feedCache.set(feed, { data, timestamp: Date.now() });
 }
 
 // Unified feed endpoint — aggregates all scraped content with 24hr filter
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const feed = searchParams.get('feed') || 'all'; // feelgood, local, global, all
+
+  // Check cache first
+  const cached = getCachedFeed(feed);
+  if (cached) {
+    return NextResponse.json(cached);
+  }
   const useMock = searchParams.get('mock') === 'true';
   const filter24h = searchParams.get('filter24h') !== 'false'; // Default: true
   
@@ -88,16 +120,12 @@ export async function GET(request: Request) {
   if (!useMock) {
     // YouTube - use YouTube Data API v3 (FREE, real timestamps)
     // Feed-specific queries for targeted content — more queries & more results per query
-    const MAX_RESULTS = 30;
+    const MAX_RESULTS = 50;
+    // Single query per feed to stay within YouTube API rate limits
     const youtubeQueries: Record<string, { query: string, feed: string }> = {
-      feelgood: { query: 'Soul surfing', feed: 'feelgood' },
-      feelgoodNature: { query: 'surfing nature ocean relaxation', feed: 'feelgood' },
-      global: { query: 'Surfing', feed: 'global' },
-      globalFresh: { query: 'Surfing today', feed: 'global' },
-      globalBig: { query: 'big wave surfing', feed: 'global' },
-      globalTravel: { query: 'surf travel vlog', feed: 'global' },
-      local: { query: 'Surfing guadeloupe', feed: 'local' },
-      localGwada: { query: 'Guadeloupe surf', feed: 'local' },
+      feelgood: { query: 'soul surfing waves ocean', feed: 'feelgood' },
+      global: { query: 'surfing big waves', feed: 'global' },
+      local: { query: 'Guadeloupe surf', feed: 'local' },
     };
     
     // Determine which queries to run based on feed param
@@ -164,116 +192,33 @@ export async function GET(request: Request) {
           isShort = (item.title || '').toLowerCase().includes('#shorts');
         }
 
-        return { ...item, isShort: !!isShort };
+        return { ...item, isShort: !!isShort, size: isShort ? 'tall' : 'horizontal' };
       });
     }
   }
   
-  // Mock fallback content (used when scrapers fail - marked as no timestamp)
+  // Mock fallback content (used when scrapers fail — included with platform='youtube'
+  // so the feed components treat them as real video cards)
   const mockContent = [
-    // TWITTER TWEETS
-    {
-      id: 'mock_tw_1',
-      feed: 'local',
-      size: 'small',
-      type: 'tweet',
-      content: 'Caravelle was firing this morning! Clean 3ft sets, light offshore 🌊',
-      source: '@GwadaSurfReport',
-      timestamp: new Date().toISOString(),
-      hasValidTimestamp: false,
-      platform: 'twitter',
-    },
-    {
-      id: 'mock_tw_2',
-      feed: 'feelgood',
-      size: 'small',
-      type: 'tweet',
-      content: 'Nothing beats that first wave feeling. Saltwater therapy is real.',
-      source: '@SurferDaily',
-      timestamp: new Date().toISOString(),
-      hasValidTimestamp: false,
-      platform: 'twitter',
-    },
-    {
-      id: 'mock_tw_3',
-      feed: 'global',
-      size: 'small',
-      type: 'tweet',
-      content: 'WSL announces carbon-neutral tour for 2027. Big step for ocean conservation 🌍',
-      source: '@WSLUpdates',
-      timestamp: new Date().toISOString(),
-      hasValidTimestamp: false,
-      platform: 'twitter',
-    },
-    {
-      id: 'mock_tw_4',
-      feed: 'local',
-      size: 'small',
-      type: 'tweet',
-      content: 'Pointe des Châteaux sunrise session. 5 surfers, empty waves, spiritual morning.',
-      source: '@GwadaLocals',
-      timestamp: new Date().toISOString(),
-      hasValidTimestamp: false,
-      platform: 'twitter',
-    },
-    
-    // INSTAGRAM REELS (fallback)
-    {
-      id: 'mock_ig_1',
-      feed: 'feelgood',
-      size: 'horizontal',
-      type: 'reel',
-      title: 'First Wave Forever',
-      content: 'That magical first wave moment. Pure joy. 🎬 Instagram',
-      source: '@surfstories',
-      image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=800&auto=format',
-      timestamp: new Date().toISOString(),
-      hasValidTimestamp: false,
-      platform: 'instagram',
-    },
-    {
-      id: 'mock_ig_2',
-      feed: 'local',
-      size: 'horizontal',
-      type: 'reel',
-      title: 'Anse Bertrand Raw',
-      content: 'North coast powerhouse. Fast, hollow waves. 🎬 Instagram',
-      location: 'Anse-Bertrand',
-      source: '@gwadasurf',
-      image: 'https://images.unsplash.com/photo-1455729552865-3658e0c677dd?w=800&auto=format',
-      timestamp: new Date().toISOString(),
-      hasValidTimestamp: false,
-      platform: 'instagram',
-    },
-    
-    // TIKTOK REELS (fallback)
-    {
-      id: 'mock_tt_1',
-      feed: 'feelgood',
-      size: 'horizontal',
-      type: 'reel',
-      title: 'Zen Surfer Tips',
-      content: 'Paddle out. Catch waves. Reset mind. 🎬 TikTok',
-      source: '@zensurfer',
-      image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format',
-      timestamp: new Date().toISOString(),
-      hasValidTimestamp: false,
-      platform: 'tiktok',
-    },
-    {
-      id: 'mock_tt_2',
-      feed: 'local',
-      size: 'horizontal',
-      type: 'reel',
-      title: 'Gwada Dawn Patrol',
-      content: '5AM sessions. Empty waves. Pure bliss. 🎬 TikTok',
-      location: 'Le Moule',
-      source: '@gwadasurfer',
-      image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=800&auto=format',
-      timestamp: new Date().toISOString(),
-      hasValidTimestamp: false,
-      platform: 'tiktok',
-    },
+    // HARDCODED YOUTUBE VIDEOS (fallback when API quota exhausted)
+    { id: 'fb_yt_1', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Morning Glass', content: 'Perfect morning surf session', source: 'SurfVision', image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
+    { id: 'fb_yt_2', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Soul Surfing', content: 'Let the ocean heal your soul', source: 'WaveRider', image: 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
+    { id: 'fb_yt_3', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Wave Wisdom', content: 'What the ocean teaches us', source: 'CoastalVibes', image: 'https://images.unsplash.com/photo-1534190760962-754642a4dc2e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
+    { id: 'fb_yt_4', feed: 'feelgood', size: 'tall', type: 'video', title: 'Empty Lineup', content: 'Just you and the swell', source: 'SurfStories', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
+    { id: 'fb_yt_5', feed: 'feelgood', size: 'tall', type: 'video', title: 'Golden Hour', content: 'When light hits the water just right', source: 'OceanVibes', image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
+    { id: 'fb_yt_6', feed: 'feelgood', size: 'tall', type: 'video', title: 'Drift Days', content: 'Where time slows down', source: 'SurfLife', image: 'https://images.unsplash.com/photo-1559827260-dc66d52b21d4?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
+    { id: 'fb_yt_7', feed: 'feelgood', size: 'tall', type: 'video', title: 'Ocean Breath', content: 'Breathe in the salt air', source: 'CoastalCalm', image: 'https://images.unsplash.com/photo-1455729552865-3658e0c677dd?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
+    { id: 'fb_yt_8', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Sunrise Paddle', content: 'Dawn patrol at its finest', source: 'SurfVision', image: 'https://images.unsplash.com/photo-1506905925346-21b49c82b1dd?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
+    { id: 'fb_yt_9', feed: 'global', size: 'horizontal', type: 'video', title: 'Pipeline Masters', content: 'Best rides from the North Shore', source: 'WSL', image: 'https://images.unsplash.com/photo-1659927005364-9ba5f84af96d?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
+    { id: 'fb_yt_10', feed: 'global', size: 'horizontal', type: 'video', title: 'Teahupo\'o 2026', content: 'Heavy barrels from Tahiti', source: 'SurfWorld', image: 'https://images.unsplash.com/photo-1505142468610-359797ca27ae?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
+    { id: 'fb_yt_11', feed: 'global', size: 'tall', type: 'video', title: 'Barrel of the Year', content: 'Riding the wave of a lifetime', source: 'BigWaveTV', image: 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
+    { id: 'fb_yt_12', feed: 'global', size: 'tall', type: 'video', title: 'Surfing Mentawai', content: 'Paradise found in Indonesia', source: 'SurfTribe', image: 'https://images.unsplash.com/photo-1534190760962-754642a4dc2e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
+    { id: 'fb_yt_13', feed: 'global', size: 'tall', type: 'video', title: 'Jaws at Sunset', content: 'Big wave legends charging', source: 'MegaSwell', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
+    { id: 'fb_yt_14', feed: 'local', size: 'horizontal', type: 'video', title: 'Caravelle Session', content: 'Morning waves in Sainte-Anne', source: 'GwadaSurf', image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
+    { id: 'fb_yt_15', feed: 'local', size: 'tall', type: 'video', title: 'Anse Bertrand', content: 'North coast powerhouse', source: 'LocalSurf', image: 'https://images.unsplash.com/photo-1455729552865-3658e0c677dd?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
+    { id: 'fb_yt_16', feed: 'local', size: 'tall', type: 'video', title: 'La Chapelle', content: 'Reef break at its best', source: 'GwadaWaves', image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
+    { id: 'fb_yt_17', feed: 'local', size: 'horizontal', type: 'video', title: 'Pointe des Châteaux', content: 'Epic sunrise session', source: 'GwadaShots', image: 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
+    { id: 'fb_yt_18', feed: 'local', size: 'tall', type: 'video', title: 'Port Louis', content: 'Afternoon offshore glass', source: 'GwadaLocals', image: 'https://images.unsplash.com/photo-1534190760962-754642a4dc2e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
   ];
   
   // Merge: real scraped + mock fallback
@@ -298,7 +243,7 @@ export async function GET(request: Request) {
   const hasReal = youtubeItems.length > 0;
   const itemsWithoutTimestamp = filteredContent.filter(item => !item.hasValidTimestamp).length;
   
-  return NextResponse.json({
+  const responseBody = {
     success: true,
     feed,
     real: hasReal,
@@ -316,5 +261,10 @@ export async function GET(request: Request) {
     },
     scrapedAt: new Date().toISOString(),
     note: hasReal ? 'Real scraping + mock fallback' : 'All mock data',
-  });
+  };
+
+  // Cache the response
+  setCachedFeed(feed, responseBody);
+
+  return NextResponse.json(responseBody);
 }

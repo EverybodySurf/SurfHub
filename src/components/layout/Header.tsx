@@ -30,6 +30,9 @@ export function Header() {
   // Admin routes have white background, need dark text
   const isAdminRoute = pathname?.startsWith('/admin');
   
+  // Only homepage hero needs white text — everywhere else use dark/foreground
+  const isHomePage = pathname === '/';
+
   // Scroll effect: transparent → glassmorphic
   useEffect(() => {
     const onScroll = () => {
@@ -42,8 +45,8 @@ export function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Dynamic text color based on scroll and route
-  const navTextClass = scrolled || isAdminRoute
+  // Dynamic text color: white only on homepage hero, else always readable
+  const navTextClass = scrolled || isAdminRoute || !isHomePage
     ? 'text-foreground transition-colors duration-300'
     : 'text-white transition-colors duration-300';
 
@@ -87,7 +90,7 @@ export function Header() {
           }
         `}
       >
-        <div className="container flex h-16 max-w-screen-2xl items-center px-6">
+        <div className="container flex h-16 max-w-screen-2xl items-center px-6 md:hidden">
           {/* Logo */}
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Waves className="h-6 w-6 text-yellow-300 transition-colors duration-300" />
@@ -161,7 +164,7 @@ export function Header() {
               <Link 
                 key={item.href} 
                 href={item.href} 
-                className={`text-lg py-2 flex items-center ${
+                className={`text-lg py-2 flex items-center justify-center ${
                   pathname === item.href
                     ? "text-foreground font-semibold"
                     : "text-muted-foreground"
@@ -174,20 +177,22 @@ export function Header() {
           </nav>
           <div className="flex flex-col space-y-3 mt-6 pt-6 border-t border-border/20">
             {!session ? (
-              <Link href="/login" className="flex items-center text-base font-medium">
+              <Link href="/login" className="flex items-center justify-center text-base font-medium">
                 <CircleUserRound className="mr-2 h-5 w-5 text-cyan-400" />
                 Login / Sign Up
               </Link>
             ) : (
               <button
                 onClick={handleSignOut}
-                className="flex items-center text-base font-medium"
+                className="flex items-center justify-center text-base font-medium"
               >
                 <LogOut className="mr-2 h-5 w-5 text-cyan-400" />
                 Sign Out
               </button>
             )}
-            <ThemeToggleButton scrolled={scrolled} />
+            <div className="flex justify-center">
+              <ThemeToggleButton scrolled={scrolled} />
+            </div>
           </div>
         </div>
       </nav>

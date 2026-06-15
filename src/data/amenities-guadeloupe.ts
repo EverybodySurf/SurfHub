@@ -1,17 +1,18 @@
 // Guadeloupe Surf Spot Amenities Data
 // Nearby services and businesses for surfers
+// Last updated: 2026-06-15
 
 export interface Amenity {
   id: string;
   spotId: string; // Links to surf spot
   name: string;
-  type: 'cafe' | 'restaurant' | 'surf-shop' | 'board-rental' | 'gas-station' | 'grocery' | 'hotel' | 'parking';
+  type: 'cafe' | 'restaurant' | 'surf-shop' | 'board-rental' | 'gas-station' | 'grocery' | 'hotel' | 'parking' | 'lodging';
   location: {
     lat: number;
     lon: number;
   };
   address?: string;
-  distanceFromSpot?: string; // e.g. "200m", "0.5km"
+  distanceFromSpot?: string;
   phone?: string;
   website?: string;
   hours?: string;
@@ -28,6 +29,7 @@ export const amenityIcons: Record<string, string> = {
   'grocery': '🛒',
   'hotel': '🏨',
   'parking': '🅿️',
+  'lodging': '🏠',
 };
 
 // Amenity type colors (for badges/tags)
@@ -40,18 +42,31 @@ export const amenityColors: Record<string, string> = {
   'grocery': 'bg-green-100 text-green-800',
   'hotel': 'bg-indigo-100 text-indigo-800',
   'parking': 'bg-gray-100 text-gray-800',
+  'lodging': 'bg-teal-100 text-teal-800',
 };
 
-// Amenities data - compiled from web scraping
+export const amenityTypeLabels: Record<string, string> = {
+  cafe: 'Cafe',
+  restaurant: 'Restaurant',
+  'surf-shop': 'Surf Shop',
+  'board-rental': 'Board Rental',
+  'gas-station': 'Gas',
+  grocery: 'Grocery',
+  hotel: 'Hotel',
+  parking: 'Parking',
+  lodging: 'Lodging',
+};
+
+
 export const guadeloupeAmenities: Amenity[] = [
-  // ========== PORT LOUIS ==========
+  // ========== PORT LOUIS (spot-2) ==========
   {
     id: 'amen-pl-1',
     spotId: 'spot-2',
     name: 'Snack Bar Anse du Souffleur',
     type: 'cafe',
-    location: { lat: 16.318, lon: -61.535 },
-    address: 'Anse du Souffleur, Port Louis, Guadeloupe',
+    location: { lat: 16.4200, lon: -61.5320 },
+    address: 'Anse du Souffleur, Port Louis',
     distanceFromSpot: '50m',
     notes: 'Beachside snack bar with drinks and light meals',
   },
@@ -60,8 +75,8 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-2',
     name: 'Restaurant Le Souffleur',
     type: 'restaurant',
-    location: { lat: 16.317, lon: -61.534 },
-    address: 'Port Louis, Guadeloupe',
+    location: { lat: 16.4190, lon: -61.5300 },
+    address: 'Port Louis',
     distanceFromSpot: '100m',
     notes: 'Local Creole cuisine',
   },
@@ -70,8 +85,8 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-2',
     name: 'Caraibe Surf Shop',
     type: 'surf-shop',
-    location: { lat: 16.316, lon: -61.533 },
-    address: 'Port Louis, Guadeloupe',
+    location: { lat: 16.4180, lon: -61.5290 },
+    address: 'Port Louis',
     distanceFromSpot: '300m',
     notes: 'Surf gear and accessories',
   },
@@ -80,7 +95,7 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-2',
     name: 'Station Total Port Louis',
     type: 'gas-station',
-    location: { lat: 16.315, lon: -61.531 },
+    location: { lat: 16.4170, lon: -61.5270 },
     address: 'Route Nationale, Port Louis',
     distanceFromSpot: '500m',
   },
@@ -89,20 +104,30 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-2',
     name: 'Superette Port Louis',
     type: 'grocery',
-    location: { lat: 16.316, lon: -61.532 },
+    location: { lat: 16.4180, lon: -61.5280 },
     address: 'Centre Ville, Port Louis',
     distanceFromSpot: '400m',
     notes: 'Snacks, drinks, supplies',
   },
+  {
+    id: 'amen-pl-6',
+    spotId: 'spot-2',
+    name: 'Gîtes du Souffleur',
+    type: 'lodging',
+    location: { lat: 16.4210, lon: -61.5330 },
+    address: 'Port Louis',
+    distanceFromSpot: '200m',
+    notes: 'Beachfront guesthouses and vacation rentals',
+  },
 
-  // ========== LE MOULE ==========
+  // ========== LE MOULE / DAMENCOURT (spot-3) ==========
   {
     id: 'amen-lm-1',
     spotId: 'spot-3',
     name: 'Snack de la Plage',
     type: 'cafe',
-    location: { lat: 16.302, lon: -61.548 },
-    address: 'Plage du Moule, Le Moule',
+    location: { lat: 16.3390, lon: -61.3600 },
+    address: 'Plage du Moule',
     distanceFromSpot: '100m',
     notes: 'Beachside snacks and drinks',
   },
@@ -111,8 +136,8 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-3',
     name: 'La Case du Pêcheur',
     type: 'restaurant',
-    location: { lat: 16.301, lon: -61.549 },
-    address: 'Le Moule, Guadeloupe',
+    location: { lat: 16.3380, lon: -61.3590 },
+    address: 'Le Moule',
     distanceFromSpot: '200m',
     notes: 'Fresh seafood restaurant',
   },
@@ -121,8 +146,8 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-3',
     name: 'Le Moule Surf Location',
     type: 'board-rental',
-    location: { lat: 16.299, lon: -61.551 },
-    address: 'Le Moule, Guadeloupe',
+    location: { lat: 16.3370, lon: -61.3580 },
+    address: 'Le Moule',
     distanceFromSpot: '150m',
     notes: 'Board rentals and surf lessons',
   },
@@ -131,7 +156,7 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-3',
     name: 'Station Shell Le Moule',
     type: 'gas-station',
-    location: { lat: 16.298, lon: -61.553 },
+    location: { lat: 16.3350, lon: -61.3550 },
     address: 'Route de la Plage, Le Moule',
     distanceFromSpot: '600m',
   },
@@ -140,20 +165,30 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-3',
     name: 'Carrefour City Le Moule',
     type: 'grocery',
-    location: { lat: 16.300, lon: -61.552 },
+    location: { lat: 16.3360, lon: -61.3560 },
     address: 'Centre Ville, Le Moule',
     distanceFromSpot: '400m',
     notes: 'Supermarket with full selection',
   },
+  {
+    id: 'amen-lm-6',
+    spotId: 'spot-3',
+    name: 'Le Moule Surf Club',
+    type: 'surf-shop',
+    location: { lat: 16.3380, lon: -61.3610 },
+    address: 'Damencourt, Le Moule',
+    distanceFromSpot: '50m',
+    notes: 'Surf school and board rentals on the beach',
+  },
 
-  // ========== ANSE BERTRAND ==========
+  // ========== ANSE BERTRAND (spot-1) ==========
   {
     id: 'amen-ab-1',
     spotId: 'spot-1',
     name: 'Snack Anse Laborde',
     type: 'cafe',
-    location: { lat: 16.335, lon: -61.582 },
-    address: 'Anse Laborde, Anse Bertrand',
+    location: { lat: 16.4740, lon: -61.5130 },
+    address: 'Anse Laborde',
     distanceFromSpot: '100m',
     notes: 'Local snacks and cold drinks',
   },
@@ -162,8 +197,8 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-1',
     name: 'Le Jardin de la Pointe',
     type: 'restaurant',
-    location: { lat: 16.334, lon: -61.584 },
-    address: 'Anse Bertrand, Guadeloupe',
+    location: { lat: 16.4730, lon: -61.5150 },
+    address: 'Anse Bertrand',
     distanceFromSpot: '300m',
     notes: 'Restaurant with garden setting',
   },
@@ -172,8 +207,8 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-1',
     name: "Ti'Plage Surf",
     type: 'surf-shop',
-    location: { lat: 16.333, lon: -61.583 },
-    address: 'Anse Bertrand, Guadeloupe',
+    location: { lat: 16.4720, lon: -61.5140 },
+    address: 'Anse Bertrand',
     distanceFromSpot: '200m',
     notes: 'Local surf shop',
   },
@@ -182,7 +217,7 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-1',
     name: 'Station Total Anse Bertrand',
     type: 'gas-station',
-    location: { lat: 16.332, lon: -61.580 },
+    location: { lat: 16.4700, lon: -61.5100 },
     address: 'Route Nationale, Anse Bertrand',
     distanceFromSpot: '800m',
   },
@@ -191,70 +226,177 @@ export const guadeloupeAmenities: Amenity[] = [
     spotId: 'spot-1',
     name: 'Petite Marché Anse Bertrand',
     type: 'grocery',
-    location: { lat: 16.333, lon: -61.581 },
+    location: { lat: 16.4710, lon: -61.5110 },
     address: 'Centre Ville, Anse Bertrand',
     distanceFromSpot: '500m',
     notes: 'Local market and grocery',
   },
 
-  // ========== DESHAIES ==========
+  // ========== DESHAIES (spot-14) ==========
   {
     id: 'amen-de-1',
-    spotId: 'spot-10',
+    spotId: 'spot-14',
     name: 'Snack de la Grande Anse',
     type: 'cafe',
-    location: { lat: 16.335, lon: -61.732 },
+    location: { lat: 16.3110, lon: -61.7950 },
     address: 'Grande Anse, Deshaies',
     distanceFromSpot: '100m',
     notes: 'Beachside snack bar',
   },
   {
     id: 'amen-de-2',
-    spotId: 'spot-10',
+    spotId: 'spot-14',
     name: "La Kaz'Anse",
     type: 'restaurant',
-    location: { lat: 16.334, lon: -61.733 },
-    address: 'Deshaies, Guadeloupe',
+    location: { lat: 16.3100, lon: -61.7960 },
+    address: 'Deshaies',
     distanceFromSpot: '200m',
     notes: 'Popular restaurant in tourist area',
   },
   {
     id: 'amen-de-3',
-    spotId: 'spot-10',
+    spotId: 'spot-14',
     name: 'Le Jardin de Pomme Rose',
     type: 'restaurant',
-    location: { lat: 16.332, lon: -61.735 },
-    address: 'Deshaies, Guadeloupe',
+    location: { lat: 16.3080, lon: -61.7980 },
+    address: 'Deshaies',
     distanceFromSpot: '500m',
     notes: 'Upscale dining option',
   },
   {
     id: 'amen-de-4',
-    spotId: 'spot-10',
+    spotId: 'spot-14',
     name: 'Deshaies Surf Location',
     type: 'board-rental',
-    location: { lat: 16.333, lon: -61.734 },
-    address: 'Deshaies, Guadeloupe',
+    location: { lat: 16.3090, lon: -61.7970 },
+    address: 'Deshaies',
     distanceFromSpot: '300m',
     notes: 'Board rentals available',
   },
   {
     id: 'amen-de-5',
-    spotId: 'spot-10',
+    spotId: 'spot-14',
     name: 'Station Shell Deshaies',
     type: 'gas-station',
-    location: { lat: 16.331, lon: -61.736 },
+    location: { lat: 16.3070, lon: -61.7990 },
     address: 'Route de la Plage, Deshaies',
     distanceFromSpot: '700m',
   },
   {
     id: 'amen-de-6',
-    spotId: 'spot-10',
+    spotId: 'spot-14',
     name: 'Supermarché U Deshaies',
     type: 'grocery',
-    location: { lat: 16.332, lon: -61.735 },
+    location: { lat: 16.3080, lon: -61.7980 },
     address: 'Centre Ville, Deshaies',
     distanceFromSpot: '600m',
     notes: 'Full supermarket',
+  },
+
+  // ========== LA PERLE (spot-13) ==========
+  {
+    id: 'amen-lp-1',
+    spotId: 'spot-13',
+    name: "Chez Loulouse",
+    type: 'restaurant',
+    location: { lat: 16.3420, lon: -61.7800 },
+    address: 'Plage de la Perle, Deshaies',
+    distanceFromSpot: '100m',
+    notes: 'Beachside restaurant with Creole cuisine',
+  },
+  {
+    id: 'amen-lp-2',
+    spotId: 'spot-13',
+    name: 'Hotel Fort Royal',
+    type: 'lodging',
+    location: { lat: 16.3380, lon: -61.7830 },
+    address: 'Deshaies',
+    distanceFromSpot: '1km',
+    notes: 'Beachfront resort with surf school',
+  },
+  {
+    id: 'amen-lp-3',
+    spotId: 'spot-13',
+    name: 'Le Madras',
+    type: 'cafe',
+    location: { lat: 16.3410, lon: -61.7810 },
+    address: 'Plage de la Perle',
+    distanceFromSpot: '200m',
+    notes: 'Snack bar and café on the beach',
+  },
+
+  // ========== PETIT HAVRE (spot-7) ==========
+  {
+    id: 'amen-ph-1',
+    spotId: 'spot-7',
+    name: 'Snack Petit Havre',
+    type: 'cafe',
+    location: { lat: 16.2090, lon: -61.4280 },
+    address: 'Plage du Petit Havre, Le Gosier',
+    distanceFromSpot: '50m',
+    notes: 'Beachside snack bar',
+  },
+  {
+    id: 'amen-ph-2',
+    spotId: 'spot-7',
+    name: 'Restaurant Le Gosier',
+    type: 'restaurant',
+    location: { lat: 16.2060, lon: -61.4910 },
+    address: 'Le Gosier',
+    distanceFromSpot: '3km',
+    notes: 'Dining options in Le Gosier town',
+  },
+  {
+    id: 'amen-ph-3',
+    spotId: 'spot-7',
+    name: 'Le Gosier Surf Shop',
+    type: 'surf-shop',
+    location: { lat: 16.2070, lon: -61.4900 },
+    address: 'Le Gosier',
+    distanceFromSpot: '2.5km',
+    notes: 'Surf gear and board rentals',
+  },
+
+  // ========== SAINT-FRANÇOIS HARBOUR (spot-11) ==========
+  {
+    id: 'amen-sf-1',
+    spotId: 'spot-11',
+    name: 'Marina de Saint-François',
+    type: 'restaurant',
+    location: { lat: 16.2520, lon: -61.2750 },
+    address: 'Saint-François Marina',
+    distanceFromSpot: '200m',
+    notes: 'Multiple restaurants at the marina',
+  },
+  {
+    id: 'amen-sf-2',
+    spotId: 'spot-11',
+    name: 'Carrefour Saint-François',
+    type: 'grocery',
+    location: { lat: 16.2500, lon: -61.2780 },
+    address: 'Saint-François',
+    distanceFromSpot: '500m',
+  },
+
+  // ========== ANSE SALABOUELLE (spot-4) ==========
+  {
+    id: 'amen-as-1',
+    spotId: 'spot-4',
+    name: 'Snack Salabouelle',
+    type: 'cafe',
+    location: { lat: 16.2960, lon: -61.3240 },
+    address: 'Anse Salabouelle',
+    distanceFromSpot: '50m',
+    notes: 'Small beach bar',
+  },
+  {
+    id: 'amen-as-2',
+    spotId: 'spot-4',
+    name: 'Parking Salabouelle',
+    type: 'parking',
+    location: { lat: 16.2940, lon: -61.3220 },
+    address: 'Anse Salabouelle',
+    distanceFromSpot: '100m',
+    notes: 'Small parking area near the beach',
   },
 ];

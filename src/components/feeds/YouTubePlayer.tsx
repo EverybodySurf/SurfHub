@@ -1,116 +1,164 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { Card } from '@/components/ui/card';
-import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { VideoModal } from './VideoModal';
+
+// Card import removed — thumbnail is standalone rounded, channel info below
 
 interface YouTubePlayerProps {
   videoId: string;
   title: string;
-  channelTitle: string;
-  channelId: string;
   thumbnail: string;
   isShort?: boolean;
 }
 
+/**
+ * Check if a thumbnail image is portrait (short) by measuring its aspect ratio.
+ * YouTube Shorts thumbnails are ~9:16, regular videos are ~16:9.
+ */
+function isPortraitThumbnail(src: string): Promise<boolean> {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => resolve(img.naturalHeight > img.naturalWidth);
+    img.onerror = () => resolve(false);
+    img.src = src;
+  });
+}
+
+/**
+ * YouTube video card — clean thumbnail + channel info below, like YouTube.
+ *
+ * - **Hover**: after a brief delay, loads & plays the video muted
+ * - **Click**: opens full-screen modal with sound
+ */
 export function YouTubePlayer({
   videoId,
   title,
-  channelTitle,
-  channelId,
   thumbnail,
-  isShort = false,
+  isShort: propIsShort,
 }: YouTubePlayerProps) {
-  const [playing, setPlaying] = useState(false);
+  const [hoverPlaying, setHoverPlaying] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [isShort, setIsShort] = useState(propIsShort ?? false);
+  const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // On mount, check thumbnail aspect ratio if the prop didn't already flag it
+  if (!propIsShort && !hasInteracted && typeof window !== 'undefined') {
+    isPortraitThumbnail(thumbnail).then(setIsShort);
+  }
+
+  const clearTimer = useCallback(() => {
+    if (hoverTimer.current) {
+      clearTimeout(hoverTimer.current);
+      hoverTimer.current = null;
+    }
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    clearTimer();
+    hoverTimer.current = setTimeout(() => {
+      setHoverPlaying(true);
+      setHasInteracted(true);
+    }, 300);
+  }, [clearTimer]);
+
+  const handleMouseLeave = useCallback(() => {
+    clearTimer();
+    setHoverPlaying(false);
+  }, [clearTimer]);
+
+  const handleClick = useCallback(() => {
+    setShowModal(true);
+  }, []);
 
   return (
-    <Card
-      className={cn(
-        'relative overflow-hidden bg-card border-border hover:border-primary/40 transition-all duration-500 group min-h-[280px] flex flex-col',
-        isShort && 'max-w-[280px] mx-auto'
+    <>
+      <div
+        className={cn('group cursor-pointer', isShort ? 'col-span-1' : 'col-span-3')}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onClick={handleClick}
+      >
+        {/* ─── Video / Thumbnail — natural ratio container ─── */}
+        {/*
+          4-column grid: landscape col-span-3 (16:9), short col-span-1 (9:16).
+          Natural ratios kept — heights are within ~5% of each other.
+          object-cover handles any minor overflow.
+        */}
+        <div
+          className={cn(
+            'relative w-full bg-black rounded-xl overflow-hidden',
+            isShort ? 'aspect-[9/16]' : 'aspect-video',
+            'ring-1 ring-border/40 group-hover:ring-primary/40 transition-all duration-300'
+          )}
+        >
+          {hoverPlaying ? (
+            <>
+              <iframe
+                src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=${soundEnabled ? '0' : '1'}&controls=0&modbranding=1&rel=0&showinfo=0&playsinline=1`}
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                allow="autoplay; encrypted-media"
+                title={title}
+              />
+              {/* Sound toggle */}
+              <button
+                onClick={(e) => { e.stopPropagation(); setSoundEnabled(!soundEnabled); }}
+                className="absolute bottom-2 right-2 z-10 p-1.5 rounded-full bg-black/60 hover:bg-black/80 text-white transition-colors pointer-events-auto"
+                aria-label={soundEnabled ? 'Mute' : 'Unmute'}
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {soundEnabled ? (
+                    <>
+                      <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
+                    </>
+                  ) : (
+                    <>
+                      <path d="M11 5 6 9H2v6h4l5 4V5z" />
+                      <path d="M22 9l-6 6M16 9l6 6" />
+                    </>
+                  )}
+                </svg>
+              </button>
+            </>
+          ) : (
+            <>
+              <Image
+                src={thumbnail}
+                alt={title}
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-500"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+
+              {/* Gradient overlay for title readability */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
+
+              {/* Title overlay */}
+              <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
+                <p className="text-sm text-white font-medium line-clamp-2 drop-shadow-lg">
+                  {title}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+
+      </div>
+
+      {/* ─── Full-screen modal ─── */}
+      {showModal && (
+        <VideoModal
+          videoId={videoId}
+          title={title}
+          isShort={isShort}
+          onClose={() => setShowModal(false)}
+        />
       )}
-    >
-      {/* ─── Playing State ─── */}
-      {playing ? (
-        <>
-          {/* Video embed */}
-          <div
-            className={cn(
-              'relative w-full bg-black',
-              isShort ? 'aspect-[9/16]' : 'aspect-video'
-            )}
-          >
-            <iframe
-              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`}
-              className="absolute inset-0 w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              title={title}
-            />
-
-            {/* Close button */}
-            <button
-              onClick={() => setPlaying(false)}
-              className="absolute top-2 right-2 z-10 p-1.5 rounded-full bg-black/70 hover:bg-black text-white transition-colors"
-              aria-label="Close video"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Channel name only — no actions */}
-          <div className="flex items-center gap-2 px-4 py-3">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-              {channelTitle.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-xs text-muted-foreground truncate">
-              {channelTitle}
-            </span>
-          </div>
-        </>
-      ) : (
-        /* ─── Thumbnail State — no play overlay, just clean image ─── */
-        <>
-          {/* Clickable thumbnail */}
-          <div
-            className={cn(
-              'relative w-full cursor-pointer',
-              isShort ? 'aspect-[9/16]' : 'aspect-video'
-            )}
-            onClick={() => setPlaying(true)}
-          >
-            <Image
-              src={thumbnail}
-              alt={title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-
-            {/* Gradient overlay for title readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent pointer-events-none" />
-
-            {/* Title overlay */}
-            <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
-              <p className="text-sm text-white font-medium line-clamp-2 drop-shadow-lg">
-                {title}
-              </p>
-            </div>
-          </div>
-
-          {/* Channel info below thumbnail */}
-          <div className="flex items-center gap-2 px-4 py-3">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-              {channelTitle.charAt(0).toUpperCase()}
-            </div>
-            <span className="text-xs text-muted-foreground truncate">
-              {channelTitle}
-            </span>
-          </div>
-        </>
-      )}
-    </Card>
+    </>
   );
 }

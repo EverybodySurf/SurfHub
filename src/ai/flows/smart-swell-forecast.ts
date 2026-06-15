@@ -48,10 +48,10 @@ const SmartForecastOutputSchema = z.object({
   
   // Marine fields (optional)
   marineData: z.object({
-    waveHeight: z.number().describe('Significant wave height in meters'),
-    primarySwellHeight: z.number().describe('Primary swell height in meters'),
-    primarySwellPeriod: z.number().describe('Primary swell period in seconds'),
-    primarySwellDirection: z.number().describe('Primary swell direction in degrees'),
+    waveHeight: z.number().optional().describe('Significant wave height in meters'),
+    primarySwellHeight: z.number().optional().describe('Primary swell height in meters'),
+    primarySwellPeriod: z.number().optional().describe('Primary swell period in seconds'),
+    primarySwellDirection: z.number().optional().describe('Primary swell direction in degrees'),
     secondarySwellHeight: z.number().optional().describe('Secondary swell height in meters'),
     secondarySwellPeriod: z.number().optional().describe('Secondary swell period in seconds'),
     secondarySwellDirection: z.number().optional().describe('Secondary swell direction in degrees'),
@@ -59,15 +59,15 @@ const SmartForecastOutputSchema = z.object({
     windWavePeriod: z.number().optional().describe('Wind wave period in seconds'), 
     windWaveDirection: z.number().optional().describe('Wind wave direction in degrees'),
     seaTemperature: z.number().optional().describe('Sea surface temperature in Celsius'),
-    windSpeed: z.number().describe('Wind speed in m/s'),
-    windDirection: z.number().describe('Wind direction in degrees'),
+    windSpeed: z.number().optional().describe('Wind speed in m/s'),
+    windDirection: z.number().optional().describe('Wind direction in degrees'),
     // New oceanographic data
     currentHeight: z.number().optional().describe('Current tide height in meters'),
     nextHighTide: z.string().optional().describe('Time of next high tide'),
     nextLowTide: z.string().optional().describe('Time of next low tide'),
     oceanCurrentVelocity: z.number().optional().describe('Ocean current velocity in m/s'),
     oceanCurrentDirection: z.number().optional().describe('Ocean current direction in degrees'),
-    dataSource: z.string().describe('Source of marine data'),
+    dataSource: z.string().optional().describe('Source of marine data'),
   }).optional().describe('Real marine conditions'),
   
   // Spot information (optional)
@@ -128,21 +128,20 @@ export class SmartSwellForecaster {
     
     // Auto-selection logic
     if (preference === 'auto' || preference === undefined) {
-      if (hasOpenWeather && hasMarineAPIs) {
+      if (hasMarineAPIs || hasOpenWeather) {
         return {
           type: 'marine',
-          reason: 'Marine APIs available - using highest quality forecasting',
-          quality: 'Premium'
+          reason: hasMarineAPIs ? 'Marine APIs available - using highest quality forecasting' : 'Open-Meteo free marine data available',
+          quality: hasMarineAPIs ? 'Premium' : 'Standard'
         };
       }
       
-      if (hasOpenWeather) {
-        return {
-          type: 'enhanced',
-          reason: 'OpenWeather available - using enhanced algorithms',
-          quality: 'Good'
-        };
-      }
+      // Open-Meteo is always free — use marine forecasting with it
+      return {
+        type: 'marine',
+        reason: 'Using free Open-Meteo marine API (no API keys needed)',
+        quality: 'Standard'
+      };
     }
     
     // Fallback

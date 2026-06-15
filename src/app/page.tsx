@@ -33,7 +33,6 @@ const allItems: GridItem[] = [
   { id: 'hero1', feed: 'feelgood', size: 'small', type: 'photo', title: '', content: 'Peaceful moments.', image: 'https://images.unsplash.com/photo-1505142468610-359797ca27ae?w=400&auto=format' },
   { id: 'hero2', feed: 'local', size: 'small', type: 'photo', title: '', content: 'Island vibes.', image: 'https://images.unsplash.com/photo-1506905925346-21b49c82b1dd?w=400&auto=format' },
   { id: 'hero3', feed: 'global', size: 'small', type: 'photo', title: '', content: 'World waves.', image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=400&auto=format' },
-  { id: 'hero4', feed: 'feelgood', size: 'small', type: 'quote', title: '', content: '"Saltwater cures all wounds."', source: 'Old Wisdom' },
   { id: 'hero5', feed: 'feelgood', size: 'small', type: 'photo', title: '', content: 'Coastal calm.', image: 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=400&auto=format' },
   { id: 'hero6', feed: 'local', size: 'small', type: 'photo', title: '', content: 'Tropical dawn.', image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=400&auto=format' },
   { id: 'hero7', feed: 'feelgood', size: 'small', type: 'photo', title: '', content: 'Ocean breath.', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=400&auto=format' },
@@ -45,12 +44,10 @@ const allItems: GridItem[] = [
   { id: 'hero13', feed: 'feelgood', size: 'small', type: 'photo', title: '', content: 'Morning mist.', image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=400&auto=format' },
   { id: 'hero14', feed: 'local', size: 'small', type: 'photo', title: '', content: 'Warm waters.', image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=400&auto=format' },
   { id: 'hero15', feed: 'global', size: 'small', type: 'photo', title: '', content: 'Ocean soul.', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=400&auto=format' },
-  { id: 'hero16', feed: 'feelgood', size: 'small', type: 'quote', title: '', content: '"The best surfer out there is the one having the most fun."', source: 'Phil Edwards' },
 
   // FEEL GOOD — Quotes & photos used by hero collage
   { id: 'fg1', feed: 'feelgood', size: 'tall', type: 'quote', title: 'Wave Wisdom', content: '"The ocean heals everything. It whispers to those who listen."', source: 'Surfer\'s Journal', image: 'https://images.unsplash.com/photo-1505142468610-359797ca27ae?w=600&auto=format' },
   { id: 'fg3', feed: 'feelgood', size: 'wide', type: 'photo', title: 'Empty Lineup', content: 'Just you, the board, and the swell.', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format' },
-  { id: 'fg4', feed: 'feelgood', size: 'small', type: 'quote', title: '', content: '"You can\'t stop the waves, but you can learn how to swim."', source: 'Jon Kabat-Zinn' },
   { id: 'fg6', feed: 'feelgood', size: 'tall', type: 'photo', title: 'Golden Hour', content: 'When light hits water just right.', image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=600&auto=format' },
   { id: 'fg7', feed: 'feelgood', size: 'square', type: 'photo', title: 'Drift Days', content: 'Days where time slows down.', image: 'https://images.unsplash.com/photo-1534190760962-754642a4dc2e?w=400&auto=format' },
 
@@ -133,8 +130,7 @@ function generateCollageLayout() {
 const heroCollageItemsStatic = [
   ...allItems.filter(item => item.id.startsWith('hero') && item.image && item.type !== 'video' && item.type !== 'reel'),
   ...allItems.filter(item => item.type === 'photo' && !item.id.startsWith('hero') && item.image),
-  ...allItems.filter(item => item.type === 'quote' && !item.id.startsWith('hero')),
-  ...allItems.filter(item => item.type === 'tweet' && !item.image).slice(0, 2),
+  // Quotes and tweets removed — image-only collage
 ].slice(0, 20);
 
 // Shuffle function for randomizing hero pool
@@ -366,48 +362,86 @@ export default function HomePage() {
         
         {/* Title overlay */}
         <div className="relative z-30 h-[120dvh] md:h-screen flex flex-col items-center justify-center px-8 md:px-12">
-          {/* Two-line brand + location */}
-          <div 
-            className="relative mb-4"
-            style={{ transform: `translateY(${titleOffset}px)` }}
-          >
-            {/* SurfHub — gradient, top-left */}
-            <span 
-              className="absolute -top-10 md:-top-14 left-0 text-[1.8rem] md:text-[2.5rem] font-black tracking-[-0.01em] bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
+          {/* Centered title block */}
+          <div className="flex flex-col items-center -mt-12">
+            {/* Two-line brand + location */}
+            <div 
+              className="flex flex-col items-start mb-4"
+              style={{ transform: `translateY(${titleOffset}px)` }}
             >
-              SurfHub
-            </span>
-            {/* Guadeloupe — large, white, tight kerning */}
-            <h1 className="text-5xl md:text-7xl lg:text-9xl font-black tracking-[-0.08em] text-white">
-              Guadeloupe
-            </h1>
+              {/* SurfHub — gradient, top-left of Guadeloupe */}
+              <span 
+                className="text-[1.8rem] md:text-[2.5rem] font-black tracking-[-0.01em] bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
+              >
+                SurfHub
+              </span>
+              {/* Guadeloupe — large, white, tight kerning */}
+              <h1 className="text-5xl md:text-7xl lg:text-9xl font-black tracking-[-0.08em] text-white leading-none">
+                Guadeloupe
+              </h1>
+            </div>
+            <p 
+              className="text-base md:text-lg lg:text-xl text-white/90 max-w-md mx-auto mb-6 text-center px-8 md:px-12 font-medium drop-shadow-lg"
+              style={{ transform: `translateY(${titleOffset * 0.7}px)` }}
+            >
+              Surfing is one of the magical treasures this world has to offer. Dive in and be a part of it.
+            </p>
           </div>
-          <p 
-            className="text-base md:text-lg lg:text-xl text-white/50 max-w-md mx-auto mb-10 md:mb-12 text-center px-8 md:px-12"
-            style={{ transform: `translateY(${titleOffset * 0.7}px)` }}
-          >
-            Surfing is one of the magical treasures this world has to offer. Dive in and be a part of it.
-          </p>
           
+          {/* Button pinned to bottom of hero */}
           <button 
             onClick={() => {
               document.getElementById('feed-section')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="group flex flex-col items-center gap-2 text-white/40 hover:text-white/70 transition-colors"
+            className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 group flex flex-col items-center gap-3 text-white/40 hover:text-white/70 transition-colors"
           >
-            <span className="text-xs uppercase tracking-widest">Explore</span>
-            <div className="w-5 h-8 rounded-full border border-white/25 group-hover:border-white/50 flex items-start justify-center p-1.5">
-              <div className="w-1 h-2.5 bg-white/40 group-hover:bg-white/70 rounded-full animate-bounce" />
-            </div>
+            <span className="text-xs tracking-wider text-white/80 font-medium drop-shadow-lg transition-colors">
+              Scroll down for local &amp; global surf content
+            </span>
+            <svg
+              className="h-8 w-8 text-white/40 group-hover:text-white/70 animate-bounce transition-colors"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </button>
         </div>
       </section>
       
       {/* ═══════════════════════════════════════════════════════════════
-          BREATH + TOGGLE
+          SEARCH + TOGGLE
           ═══════════════════════════════════════════════════════════════ */}
-      <section className="py-16 px-4 bg-background">
-        <div className="max-w-xl mx-auto">
+      <section className="py-8 px-4 md:px-8 lg:px-12 bg-background">
+        <div className="max-w-6xl mx-auto space-y-5">
+          {/* Search bar — Pinterest-style light gray field */}
+          <div className="relative">
+            <svg
+              className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search surf videos..."
+              className="w-full h-12 pl-11 pr-4 rounded-2xl bg-muted/60 border-0 outline-none text-sm text-foreground placeholder:text-muted-foreground/60 transition-all focus:bg-muted/80 focus:ring-2 focus:ring-teal-400/50 focus:ring-inset"
+            />
+          </div>
+
+          {/* Feed toggle pills */}
           <div className="flex items-center justify-center relative px-3 py-1.5 rounded-full bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/15 dark:border-white/8">
             
             <div 
@@ -450,7 +484,7 @@ export default function HomePage() {
           {activeFeed === 'global' && <GlobalSurfFeed />}
         </div>
         
-        <div className="mt-16 text-center">
+        <div className="mt-10 text-center">
           <p className="text-xs text-muted-foreground opacity-40">
             Curated daily • More coming soon
           </p>
