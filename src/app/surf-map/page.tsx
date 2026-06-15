@@ -55,6 +55,7 @@ export default function ExplorePage() {
   const [selectedSpot, setSelectedSpot] = useState<SurfSpot | null>(null);
   const [selectedAmenity, setSelectedAmenity] = useState<Amenity | null>(null);
   const [sidebarTab, setSidebarTab] = useState<'spots' | 'amenities'>('spots');
+  const [menuOpen, setMenuOpen] = useState(false); // Mobile filter menu
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -168,8 +169,8 @@ export default function ExplorePage() {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Top Bar */}
-      <header className="border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shrink-0">
+      {/* Top Bar — hidden on mobile, visible on md+ */}
+      <header className="hidden md:block border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60 shrink-0">
         <div className="flex items-center gap-3 px-4 py-2.5">
           <MapPin className="h-5 w-5 text-cyan-400 shrink-0" />
           <h1 className="text-lg font-bold tracking-tight hidden sm:block">
@@ -263,6 +264,139 @@ export default function ExplorePage() {
           </div>
         )}
       </header>
+
+      {/* Mobile FAB — visible only on small screens */}
+      <div className="md:hidden fixed bottom-6 right-4 z-50 flex flex-col items-end gap-2">
+        {/* Active filter indicator */}
+        {(viewMode !== 'all' || amenityFilter !== 'all' || searchQuery) && (
+          <button
+            onClick={() => { setSearchQuery(''); setViewMode('all'); setAmenityFilter('all'); }}
+            className="bg-red-500/90 text-white text-xs px-2.5 py-1 rounded-full shadow-lg backdrop-blur"
+          >
+            Clear filters
+          </button>
+        )}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="h-14 w-14 rounded-full bg-cyan-500 text-white shadow-xl flex items-center justify-center active:scale-95 transition-transform"
+        >
+          {menuOpen ? <X className="h-6 w-6" /> : <SlidersHorizontal className="h-6 w-6" />}
+        </button>
+      </div>
+
+      {/* Mobile Filter Sheet */}
+      <div className={cn(
+        'md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200',
+        menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
+      )} onClick={() => setMenuOpen(false)}>
+        <div 
+          className={cn(
+            'absolute bottom-0 left-0 right-0 bg-card rounded-t-2xl p-5 pb-8 max-h-[70vh] overflow-y-auto transition-transform duration-300',
+            menuOpen ? 'translate-y-0' : 'translate-y-full',
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-4" />
+          
+          <h3 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <SlidersHorizontal className="h-5 w-5 text-cyan-400" />
+            Map Filters
+          </h3>
+
+          {/* Search */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <input
+              type="text"
+              placeholder="Search spots, cafes, shops..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-8 py-2.5 text-sm rounded-xl border border-border bg-muted/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 focus:border-cyan-400/50"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted"
+              >
+                <X className="h-4 w-4 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+
+          {/* View Mode Toggle */}
+          <div className="flex rounded-xl border border-border overflow-hidden text-sm font-medium mb-4">
+            <button
+              onClick={() => { handleViewModeChange('all'); setMenuOpen(false); }}
+              className={cn(
+                'flex-1 py-2.5 text-center transition-colors',
+                viewMode === 'all' ? 'bg-cyan-500/10 text-cyan-500 font-semibold' : 'hover:bg-muted',
+              )}
+            >
+              All
+            </button>
+            <button
+              onClick={() => { handleViewModeChange('spots'); setMenuOpen(false); }}
+              className={cn(
+                'flex-1 py-2.5 text-center border-x border-border transition-colors',
+                viewMode === 'spots' ? 'bg-cyan-500/10 text-cyan-500 font-semibold' : 'hover:bg-muted',
+              )}
+            >
+              🏄 Spots
+            </button>
+            <button
+              onClick={() => { handleViewModeChange('amenities'); setMenuOpen(false); }}
+              className={cn(
+                'flex-1 py-2.5 text-center transition-colors',
+                viewMode === 'amenities' ? 'bg-cyan-500/10 text-cyan-500 font-semibold' : 'hover:bg-muted',
+              )}
+            >
+              🗺️ Amenities
+            </button>
+          </div>
+
+          {/* Amenity Filter Chips */}
+          {viewMode !== 'spots' && (
+            <div>
+              <p className="text-xs text-muted-foreground mb-2 font-medium">Filter by type:</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setAmenityFilter('all')}
+                  className={cn(
+                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                    amenityFilter === 'all'
+                      ? 'bg-primary/10 border-primary/30 text-primary'
+                      : 'border-border hover:bg-muted',
+                  )}
+                >
+                  All
+                </button>
+                {amenityTypes.map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setAmenityFilter(amenityFilter === type ? 'all' : type)}
+                    className={cn(
+                      'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex items-center gap-1',
+                      amenityFilter === type
+                        ? 'bg-primary/10 border-primary/30 text-primary'
+                        : 'border-border hover:bg-muted',
+                    )}
+                  >
+                    {amenityFilterIcons[type]}
+                    {amenityTypeLabels[type] || type}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => setMenuOpen(false)}
+            className="w-full mt-5 py-2.5 rounded-xl bg-cyan-500 text-white font-medium text-sm active:scale-[0.98] transition-transform"
+          >
+            Apply & Close
+          </button>
+        </div>
+      </div>
 
       {/* Main Content — Map + Sidebar */}
       <main className="flex-1 flex overflow-hidden">

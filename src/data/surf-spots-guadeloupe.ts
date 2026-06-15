@@ -58,7 +58,7 @@ export const guadeloupeSurfSpots: SurfSpot[] = [
     id: 'spot-9',
     name: 'Antigues Cape',
     aliases: ['Cap d\'Antigues', 'Pointe d\'Antigues'],
-    location: { lat: 16.3650, lon: -61.5700, region: 'Grande-Terre' },
+    location: { lat: 16.4420, lon: -61.5450, region: 'Grande-Terre' },
     beachName: 'Pointe d\'Antigues',
     waveType: 'reef-break',
     difficulty: 'expert',
