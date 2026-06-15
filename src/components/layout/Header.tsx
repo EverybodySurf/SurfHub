@@ -69,29 +69,13 @@ export function Header() {
           {/* Logo — home button */}
           <Link href="/" className="flex items-center space-x-2">
             <Waves className="h-6 w-6 text-pink-500 shrink-0" />
-            <span className={`font-black text-lg ${textColor} transition-colors duration-300`}>
+            <span className="font-black text-lg text-yellow-300 dark:text-foreground transition-colors duration-300">
               SurfHub<span className="text-cyan-400 ml-1">GP</span>
             </span>
           </Link>
 
-          {/* Right section */}
-          <div className="flex items-center gap-2">
-            {/* Theme toggle always visible */}
-            <ThemeToggleButton scrolled={isScrolled} />
-
-            {/* Desktop quick actions: Login/Sign Out */}
-            <div className="hidden md:flex items-center gap-2">
-              {!session ? (
-                <Link href="/login" className={`text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-white/10 transition-colors ${textColor}`}>
-                  Login
-                </Link>
-              ) : (
-                <Button onClick={handleSignOut} variant="ghost" className={`text-sm font-medium h-9 ${textColor}`}>
-                  <LogOut className="mr-1.5 h-4 w-4" />
-                  Sign Out
-                </Button>
-              )}
-            </div>
+          {/* Right section — just hamburger menu */}
+          <div className="flex items-center">
 
             {/* Hamburger menu — works on all screen sizes */}
             <button
@@ -129,8 +113,11 @@ export function Header() {
               })}
             </nav>
 
-            {/* Mobile-only auth actions */}
-            <div className="md:hidden flex flex-col gap-3 mt-6 pt-6 border-t border-border/20">
+            {/* Theme toggle & auth actions inside dropdown */}
+            <div className="flex flex-col gap-3 mt-6 pt-6 border-t border-border/20">
+              <div className="flex justify-center">
+                <ThemeToggleButton scrolled={isScrolled} />
+              </div>
               {!session ? (
                 <Link
                   href="/login"

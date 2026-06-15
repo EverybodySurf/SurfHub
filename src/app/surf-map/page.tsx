@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { SurfSpot, guadeloupeSurfSpots } from '@/data/surf-spots-guadeloupe';
 import { Amenity, guadeloupeAmenities, amenityColors, amenityTypeLabels } from '@/data/amenities-guadeloupe';
@@ -21,7 +21,6 @@ const UnifiedMap = dynamic(() => import('@/components/surf-map/UnifiedMap'), {
 
 // Filter types
 type ViewMode = 'all' | 'spots' | 'amenities';
-type AmenityFilter = string | 'all';
 
 const amenityFilterIcons: Record<string, React.ReactNode> = {
   cafe: <Coffee className="h-3.5 w-3.5" />,
@@ -51,11 +50,13 @@ export default function ExplorePage() {
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('all');
-  const [amenityFilter, setAmenityFilter] = useState<AmenityFilter>('all');
+  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set());
   const [selectedSpot, setSelectedSpot] = useState<SurfSpot | null>(null);
   const [selectedAmenity, setSelectedAmenity] = useState<Amenity | null>(null);
   const [sidebarTab, setSidebarTab] = useState<'spots' | 'amenities'>('spots');
   const [menuOpen, setMenuOpen] = useState(false); // Mobile filter menu
+  const sheetStartY = useRef(0);
+  const [sheetOffset, setSheetOffset] = useState(0);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -87,12 +88,12 @@ export default function ExplorePage() {
     return list;
   }, [spots, searchQuery, viewMode]);
 
-  // Filter amenities by search + filter type
+  // Filter amenities by search + selected types
   const filteredAmenities = useMemo(() => {
     if (viewMode === 'spots') return [];
     let list = amenities;
-    if (amenityFilter !== 'all') {
-      list = list.filter((a) => a.type === amenityFilter);
+    if (selectedTypes.size > 0) {
+      list = list.filter((a) => selectedTypes.has(a.type));
     }
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -105,17 +106,17 @@ export default function ExplorePage() {
       );
     }
     return list;
-  }, [amenities, searchQuery, viewMode, amenityFilter]);
+  }, [amenities, searchQuery, viewMode, selectedTypes]);
 
   // Visible spot/amenity IDs for map
   const visibleSpotIds = useMemo(() => {
     if (viewMode === 'amenities') {
-      // If an amenity is selected, show its parent spot
+      // If an amenity is selected, show its parent spot only
       if (selectedAmenity) {
         return new Set([selectedAmenity.spotId]);
       }
-      // Otherwise show all spots (for context) or none
-      return new Set(spots.map((s) => s.id));
+      // No spots when in amenities-only mode
+      return new Set();
     }
     return new Set(filteredSpots.map((s) => s.id));
   }, [filteredSpots, viewMode, selectedAmenity, spots]);
@@ -169,108 +170,19 @@ export default function ExplorePage() {
 
   return (
     <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Top Bar — hidden on all screens, FAB replaces it */}
+      {/* Top Bar — hidden, FAB replaces it */}
       <header className="hidden">
         <div className="flex items-center gap-3 px-4 py-2.5">
           <MapPin className="h-5 w-5 text-cyan-400 shrink-0" />
-          <h1 className="text-lg font-bold tracking-tight hidden sm:block">
-            Surf & Amenities Map
-          </h1>
-
-          {/* Search */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search spots, cafes, shops..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-8 py-1.5 text-sm rounded-full border border-border bg-muted/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/30 focus:border-cyan-400/50"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded-full hover:bg-muted"
-              >
-                <X className="h-4 w-4 text-muted-foreground" />
-              </button>
-            )}
-          </div>
-
-          {/* View Mode Toggle */}
-          <div className="flex rounded-lg border border-border overflow-hidden text-xs font-medium">
-            <button
-              onClick={() => handleViewModeChange('all')}
-              className={cn(
-                'px-3 py-1.5 transition-colors',
-                viewMode === 'all' ? 'bg-cyan-500/10 text-cyan-500' : 'hover:bg-muted',
-              )}
-            >
-              All
-            </button>
-            <button
-              onClick={() => handleViewModeChange('spots')}
-              className={cn(
-                'px-3 py-1.5 border-x border-border transition-colors',
-                viewMode === 'spots' ? 'bg-cyan-500/10 text-cyan-500' : 'hover:bg-muted',
-              )}
-            >
-              🏄 Spots
-            </button>
-            <button
-              onClick={() => handleViewModeChange('amenities')}
-              className={cn(
-                'px-3 py-1.5 transition-colors',
-                viewMode === 'amenities' ? 'bg-cyan-500/10 text-cyan-500' : 'hover:bg-muted',
-              )}
-            >
-              🗺️ Amenities
-            </button>
-          </div>
         </div>
-
-        {/* Amenity Filter Chips (visible in 'all' or 'amenities' mode) */}
-        {viewMode !== 'spots' && (
-          <div className="flex items-center gap-1.5 px-4 pb-2.5 overflow-x-auto scrollbar-none">
-            <span className="text-xs text-muted-foreground shrink-0 mr-1">
-              <SlidersHorizontal className="h-3 w-3 inline mr-1" />
-            </span>
-            <button
-              onClick={() => setAmenityFilter('all')}
-              className={cn(
-                'px-2.5 py-1 rounded-full text-xs whitespace-nowrap border transition-colors',
-                amenityFilter === 'all'
-                  ? 'bg-primary/10 border-primary/30 text-primary'
-                  : 'border-border hover:bg-muted',
-              )}
-            >
-              All
-            </button>
-            {amenityTypes.map((type) => (
-              <button
-                key={type}
-                onClick={() => setAmenityFilter(amenityFilter === type ? 'all' : type)}
-                className={cn(
-                  'px-2.5 py-1 rounded-full text-xs whitespace-nowrap border transition-colors flex items-center gap-1',
-                  amenityFilter === type
-                    ? 'bg-primary/10 border-primary/30 text-primary'
-                    : 'border-border hover:bg-muted',
-                )}
-              >
-                {amenityFilterIcons[type]}
-                {amenityTypeLabels[type] || type}
-              </button>
-            ))}
-          </div>
-        )}
       </header>
 
       {/* Map Menu FAB — visible on all screens */}
       <div className="fixed bottom-6 right-4 z-50 flex flex-col items-end gap-2">
         {/* Active filter indicator */}
-        {(viewMode !== 'all' || amenityFilter !== 'all' || searchQuery) && (
+        {(viewMode !== 'all' || selectedTypes.size > 0 || searchQuery) && (
           <button
-            onClick={() => { setSearchQuery(''); setViewMode('all'); setAmenityFilter('all'); }}
+            onClick={() => { setSearchQuery(''); setViewMode('all'); setSelectedTypes(new Set()); }}
             className="bg-red-500/90 text-white text-xs px-2.5 py-1 rounded-full shadow-lg backdrop-blur"
           >
             Clear filters
@@ -286,15 +198,25 @@ export default function ExplorePage() {
 
       {/* Filter Sheet — works on all screens */}
       <div className={cn(
-        'fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-200',
+        'fixed inset-0 z-[1100] bg-black/40 backdrop-blur-sm transition-opacity duration-200',
         menuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
       )} onClick={() => setMenuOpen(false)}>
         <div 
           className={cn(
-            'absolute bottom-0 left-0 right-0 bg-card rounded-t-2xl p-5 pb-8 max-h-[70vh] overflow-y-auto transition-transform duration-300',
+            'absolute bottom-0 left-0 right-0 bg-card rounded-t-2xl p-5 pb-8 max-h-[70vh] overflow-y-auto',
             menuOpen ? 'translate-y-0' : 'translate-y-full',
           )}
+          style={sheetOffset > 0 ? { transform: `translateY(${sheetOffset}px)` } : undefined}
           onClick={(e) => e.stopPropagation()}
+          onTouchStart={(e) => { sheetStartY.current = e.touches[0].clientY; }}
+          onTouchMove={(e) => {
+            const dy = e.touches[0].clientY - sheetStartY.current;
+            if (dy > 0) setSheetOffset(dy);
+          }}
+          onTouchEnd={() => {
+            if (sheetOffset > 100) setMenuOpen(false);
+            setSheetOffset(0);
+          }}
         >
           <div className="w-10 h-1 rounded-full bg-muted-foreground/30 mx-auto mb-4" />
           
@@ -354,47 +276,68 @@ export default function ExplorePage() {
             </button>
           </div>
 
-          {/* Amenity Filter Chips */}
+          {/* Amenity Filter Chips — Multi-select */}
           {viewMode !== 'spots' && (
             <div>
-              <p className="text-xs text-muted-foreground mb-2 font-medium">Filter by type:</p>
+              <p className="text-xs text-muted-foreground mb-2 font-medium">Filter by type (tap multiple):</p>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setAmenityFilter('all')}
+                  onClick={() => setSelectedTypes(new Set())}
                   className={cn(
                     'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                    amenityFilter === 'all'
+                    selectedTypes.size === 0
                       ? 'bg-primary/10 border-primary/30 text-primary'
                       : 'border-border hover:bg-muted',
                   )}
                 >
                   All
                 </button>
-                {amenityTypes.map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setAmenityFilter(amenityFilter === type ? 'all' : type)}
-                    className={cn(
-                      'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex items-center gap-1',
-                      amenityFilter === type
-                        ? 'bg-primary/10 border-primary/30 text-primary'
-                        : 'border-border hover:bg-muted',
-                    )}
-                  >
-                    {amenityFilterIcons[type]}
-                    {amenityTypeLabels[type] || type}
-                  </button>
-                ))}
+                {amenityTypes.map((type) => {
+                  const isActive = selectedTypes.has(type);
+                  return (
+                    <button
+                      key={type}
+                      onClick={() => {
+                        const next = new Set(selectedTypes);
+                        if (next.has(type)) next.delete(type); else next.add(type);
+                        setSelectedTypes(next);
+                      }}
+                      className={cn(
+                        'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex items-center gap-1',
+                        isActive
+                          ? 'bg-primary/10 border-primary/30 text-primary'
+                          : 'border-border hover:bg-muted',
+                      )}
+                    >
+                      {amenityFilterIcons[type]}
+                      {amenityTypeLabels[type] || type}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           )}
 
-          <button
-            onClick={() => setMenuOpen(false)}
-            className="w-full mt-5 py-2.5 rounded-xl bg-cyan-500 text-white font-medium text-sm active:scale-[0.98] transition-transform"
-          >
-            Apply & Close
-          </button>
+          {/* Action buttons row */}
+          <div className="mt-5 flex gap-3">
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setViewMode('all');
+                setSelectedTypes(new Set());
+                setMenuOpen(false);
+              }}
+              className="flex-1 py-2.5 rounded-xl border border-border text-sm font-medium hover:bg-muted transition-colors"
+            >
+              Clear all
+            </button>
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="flex-[2] py-2.5 rounded-xl bg-cyan-500 text-white font-medium text-sm active:scale-[0.98] transition-transform"
+            >
+              Apply & Close
+            </button>
+          </div>
         </div>
       </div>
 

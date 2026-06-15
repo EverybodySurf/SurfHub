@@ -47,15 +47,35 @@ export default function UnifiedMap({
   const guadeloupeCenter: L.LatLngExpression = [16.25, -61.55];
   const defaultZoom = 10;
 
-  // Init map
+  // Init map with dark/light tile layer — rebuilds on theme switch
   useEffect(() => {
     if (!containerRef.current) return;
-    if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
+
+    function buildMap() {
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
+      const isDark = document.documentElement.classList.contains('dark');
+    const tileUrl = isDark
+      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    const attribution = isDark
+      ? '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
+      : '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>';
+
     const map = L.map(containerRef.current, { zoomControl: false }).setView(guadeloupeCenter, defaultZoom);
     mapRef.current = map;
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    }).addTo(map);
+    L.tileLayer(tileUrl, { attribution }).addTo(map);
+    }
+
+    buildMap();
+
+    // Rebuild when theme changes
+    const observer = new MutationObserver(() => buildMap());
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => {
+      observer.disconnect();
+      if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
+    };
     return () => { if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; } };
   }, []);
 
