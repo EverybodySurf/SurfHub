@@ -72,7 +72,7 @@ export function Header() {
           {/* Logo — home button */}
           <Link href="/" className="flex items-center space-x-2">
             <Waves className="h-6 w-6 text-pink-500 shrink-0" />
-            <span className="font-black text-lg text-neutral-800 dark:text-neutral-200 transition-colors duration-300">
+            <span className={`font-black text-lg ${isScrolled || !isFullscreenPage ? 'text-neutral-600 dark:text-neutral-200' : 'text-white'} transition-colors duration-300`}>
               SurfHub<span className="text-cyan-400 ml-1">GP</span>
             </span>
           </Link>
