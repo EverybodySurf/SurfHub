@@ -89,6 +89,17 @@ export function Header() {
               <Menu className={`size-6 duration-200 ${textColor} ${menuOpen ? 'rotate-180 scale-0 opacity-0' : ''}`} />
               <X className={`absolute inset-0 m-auto size-6 duration-200 ${textColor} ${menuOpen ? 'rotate-0 scale-100 opacity-100' : '-rotate-180 scale-0 opacity-0'}`} />
             </button>
+
+            {/* Hide header button */}
+            <button
+              onClick={() => setHeaderHidden(true)}
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors opacity-40 hover:opacity-100"
+              aria-label="Hide header"
+            >
+              <svg className={`h-4 w-4 ${textColor}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+            </button>
           </div>
         </div>
 
