@@ -39,7 +39,7 @@ export function Header() {
   const isScrolled = scrolled || isAdminRoute;
   // Text: dark on scrollable pages, white on fullscreen pages (like home, surf-map) when not scrolled
   const isFullscreenPage = isHomePage || pathname?.startsWith('/surf-map');
-  const textColor = isScrolled || !isFullscreenPage ? 'text-foreground' : 'text-white';
+  const textColor = isScrolled || !isFullscreenPage ? 'text-neutral-600 dark:text-neutral-200' : 'text-white';
 
   const navItems = [
     { href: '/', label: 'Home', icon: Waves },
@@ -72,7 +72,7 @@ export function Header() {
           {/* Logo — home button */}
           <Link href="/" className="flex items-center space-x-2">
             <Waves className="h-6 w-6 text-pink-500 shrink-0" />
-            <span className={`font-black text-lg ${isScrolled || !isFullscreenPage ? 'text-neutral-600 dark:text-neutral-200' : 'text-white'} transition-colors duration-300`}>
+            <span className={`font-black text-lg ${textColor} transition-colors duration-300`}>
               SurfHub<span className="text-cyan-400 ml-1">GP</span>
             </span>
           </Link>
