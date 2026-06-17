@@ -1,17 +1,17 @@
 'use client';
 
-import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 
 import { GoodVibesFeed } from '@/components/feeds/GoodVibesFeed';
 import { GuadeloupeFeed } from '@/components/feeds/GuadeloupeFeed';
 import { GlobalSurfFeed } from '@/components/feeds/GlobalSurfFeed';
 import SurfMapSection from '@/components/surf-map/SurfMapSection';
+import { HeroCollageSlot } from '@/components/hero/HeroCollageSlot';
 import { MapPin } from 'lucide-react';
 
-import type { GridItem, FeedType } from '@/data/hero-collage-data';
-import { allItems, typeLabels, heroCollageItemsStatic } from '@/data/hero-collage-data';
-import { addCropParams, shuffleArray, generateCollageLayout } from '@/lib/surf-map/image-utils';
+import type { FeedType } from '@/data/hero-collage-data';
+import { heroCollageItemsStatic } from '@/data/hero-collage-data';
+import { shuffleArray, generateCollageLayout } from '@/lib/surf-map/image-utils';
 
 export default function HomePage() {
   const [activeFeed, setActiveFeed] = useState<FeedType>('feelgood');
@@ -65,77 +65,6 @@ export default function HomePage() {
   const titleOffset = scrollY * 0.3;
   const collageOffset = scrollY * 0.15;
   
-  const renderCollageSlot = (index: number, className: string, styleOverrides = {}) => {
-    const item = heroCollageItems[index];
-    if (!item) return null;
-    
-    const croppedImage = item.image ? addCropParams(item.image, className) : null;
-    
-    const baseStyle = {
-      opacity: layout.opacities[index],
-      zIndex: isHovered === index ? 50 : 10 + index,
-      transform: `scale(${layout.scaleVariations[index]})`,
-    };
-    
-    const style = { ...baseStyle, ...styleOverrides };
-    
-    return (
-      <div 
-        className={className}
-        style={style}
-        onMouseEnter={() => setIsHovered(index)}
-        onMouseLeave={() => setIsHovered(null)}
-      >
-        {croppedImage ? (
-          <>
-            <Image
-              src={croppedImage}
-              alt={item.title || item.content || ''}
-              fill
-              className="object-cover transition-transform duration-500"
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/30 to-transparent" />
-          </>
-        ) : (
-          <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 ${
-            item.type === 'tweet' 
-              ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-black border border-white/10' 
-              : 'bg-gradient-to-br from-gray-900 to-black'
-          }`}>
-            {item.type === 'tweet' && (
-              <div className="absolute top-3 left-3 text-white/30 font-bold text-lg">𝕏</div>
-            )}
-            <p className={`text-sm md:text-base text-white/80 text-center leading-relaxed ${
-              item.type === 'quote' ? 'italic' : ''
-            }`}>
-              {item.content}
-            </p>
-            {item.source && (
-              <p className="absolute bottom-3 text-xs text-white/40 flex items-center gap-1">
-                {item.type === 'tweet' && <span className="text-white/50">𝕏</span>}
-                <span>{item.source}</span>
-              </p>
-            )}
-          </div>
-        )}
-        
-        {item.videoUrl && (
-          <div className="absolute top-3 right-3 px-2 py-1 rounded bg-black/50 backdrop-blur-sm">
-            <span className="text-xs text-white">▶</span>
-          </div>
-        )}
-        
-        {(item.title || (item.content && item.type !== 'quote')) && (
-          <div className="absolute bottom-4 left-4 right-4">
-            <p className="text-xs text-white/30">{typeLabels[item.type]}</p>
-            {item.title && <p className="text-xs text-white/20 mt-1 line-clamp-1">{item.title}</p>}
-          </div>
-        )}
-      </div>
-    );
-  };
-  
   return (
     <div className="min-h-screen bg-background snap-y snap-mandatory overflow-y-auto" style={{ scrollBehavior: 'smooth' }}>
       
@@ -154,51 +83,51 @@ export default function HomePage() {
         >
           {/* COLUMN 1-4 — Left side anchors */}
           <div className="col-[1_/_5] row-[1_/_11] h-full w-full">
-            {renderCollageSlot(0, 'relative overflow-hidden h-full w-full', { zIndex: 5 })}
+            <HeroCollageSlot item={heroCollageItems[0]} index={0} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[0]} scale={layout.scaleVariations[0]} isHovered={isHovered === 0} onHover={setIsHovered} styleOverrides={{ zIndex: 5 }} />
           </div>
           <div className="col-[1_/_3] row-[1_/_6] h-full w-full">
-            {renderCollageSlot(1, 'relative overflow-hidden h-full w-full', { zIndex: 10 })}
+            <HeroCollageSlot item={heroCollageItems[1]} index={1} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[1]} scale={layout.scaleVariations[1]} isHovered={isHovered === 1} onHover={setIsHovered} styleOverrides={{ zIndex: 10 }} />
           </div>
           
           {/* COLUMN 5-8 — Center coverage */}
           <div className="col-[5_/_9] row-[1_/_6] h-full w-full">
-            {renderCollageSlot(2, 'relative overflow-hidden h-full w-full', { zIndex: 15 })}
+            <HeroCollageSlot item={heroCollageItems[2]} index={2} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[2]} scale={layout.scaleVariations[2]} isHovered={isHovered === 2} onHover={setIsHovered} styleOverrides={{ zIndex: 15 }} />
           </div>
           <div className="col-[5_/_9] row-[5_/_8] h-full w-full">
-            {renderCollageSlot(3, 'relative overflow-hidden h-full w-full', { zIndex: 20 })}
+            <HeroCollageSlot item={heroCollageItems[3]} index={3} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[3]} scale={layout.scaleVariations[3]} isHovered={isHovered === 3} onHover={setIsHovered} styleOverrides={{ zIndex: 20 }} />
           </div>
           <div className="col-[5_/_9] row-[7_/_11] h-full w-full">
-            {renderCollageSlot(4, 'relative overflow-hidden h-full w-full', { zIndex: 25 })}
+            <HeroCollageSlot item={heroCollageItems[4]} index={4} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[4]} scale={layout.scaleVariations[4]} isHovered={isHovered === 4} onHover={setIsHovered} styleOverrides={{ zIndex: 25 }} />
           </div>
           
           {/* COLUMN 9-12 — Right side, full coverage */}
           <div className="col-[11_/_13] row-[1_/_11] h-full w-full">
-            {renderCollageSlot(5, 'relative overflow-hidden h-full w-full', { zIndex: 8 })}
+            <HeroCollageSlot item={heroCollageItems[5]} index={5} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[5]} scale={layout.scaleVariations[5]} isHovered={isHovered === 5} onHover={setIsHovered} styleOverrides={{ zIndex: 8 }} />
           </div>
           <div className="col-[9_/_12] row-[1_/_6] h-full w-full">
-            {renderCollageSlot(6, 'relative overflow-hidden h-full w-full', { zIndex: 12 })}
+            <HeroCollageSlot item={heroCollageItems[6]} index={6} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[6]} scale={layout.scaleVariations[6]} isHovered={isHovered === 6} onHover={setIsHovered} styleOverrides={{ zIndex: 12 }} />
           </div>
           <div className="col-[9_/_12] row-[5_/_8] h-full w-full">
-            {renderCollageSlot(7, 'relative overflow-hidden h-full w-full', { zIndex: 18 })}
+            <HeroCollageSlot item={heroCollageItems[7]} index={7} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[7]} scale={layout.scaleVariations[7]} isHovered={isHovered === 7} onHover={setIsHovered} styleOverrides={{ zIndex: 18 }} />
           </div>
           <div className="col-[9_/_12] row-[7_/_11] h-full w-full">
-            {renderCollageSlot(8, 'relative overflow-hidden h-full w-full', { zIndex: 22 })}
+            <HeroCollageSlot item={heroCollageItems[8]} index={8} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[8]} scale={layout.scaleVariations[8]} isHovered={isHovered === 8} onHover={setIsHovered} styleOverrides={{ zIndex: 22 }} />
           </div>
           <div className="col-[9_/_13] row-[1_/_4] h-full w-full">
-            {renderCollageSlot(9, 'relative overflow-hidden h-full w-full', { zIndex: 28 })}
+            <HeroCollageSlot item={heroCollageItems[9]} index={9} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[9]} scale={layout.scaleVariations[9]} isHovered={isHovered === 9} onHover={setIsHovered} styleOverrides={{ zIndex: 28 }} />
           </div>
           
           {/* FILLER SLOTS (10) */}
-          <div className="hidden md:block col-[3_/_5] row-[3_/_5] h-full w-full">{renderCollageSlot(10, 'relative overflow-hidden h-full w-full', { zIndex: 30 })}</div>
-          <div className="hidden md:block col-[4_/_6] row-[4_/_6] h-full w-full">{renderCollageSlot(11, 'relative overflow-hidden h-full w-full', { zIndex: 32 })}</div>
-          <div className="hidden md:block col-[6_/_8] row-[3_/_4] h-full w-full">{renderCollageSlot(12, 'relative overflow-hidden h-full w-full', { zIndex: 34 })}</div>
-          <div className="hidden md:block col-[7_/_9] row-[4_/_5] h-full w-full">{renderCollageSlot(13, 'relative overflow-hidden h-full w-full', { zIndex: 36 })}</div>
-          <div className="hidden md:block col-[8_/_10] row-[2_/_4] h-full w-full">{renderCollageSlot(14, 'relative overflow-hidden h-full w-full', { zIndex: 38 })}</div>
-          <div className="hidden md:block col-[10_/_12] row-[3_/_5] h-full w-full">{renderCollageSlot(15, 'relative overflow-hidden h-full w-full', { zIndex: 40 })}</div>
-          <div className="hidden md:block col-[3_/_4] row-[6_/_8] h-full w-full">{renderCollageSlot(16, 'relative overflow-hidden h-full w-full', { zIndex: 42 })}</div>
-          <div className="hidden md:block col-[8_/_9] row-[6_/_8] h-full w-full">{renderCollageSlot(17, 'relative overflow-hidden h-full w-full', { zIndex: 44 })}</div>
-          <div className="hidden md:block col-[1_/_3] row-[8_/_10] h-full w-full">{renderCollageSlot(18, 'relative overflow-hidden h-full w-full', { zIndex: 46 })}</div>
-          <div className="hidden md:block col-[6_/_7] row-[6_/_7] h-full w-full">{renderCollageSlot(19, 'relative overflow-hidden h-full w-full', { zIndex: 48 })}</div>
+          <div className="hidden md:block col-[3_/_5] row-[3_/_5] h-full w-full"><HeroCollageSlot item={heroCollageItems[10]} index={10} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[10]} scale={layout.scaleVariations[10]} isHovered={isHovered === 10} onHover={setIsHovered} styleOverrides={{ zIndex: 30 }} /></div>
+          <div className="hidden md:block col-[4_/_6] row-[4_/_6] h-full w-full"><HeroCollageSlot item={heroCollageItems[11]} index={11} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[11]} scale={layout.scaleVariations[11]} isHovered={isHovered === 11} onHover={setIsHovered} styleOverrides={{ zIndex: 32 }} /></div>
+          <div className="hidden md:block col-[6_/_8] row-[3_/_4] h-full w-full"><HeroCollageSlot item={heroCollageItems[12]} index={12} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[12]} scale={layout.scaleVariations[12]} isHovered={isHovered === 12} onHover={setIsHovered} styleOverrides={{ zIndex: 34 }} /></div>
+          <div className="hidden md:block col-[7_/_9] row-[4_/_5] h-full w-full"><HeroCollageSlot item={heroCollageItems[13]} index={13} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[13]} scale={layout.scaleVariations[13]} isHovered={isHovered === 13} onHover={setIsHovered} styleOverrides={{ zIndex: 36 }} /></div>
+          <div className="hidden md:block col-[8_/_10] row-[2_/_4] h-full w-full"><HeroCollageSlot item={heroCollageItems[14]} index={14} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[14]} scale={layout.scaleVariations[14]} isHovered={isHovered === 14} onHover={setIsHovered} styleOverrides={{ zIndex: 38 }} /></div>
+          <div className="hidden md:block col-[10_/_12] row-[3_/_5] h-full w-full"><HeroCollageSlot item={heroCollageItems[15]} index={15} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[15]} scale={layout.scaleVariations[15]} isHovered={isHovered === 15} onHover={setIsHovered} styleOverrides={{ zIndex: 40 }} /></div>
+          <div className="hidden md:block col-[3_/_4] row-[6_/_8] h-full w-full"><HeroCollageSlot item={heroCollageItems[16]} index={16} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[16]} scale={layout.scaleVariations[16]} isHovered={isHovered === 16} onHover={setIsHovered} styleOverrides={{ zIndex: 42 }} /></div>
+          <div className="hidden md:block col-[8_/_9] row-[6_/_8] h-full w-full"><HeroCollageSlot item={heroCollageItems[17]} index={17} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[17]} scale={layout.scaleVariations[17]} isHovered={isHovered === 17} onHover={setIsHovered} styleOverrides={{ zIndex: 44 }} /></div>
+          <div className="hidden md:block col-[1_/_3] row-[8_/_10] h-full w-full"><HeroCollageSlot item={heroCollageItems[18]} index={18} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[18]} scale={layout.scaleVariations[18]} isHovered={isHovered === 18} onHover={setIsHovered} styleOverrides={{ zIndex: 46 }} /></div>
+          <div className="hidden md:block col-[6_/_7] row-[6_/_7] h-full w-full"><HeroCollageSlot item={heroCollageItems[19]} index={19} className="relative overflow-hidden h-full w-full" opacity={layout.opacities[19]} scale={layout.scaleVariations[19]} isHovered={isHovered === 19} onHover={setIsHovered} styleOverrides={{ zIndex: 48 }} /></div>
         </div>
         
         {/* Light gradient overlay for title readability */}
