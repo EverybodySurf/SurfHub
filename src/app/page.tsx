@@ -6,6 +6,8 @@ import { useState, useEffect, useRef } from 'react';
 import { GoodVibesFeed } from '@/components/feeds/GoodVibesFeed';
 import { GuadeloupeFeed } from '@/components/feeds/GuadeloupeFeed';
 import { GlobalSurfFeed } from '@/components/feeds/GlobalSurfFeed';
+import SurfMapSection from '@/components/surf-map/SurfMapSection';
+import { MapPin } from 'lucide-react';
 
 // Feed types
 type FeedType = 'feelgood' | 'local' | 'global';
@@ -74,7 +76,6 @@ const typeLabels: Record<string, string> = {
 
 // Add crop params to image URL for full-bleed coverage based on slot dimensions
 function addCropParams(url: string, className: string): string {
-  // Parse grid spans from className
   const colMatch = className.match(/col-span-(\d+)/);
   const rowMatch = className.match(/row-span-(\d+)/);
   
@@ -83,11 +84,9 @@ function addCropParams(url: string, className: string): string {
   const cols = parseInt(colMatch[1]);
   const rows = parseInt(rowMatch[1]);
   
-  // Grid is 12 cols x 10 rows. Approximate pixel dimensions.
   const width = cols * 120;
   const height = rows * 80;
   
-  // YouTube thumbnails: swap to maxresdefault (true 16:9, no black bars)
   if (url.includes('i.ytimg.com')) {
     const match = url.match(/\/vi\/([a-zA-Z0-9_-]+)\/(?:hqdefault|maxresdefault|mqdefault|default|sddefault)/);
     if (match) {
@@ -97,13 +96,11 @@ function addCropParams(url: string, className: string): string {
     return url;
   }
   
-  // Unsplash: add fit=crop with dimensions
   if (url.includes('unsplash.com')) {
     const baseUrl = url.split('?')[0];
     return `${baseUrl}?w=${width}&h=${height}&fit=crop&auto=format`;
   }
   
-  // Pexels: similar approach
   if (url.includes('pexels.com')) {
     const baseUrl = url.split('?')[0];
     return `${baseUrl}?auto=compress&cs=tinysrgb&w=${Math.max(width, 800)}`;
@@ -112,7 +109,6 @@ function addCropParams(url: string, className: string): string {
   return url;
 }
 
-// Collage layout generator — full coverage, subtle size variations
 function generateCollageLayout() {
   return {
     opacities: Array(20).fill(1.0),
@@ -125,15 +121,11 @@ function generateCollageLayout() {
   };
 }
 
-// Hero collage items — EXCLUDE video/reel items (only photos, quotes, text)
-// 20 slots for coverage
 const heroCollageItemsStatic = [
   ...allItems.filter(item => item.id.startsWith('hero') && item.image && item.type !== 'video' && item.type !== 'reel'),
   ...allItems.filter(item => item.type === 'photo' && !item.id.startsWith('hero') && item.image),
-  // Quotes and tweets removed — image-only collage
 ].slice(0, 20);
 
-// Shuffle function for randomizing hero pool
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -149,7 +141,9 @@ export default function HomePage() {
   const [layout, setLayout] = useState(generateCollageLayout());
   const [isHovered, setIsHovered] = useState<number | null>(null);
   
-  // Hero pool images (from curated photography API)
+  const mapRef = useRef<HTMLElement>(null);
+  const feedRef = useRef<HTMLElement>(null);
+  
   const [heroPoolImages, setHeroPoolImages] = useState<any[]>([]);
   
   useEffect(() => {
@@ -178,8 +172,6 @@ export default function HomePage() {
     fetchHeroPool();
   }, []);
   
-  // Hero collage items — use hero pool photography when available, fallback to static
-  // 20 slots for coverage (no gaps)
   const heroCollageItems = heroPoolImages.length > 0 
     ? heroPoolImages.slice(0, 20).map(img => ({
         id: img.id,
@@ -195,12 +187,10 @@ export default function HomePage() {
   const titleOffset = scrollY * 0.3;
   const collageOffset = scrollY * 0.15;
   
-  // Collage slot renderer (20 slots for coverage)
   const renderCollageSlot = (index: number, className: string, styleOverrides = {}) => {
     const item = heroCollageItems[index];
     if (!item) return null;
     
-    // Apply crop params for full-bleed coverage
     const croppedImage = item.image ? addCropParams(item.image, className) : null;
     
     const baseStyle = {
@@ -230,13 +220,11 @@ export default function HomePage() {
             <div className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/30 to-transparent" />
           </>
         ) : (
-          // Text-only cards (tweets, quotes)
           <div className={`absolute inset-0 flex flex-col items-center justify-center p-4 ${
             item.type === 'tweet' 
               ? 'bg-gradient-to-br from-gray-900 via-gray-800 to-black border border-white/10' 
               : 'bg-gradient-to-br from-gray-900 to-black'
           }`}>
-            {/* X logo for tweets */}
             {item.type === 'tweet' && (
               <div className="absolute top-3 left-3 text-white/30 font-bold text-lg">𝕏</div>
             )}
@@ -254,14 +242,12 @@ export default function HomePage() {
           </div>
         )}
         
-        {/* Video indicator */}
         {item.videoUrl && (
           <div className="absolute top-3 right-3 px-2 py-1 rounded bg-black/50 backdrop-blur-sm">
             <span className="text-xs text-white">▶</span>
           </div>
         )}
         
-        {/* Content overlay for larger slots */}
         {(item.title || (item.content && item.type !== 'quote')) && (
           <div className="absolute bottom-4 left-4 right-4">
             <p className="text-xs text-white/30">{typeLabels[item.type]}</p>
@@ -273,78 +259,58 @@ export default function HomePage() {
   };
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background snap-y snap-mandatory overflow-y-auto" style={{ scrollBehavior: 'smooth' }}>
       
       {/* ═══════════════════════════════════════════════════════════════
           HERO — Dense Overlapping Collage (20 slots, full coverage)
           ═══════════════════════════════════════════════════════════════ */}
-      <section className="relative h-[120dvh] md:min-h-screen overflow-hidden bg-black">
+      <section className="relative h-screen overflow-hidden bg-black snap-start">
         
         {/* Base background gradient layer */}
         <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900 via-black to-gray-800" />
         
         {/* Collage grid — EXPLICIT placement, full coverage, NO gaps */}
         <div 
-          className="absolute inset-0 z-1 grid grid-cols-12 grid-rows-10 gap-0 h-[120dvh] md:h-full"
+          className="absolute inset-0 z-1 grid grid-cols-12 grid-rows-10 gap-0 h-full"
           style={{ transform: `translateY(${collageOffset}px)` }}
         >
           {/* COLUMN 1-4 — Left side anchors */}
-          
-          {/* SLOT 1 — Full left (cols 1-4, rows 1-10) */}
           <div className="col-[1_/_5] row-[1_/_11] h-full w-full">
             {renderCollageSlot(0, 'relative overflow-hidden h-full w-full', { zIndex: 5 })}
           </div>
-          
-          {/* SLOT 2 — Left top accent (cols 1-2, rows 1-5) */}
           <div className="col-[1_/_3] row-[1_/_6] h-full w-full">
             {renderCollageSlot(1, 'relative overflow-hidden h-full w-full', { zIndex: 10 })}
           </div>
           
           {/* COLUMN 5-8 — Center coverage */}
-          
-          {/* SLOT 3 — Center top (cols 5-8, rows 1-5) */}
           <div className="col-[5_/_9] row-[1_/_6] h-full w-full">
             {renderCollageSlot(2, 'relative overflow-hidden h-full w-full', { zIndex: 15 })}
           </div>
-          
-          {/* SLOT 4 — Center middle (cols 5-8, rows 5-7) — fills behind text */}
           <div className="col-[5_/_9] row-[5_/_8] h-full w-full">
             {renderCollageSlot(3, 'relative overflow-hidden h-full w-full', { zIndex: 20 })}
           </div>
-          
-          {/* SLOT 5 — Center bottom (cols 5-8, rows 7-10) */}
           <div className="col-[5_/_9] row-[7_/_11] h-full w-full">
             {renderCollageSlot(4, 'relative overflow-hidden h-full w-full', { zIndex: 25 })}
           </div>
           
           {/* COLUMN 9-12 — Right side, full coverage */}
-          
-          {/* SLOT 6 — Right edge tall (cols 11-12, rows 1-10) */}
           <div className="col-[11_/_13] row-[1_/_11] h-full w-full">
             {renderCollageSlot(5, 'relative overflow-hidden h-full w-full', { zIndex: 8 })}
           </div>
-          
-          {/* SLOT 7 — Upper-right (cols 9-11, rows 1-5) */}
           <div className="col-[9_/_12] row-[1_/_6] h-full w-full">
             {renderCollageSlot(6, 'relative overflow-hidden h-full w-full', { zIndex: 12 })}
           </div>
-          
-          {/* SLOT 8 — Mid-right (cols 9-11, rows 5-7) */}
           <div className="col-[9_/_12] row-[5_/_8] h-full w-full">
             {renderCollageSlot(7, 'relative overflow-hidden h-full w-full', { zIndex: 18 })}
           </div>
-          
-          {/* SLOT 9 — Lower-right (cols 9-11, rows 7-10) */}
           <div className="col-[9_/_12] row-[7_/_11] h-full w-full">
             {renderCollageSlot(8, 'relative overflow-hidden h-full w-full', { zIndex: 22 })}
           </div>
-          
-          {/* SLOT 10 — Top-right corner (cols 9-12, rows 1-3) */}
           <div className="col-[9_/_13] row-[1_/_4] h-full w-full">
             {renderCollageSlot(9, 'relative overflow-hidden h-full w-full', { zIndex: 28 })}
           </div>
           
-          {/* FILLER SLOTS (10) — tiny accents, full coverage */}
+          {/* FILLER SLOTS (10) */}
           <div className="hidden md:block col-[3_/_5] row-[3_/_5] h-full w-full">{renderCollageSlot(10, 'relative overflow-hidden h-full w-full', { zIndex: 30 })}</div>
           <div className="hidden md:block col-[4_/_6] row-[4_/_6] h-full w-full">{renderCollageSlot(11, 'relative overflow-hidden h-full w-full', { zIndex: 32 })}</div>
           <div className="hidden md:block col-[6_/_8] row-[3_/_4] h-full w-full">{renderCollageSlot(12, 'relative overflow-hidden h-full w-full', { zIndex: 34 })}</div>
@@ -357,25 +323,21 @@ export default function HomePage() {
           <div className="hidden md:block col-[6_/_7] row-[6_/_7] h-full w-full">{renderCollageSlot(19, 'relative overflow-hidden h-full w-full', { zIndex: 48 })}</div>
         </div>
         
-        {/* Light gradient overlay for title readability — 80% transparent */}
+        {/* Light gradient overlay for title readability */}
         <div className="absolute inset-0 z-20 bg-gradient-to-b from-black/20 via-black/10 to-black/25" />
         
         {/* Title overlay */}
-        <div className="relative z-30 h-[120dvh] md:h-screen flex flex-col items-center justify-center px-8 md:px-12">
-          {/* Centered title block */}
+        <div className="relative z-30 h-screen flex flex-col items-center justify-center px-8 md:px-12">
           <div className="flex flex-col items-center -mt-12">
-            {/* Two-line brand + location */}
             <div 
               className="flex flex-col items-start mb-4"
               style={{ transform: `translateY(${titleOffset}px)` }}
             >
-              {/* SurfHub — gradient, top-left of Guadeloupe */}
               <span 
                 className="text-[1.8rem] md:text-[2.5rem] font-black tracking-[-0.01em] bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent"
               >
                 SurfHub
               </span>
-              {/* Guadeloupe — large, white, tight kerning */}
               <h1 className="text-5xl md:text-7xl lg:text-9xl font-black tracking-[-0.08em] text-white leading-none">
                 Guadeloupe
               </h1>
@@ -388,15 +350,15 @@ export default function HomePage() {
             </p>
           </div>
           
-          {/* Button pinned to bottom of hero */}
+          {/* Scroll down cue */}
           <button 
             onClick={() => {
-              document.getElementById('feed-section')?.scrollIntoView({ behavior: 'smooth' });
+              mapRef.current?.scrollIntoView({ behavior: 'smooth' });
             }}
             className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 group flex flex-col items-center gap-3 text-white/40 hover:text-white/70 transition-colors"
           >
             <span className="text-xs tracking-wider text-white/80 font-medium drop-shadow-lg transition-colors">
-              Scroll down for local &amp; global surf content
+              Scroll down to explore the Guadeloupe surf scene
             </span>
             <svg
               className="h-8 w-8 text-white/40 group-hover:text-white/70 animate-bounce transition-colors"
@@ -413,13 +375,58 @@ export default function HomePage() {
           </button>
         </div>
       </section>
+
+      {/* ═══════════════════════════════════════════════════════════════
+          MAP — Full-viewport section, the main attraction
+          ═══════════════════════════════════════════════════════════════ */}
+      <section 
+        ref={mapRef}
+        id="surf-map-section" 
+        className="relative h-screen overflow-hidden snap-start bg-background"
+      >
+        {/* Map label floating top-left */}
+        <div className="absolute top-4 left-4 z-40 pointer-events-none">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-sm border border-white/10">
+            <MapPin className="h-3 w-3 text-cyan-400" />
+            <span className="text-[10px] uppercase tracking-widest text-white/70 font-medium">Explore Guadeloupe</span>
+          </div>
+        </div>
+        
+        {/* Scroll-down arrow to feeds */}
+        <button 
+          onClick={() => {
+            feedRef.current?.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-50 group flex flex-col items-center gap-2 text-white/30 hover:text-white/60 transition-colors"
+        >
+          <span className="text-[10px] tracking-wider text-white/50 font-medium drop-shadow-lg">
+            Discover content
+          </span>
+          <svg
+            className="h-6 w-6 text-white/30 group-hover:text-white/60 animate-bounce transition-colors"
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+
+        <div className="h-full w-full pt-0">
+          <SurfMapSection />
+        </div>
+      </section>
       
       {/* ═══════════════════════════════════════════════════════════════
           SEARCH + TOGGLE
           ═══════════════════════════════════════════════════════════════ */}
-      <section className="py-8 px-4 md:px-8 lg:px-12 bg-background">
+      <section ref={feedRef} id="feed-section" className="py-8 px-4 md:px-8 lg:px-12 bg-background snap-start">
         <div className="max-w-6xl mx-auto space-y-5">
-          {/* Search bar — Pinterest-style light gray field */}
+          {/* Search bar */}
           <div className="relative">
             <svg
               className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/60"
@@ -475,9 +482,9 @@ export default function HomePage() {
       </section>
       
       {/* ═══════════════════════════════════════════════════════════════
-          FEED GRID — Live-fetching components from /api/feed
+          FEED GRID
           ═══════════════════════════════════════════════════════════════ */}
-      <section id="feed-section" className="pb-20 px-4 md:px-8 lg:px-12 bg-background">
+      <section className="min-h-screen pb-20 px-4 md:px-8 lg:px-12 bg-background snap-start">
         <div className="max-w-6xl mx-auto">
           {activeFeed === 'feelgood' && <GoodVibesFeed />}
           {activeFeed === 'local' && <GuadeloupeFeed />}
