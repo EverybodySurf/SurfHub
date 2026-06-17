@@ -2,9 +2,10 @@
 
 import { SurfSpot } from '@/data/surf-spots-guadeloupe';
 import { Amenity, amenityColors } from '@/data/amenities-guadeloupe';
-import { MapPin, X, Building2 } from 'lucide-react';
+import { MapPin, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { amenityFilterIcons, amenityTypeLabels, difficultyColors, waveTypeIcons } from './map-constants';
+import { DetailHeader, DetailLabel, Tag, InfoBlock } from './DetailComponents';
 
 interface Props {
   spot: SurfSpot;
@@ -20,8 +21,8 @@ export function SpotDetailCard({ spot, amenities, onAmenitySelect, onClose }: Pr
     <div>
       <div className="h-1 bg-gradient-to-r from-teal-400 to-cyan-500" />
       <div className="p-4">
-        <Header
-          icon={waveTypeIcons[spot.waveType]}
+        <DetailHeader
+          icon={<span className="text-lg">{waveTypeIcons[spot.waveType]}</span>}
           name={spot.name}
           subtitle={spot.beachName ?? undefined}
           onClose={onClose}
@@ -32,76 +33,32 @@ export function SpotDetailCard({ spot, amenities, onAmenitySelect, onClose }: Pr
           <Tag className="bg-gradient-to-br from-teal-400/10 to-cyan-500/10 text-cyan-700 dark:text-cyan-300 border-teal-200 dark:border-teal-800">
             {spot.waveType.replace('-', ' ')}
           </Tag>
-          {spot.location.region && <Tag className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700">{spot.location.region}</Tag>}
+          {spot.location.region && (
+            <Tag className="bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700">
+              {spot.location.region}
+            </Tag>
+          )}
         </div>
 
-        <Card className="p-3 rounded-xl bg-muted/80 mb-4">
+        <div className="p-3 rounded-xl bg-muted/80 mb-4">
           <p className="text-sm leading-relaxed text-foreground/80">{spot.description}</p>
-        </Card>
+        </div>
 
         <div className="grid grid-cols-2 gap-2.5 text-sm mb-4">
           <InfoBlock label="Wave Type" value={spot.waveType.replace('-', ' ')} capitalize />
           <InfoBlock label="Difficulty" value={spot.difficulty} capitalize />
           {spot.bestSeason && <InfoBlock label="Best Season" value={spot.bestSeason} />}
           {spot.swellDirection && <InfoBlock label="Swell Dir." value={spot.swellDirection} />}
-          <InfoBlock label="Coordinates" value={`${spot.location.lat.toFixed(4)}, ${spot.location.lon.toFixed(4)}`} mono colSpan={2} />
+          <InfoBlock label="Coordinates" value={`${spot.location.lat.toFixed(4)}, ${spot.location.lon.toFixed(4)}`} mono colSpan />
         </div>
       </div>
 
-      <AmenityList amenities={spotAmenities} onAmenitySelect={onAmenitySelect} />
+      <AmenityList amenities={spotAmenities} onSelect={onAmenitySelect} />
     </div>
   );
 }
 
-// ═══ Shared sub-components ═══
-
-function Header({ icon, name, subtitle, onClose }: { icon: string; name: string; subtitle?: string; onClose: () => void }) {
-  return (
-    <div className="flex items-start justify-between mb-4">
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-lg shadow-md">
-          {icon}
-        </div>
-        <div>
-          <h2 className="text-lg font-bold leading-tight">{name}</h2>
-          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
-        </div>
-      </div>
-      <button onClick={onClose} className="p-1.5 rounded-xl hover:bg-muted transition-colors group">
-        <X className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-      </button>
-    </div>
-  );
-}
-
-function Tag({ className, children }: { className?: string; children: React.ReactNode }) {
-  return (
-    <span className={cn('px-2.5 py-0.5 rounded-full text-xs font-medium border', className)}>
-      {children}
-    </span>
-  );
-}
-
-function Card({ className, children }: { className?: string; children: React.ReactNode }) {
-  return <div className={cn('rounded-xl', className)}>{children}</div>;
-}
-
-function InfoBlock({ label, value, mono, capitalize, colSpan }: { label: string; value: string; mono?: boolean; capitalize?: boolean; colSpan?: boolean }) {
-  return (
-    <div className={cn('p-3 rounded-xl bg-muted/70', colSpan && 'col-span-2')}>
-      <Label>{label}</Label>
-      <span className={cn('font-semibold', capitalize && 'capitalize', mono && 'font-mono text-xs')}>{value}</span>
-    </div>
-  );
-}
-
-function Label({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">{children}</span>
-  );
-}
-
-function AmenityList({ amenities, onAmenitySelect }: { amenities: Amenity[]; onAmenitySelect: (a: Amenity) => void }) {
+function AmenityList({ amenities, onSelect }: { amenities: Amenity[]; onSelect: (a: Amenity) => void }) {
   if (amenities.length === 0) {
     return <p className="text-xs text-muted-foreground italic mb-2 px-4">No amenity data yet for this spot.</p>;
   }
@@ -117,8 +74,8 @@ function AmenityList({ amenities, onAmenitySelect }: { amenities: Amenity[]; onA
         <div className="h-px flex-1 bg-gradient-to-l from-teal-400/30 to-transparent" />
       </div>
       <div className="space-y-2 px-4 pb-4">
-        {amenities.map((amenity) => (
-          <AmenityRow key={amenity.id} amenity={amenity} onClick={() => onAmenitySelect(amenity)} />
+        {amenities.map((a) => (
+          <AmenityRow key={a.id} amenity={a} onClick={() => onSelect(a)} />
         ))}
       </div>
     </div>
