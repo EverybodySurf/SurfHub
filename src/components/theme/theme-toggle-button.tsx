@@ -35,7 +35,7 @@ export function ThemeToggleButton({ scrolled = false }: ThemeToggleButtonProps) 
           <span className="sr-only">Toggle theme</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="z-[1300]">
         <DropdownMenuItem onClick={() => setTheme('light')}>
           Light
         </DropdownMenuItem>

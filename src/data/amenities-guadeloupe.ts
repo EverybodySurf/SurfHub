@@ -47,7 +47,7 @@ export const amenityColors: Record<string, string> = {
 
 export const amenityTypeLabels: Record<string, string> = {
   cafe: 'Cafe',
-  restaurant: 'Restaurant',
+  restaurant: 'Restaurants/Bars',
   'surf-shop': 'Surf Shop',
   'board-rental': 'Board Rental',
   'gas-station': 'Gas',

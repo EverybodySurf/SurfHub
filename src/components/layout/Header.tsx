@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Waves, List, MapPin, BarChart3, Users, ShoppingBag, Menu, LayoutDashboard, X, CircleUserRound, LogOut } from 'lucide-react';
+import { Waves, List, MapPin, BarChart3, Users, ShoppingBag, Menu, LayoutDashboard, X, CircleUserRound, LogOut, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggleButton } from '@/components/theme/theme-toggle-button';
 import type { Session } from '@supabase/supabase-js';
@@ -59,6 +59,13 @@ export function Header() {
 
   return (
     <>
+      {/* Backdrop overlay when menu is open — click to close */}
+      {menuOpen && (
+        <div
+          className="fixed inset-0 z-[1150]"
+          onClick={() => setMenuOpen(false)}
+        />
+      )}
     <header className="relative z-[1200]">
       <nav
         className={`
@@ -103,17 +110,17 @@ export function Header() {
           </div>
         </div>
 
-        {/* Dropdown menu — works on all screens */}
-        <div className={`${menuOpen ? 'block' : 'hidden'} bg-background/95 backdrop-blur-xl border-b border-border/20 shadow-2xl`}>
-          <div className="max-w-screen-2xl mx-auto px-4 py-6">
-            <nav className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
+        {/* Dropdown menu — floating panel on all screens */}
+        <div className={`${menuOpen ? 'block' : 'hidden'} bg-background/95 backdrop-blur-xl border border-border/20 shadow-2xl absolute right-4 top-16 w-80 rounded-2xl`}>
+          <div className="px-4 py-6">
+            <nav className="grid grid-cols-1 gap-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
+                    className={`flex items-center justify-center md:justify-start gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                       isActive
                         ? 'bg-cyan-500/10 text-cyan-500'
                         : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -163,10 +170,11 @@ export function Header() {
           headerHidden
             ? 'translate-y-2 opacity-80 hover:opacity-100'
             : '-translate-y-full opacity-0 pointer-events-none'
-        } bg-background/80 backdrop-blur-sm border border-border/40 rounded-b-xl px-4 py-1 text-xs text-muted-foreground hover:text-foreground shadow-sm`}
+        } flex items-center gap-0.5`}
         aria-label={headerHidden ? 'Show header' : 'Hide header'}
       >
-        SurfHub GP ▾
+        <Waves className="h-4 w-4 text-pink-500/70" />
+        <ChevronDown className="h-3 w-3 text-pink-500/70" />
       </button>
     </>
   );

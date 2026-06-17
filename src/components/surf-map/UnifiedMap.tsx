@@ -24,7 +24,7 @@ const amenityTypeLabels: Record<string, string> = {
 };
 
 const difficultyColors: Record<string, string> = {
-  beginner: '#22c55e', intermediate: '#f59e0b', advanced: '#f97316', expert: '#ef4444',
+  beginner: '#39ff14', intermediate: '#ffea00', advanced: '#ff5e00', expert: '#ff0040',
 };
 
 interface UnifiedMapProps {
@@ -54,16 +54,27 @@ export default function UnifiedMap({
     function buildMap() {
       if (mapRef.current) { mapRef.current.remove(); mapRef.current = null; }
       const isDark = document.documentElement.classList.contains('dark');
-    const tileUrl = isDark
-      ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-      : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    const attribution = isDark
-      ? '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>'
-      : '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>';
-
     const map = L.map(containerRef.current, { zoomControl: false }).setView(guadeloupeCenter, defaultZoom);
     mapRef.current = map;
-    L.tileLayer(tileUrl, { attribution }).addTo(map);
+
+    if (isDark) {
+      // Dark mode: CartoDB dark_all + hillshading for terrain + labels overlay
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+        subdomains: 'abcd',
+      }).addTo(map);
+      L.tileLayer('https://tiles.wmflabs.org/hillshading/{z}/{x}/{y}.png', {
+        opacity: 0.3,
+        attribution: 'Hillshading: &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+      }).addTo(map);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+      }).addTo(map);
+    } else {
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+      }).addTo(map);
+    }
     }
 
     buildMap();
@@ -103,7 +114,7 @@ export default function UnifiedMap({
         iconSize: [28, 28], iconAnchor: [14, 14],
       });
       const m = L.marker([spot.location.lat, spot.location.lon], { icon }).addTo(mapRef.current!);
-      m.bindPopup(`<div style="min-width:200px;"><h3 style="font-weight:bold;font-size:1.1rem;margin-bottom:0.25rem;">${spot.name}</h3>${spot.beachName ? `<p style="color:#666;font-size:0.875rem;">${spot.beachName}</p>` : ''}<p style="font-size:0.875rem;"><strong>Type:</strong> ${spot.waveType}</p><p style="font-size:0.875rem;"><strong>Level:</strong> ${spot.difficulty}</p>${spot.bestSeason ? `<p style="font-size:0.875rem;"><strong>Best:</strong> ${spot.bestSeason}</p>` : ''}<p style="font-size:0.8rem;margin-top:0.5rem;color:#555;">${spot.description.replace(/'/g, '&#39;')}</p></div>`);
+      m.bindTooltip(`<div class="marker-hover-card"><h4>${spot.name}</h4><p class="card-meta">${spot.difficulty} • ${spot.waveType.replace('-', ' ')}${spot.beachName ? `<br/>${spot.beachName}` : ''}${spot.swellDirection ? `<br/>Swell: ${spot.swellDirection}` : ''}${spot.bestSeason ? `<br/>Best: ${spot.bestSeason}` : ''}</p><div class="card-desc">${spot.description.replace(/'/g, '&#39;')}</div><div class="card-footer">Tap for details</div></div>`, { sticky: true, offset: [0, -10], className: 'tooltip-brand' });
       m.on('click', () => onSpotSelect?.(spot));
       spotMarkersRef.current.push(m);
     });
@@ -128,7 +139,7 @@ export default function UnifiedMap({
       });
       const m = L.marker([amenity.location.lat, amenity.location.lon], { icon }).addTo(mapRef.current!);
       const label = amenityTypeLabels[amenity.type] || amenity.type;
-      m.bindPopup(`<div style="min-width:180px;"><p style="font-size:0.9rem;"><strong>${label}</strong></p><h4 style="font-weight:bold;margin:0.25rem 0;">${amenity.name}</h4>${amenity.address ? `<p style="font-size:0.8rem;color:#666;">${amenity.address}</p>` : ''}${amenity.distanceFromSpot ? `<p style="font-size:0.8rem;color:#666;">${amenity.distanceFromSpot} from surf spot</p>` : ''}${amenity.notes ? `<p style="font-size:0.8rem;margin-top:0.25rem;">${amenity.notes}</p>` : ''}</div>`);
+      m.bindTooltip(`<div class="marker-hover-card"><h4>${emoji} ${amenity.name}</h4><p class="card-meta">${label}${amenity.address ? `<br/>${amenity.address}` : ''}${amenity.distanceFromSpot ? `<br/>${amenity.distanceFromSpot} from spot` : ''}${amenity.notes ? `<br/>${amenity.notes.replace(/'/g, '&#39;')}` : ''}</p><div class="card-footer">Tap for details</div></div>`, { sticky: true, offset: [0, -10], className: 'tooltip-brand' });
       m.on('click', () => onAmenitySelect?.(amenity));
       amenityMarkersRef.current.push(m);
     });
@@ -144,10 +155,67 @@ export default function UnifiedMap({
 
   return (
     <div className="relative h-full w-full">
+      {/* Brand tooltip styles */}
+      <style>{`
+        .leaflet-tooltip.tooltip-brand {
+          background: var(--tooltip-bg, #fff);
+          border: none;
+          border-radius: 16px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+          padding: 0;
+          max-width: 260px;
+        }
+        .leaflet-tooltip.tooltip-brand::before {
+          border-top-color: var(--tooltip-bg, #fff);
+        }
+        .marker-hover-card {
+          padding: 12px 14px;
+          font-family: inherit;
+        }
+        .marker-hover-card h4 {
+          font-size: 14px;
+          font-weight: 700;
+          margin: 0 0 4px 0;
+          color: #111;
+          line-height: 1.3;
+        }
+        .marker-hover-card .card-meta {
+          font-size: 11px;
+          color: #666;
+          margin: 0 0 6px 0;
+          line-height: 1.5;
+        }
+        .marker-hover-card .card-desc {
+          font-size: 11px;
+          color: #444;
+          line-height: 1.5;
+          margin-bottom: 6px;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .marker-hover-card .card-footer {
+          font-size: 10px;
+          color: #3b82f6;
+          font-weight: 500;
+          padding-top: 6px;
+          border-top: 1px solid #f0f0f0;
+        }
+        .dark .leaflet-tooltip.tooltip-brand {
+          --tooltip-bg: #1f2937;
+          background: var(--tooltip-bg);
+          color: #e5e7eb;
+        }
+        .dark .marker-hover-card h4 { color: #f3f4f6; }
+        .dark .marker-hover-card .card-meta { color: #9ca3af; }
+        .dark .marker-hover-card .card-desc { color: #d1d5db; }
+        .dark .marker-hover-card .card-footer { color: #60a5fa; border-top-color: #374151; }
+      `}</style>
       {/* Custom zoom controls */}
-      <div ref={zoomContainerRef} className="absolute top-16 left-4 z-[1000] flex flex-col gap-1">
-        <button className="custom-zoom-in h-10 w-10 rounded-xl bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white flex items-center justify-center text-xl font-bold transition-colors shadow-md cursor-pointer border-none" aria-label="Zoom in">+</button>
-        <button className="custom-zoom-out h-10 w-10 rounded-xl bg-cyan-500 hover:bg-cyan-600 active:bg-cyan-700 text-white flex items-center justify-center text-xl font-bold transition-colors shadow-md cursor-pointer border-none" aria-label="Zoom out">−</button>
+      <div ref={zoomContainerRef} className="absolute top-24 sm:top-16 right-4 z-[1000] flex flex-col gap-1">
+        <button className="custom-zoom-in h-9 w-9 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 active:from-teal-600 active:to-cyan-700 text-white flex items-center justify-center text-lg font-bold transition-all shadow-md cursor-pointer border-none" aria-label="Zoom in">+</button>
+        <button className="custom-zoom-out h-9 w-9 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 active:from-teal-600 active:to-cyan-700 text-white flex items-center justify-center text-lg font-bold transition-all shadow-md cursor-pointer border-none" aria-label="Zoom out">−</button>
       </div>
       <div ref={containerRef} style={{ height: '100%', width: '100%' }} className="z-0 rounded-lg" />
     </div>

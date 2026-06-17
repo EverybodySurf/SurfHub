@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { SurfSpot, guadeloupeSurfSpots } from '@/data/surf-spots-guadeloupe';
 import { Amenity, guadeloupeAmenities, amenityColors, amenityTypeLabels } from '@/data/amenities-guadeloupe';
 import { MapPin, Waves, Search, X, SlidersHorizontal, Coffee, UtensilsCrossed, ShoppingBag, Fuel, Building2, Waves as WaveIcon, Car, Bed } from 'lucide-react';
+import { AmenityRating } from '@/components/amenity-rating';
 import { cn } from '@/lib/utils';
 
 // Dynamically import the unified map
@@ -34,10 +35,10 @@ const amenityFilterIcons: Record<string, React.ReactNode> = {
 };
 
 const difficultyColors: Record<string, string> = {
-  beginner: 'bg-green-100 text-green-800 border-green-200',
-  intermediate: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-  advanced: 'bg-orange-100 text-orange-800 border-orange-200',
-  expert: 'bg-red-100 text-red-800 border-red-200',
+  beginner: 'bg-lime-200 text-lime-900 border-lime-300',
+  intermediate: 'bg-yellow-200 text-yellow-900 border-yellow-300',
+  advanced: 'bg-orange-200 text-orange-900 border-orange-300',
+  expert: 'bg-rose-200 text-rose-900 border-rose-300',
 };
 
 const waveTypeIcons: Record<string, string> = {
@@ -90,7 +91,8 @@ export default function ExplorePage() {
 
   // Filter amenities by search + selected types
   const filteredAmenities = useMemo(() => {
-    if (viewMode === 'spots') return [];
+    // In 'spots' mode, only show amenities if amenity type filters are active
+    if (viewMode === 'spots' && selectedTypes.size === 0) return [];
     let list = amenities;
     if (selectedTypes.size > 0) {
       list = list.filter((a) => selectedTypes.has(a.type));
@@ -118,12 +120,20 @@ export default function ExplorePage() {
       // No spots when in amenities-only mode
       return new Set();
     }
+    // When filtering by amenity type, hide spots so filtered amenities are clear
+    if (viewMode === 'all' && selectedTypes.size > 0) {
+      return new Set();
+    }
     return new Set(filteredSpots.map((s) => s.id));
-  }, [filteredSpots, viewMode, selectedAmenity, spots]);
+  }, [filteredSpots, viewMode, selectedAmenity, spots, selectedTypes]);
 
   const visibleAmenityIds = useMemo(() => {
     if (viewMode === 'spots') {
-      // Show amenities for the selected spot, or none
+      // If amenity type filters are active, show filtered amenities alongside spots
+      if (selectedTypes.size > 0) {
+        return new Set(filteredAmenities.map((a) => a.id));
+      }
+      // Show amenities for the selected spot only (default)
       if (selectedSpot) {
         return new Set(
           amenities.filter((a) => a.spotId === selectedSpot.id).map((a) => a.id),
@@ -132,7 +142,7 @@ export default function ExplorePage() {
       return new Set();
     }
     return new Set(filteredAmenities.map((a) => a.id));
-  }, [filteredAmenities, viewMode, selectedSpot, amenities]);
+  }, [filteredAmenities, viewMode, selectedSpot, amenities, selectedTypes]);
 
   // Amenities for selected spot
   const spotAmenities = useMemo(
@@ -178,19 +188,21 @@ export default function ExplorePage() {
       </header>
 
       {/* Map Menu FAB — visible on all screens */}
-      <div className="fixed bottom-6 right-4 z-50 flex flex-col items-end gap-2">
+      <div className="fixed bottom-6 right-4 z-50 flex flex-row items-center gap-3">
         {/* Active filter indicator */}
         {(viewMode !== 'all' || selectedTypes.size > 0 || searchQuery) && (
-          <button
-            onClick={() => { setSearchQuery(''); setViewMode('all'); setSelectedTypes(new Set()); }}
-            className="bg-red-500/90 text-white text-xs px-2.5 py-1 rounded-full shadow-lg backdrop-blur"
-          >
-            Clear filters
-          </button>
+          <div className="rounded-full bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg p-[1.5px]">
+            <button
+              onClick={() => { setSearchQuery(''); setViewMode('all'); setSelectedTypes(new Set()); }}
+              className="bg-white text-black dark:text-white text-xs px-3 py-1.5 rounded-full w-full h-full"
+            >
+              Clear filters
+            </button>
+          </div>
         )}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="h-14 w-14 rounded-full bg-cyan-500 text-white shadow-xl flex items-center justify-center active:scale-95 transition-transform"
+          className="h-14 w-14 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-white shadow-xl flex items-center justify-center active:scale-95 transition-all shrink-0"
         >
           {menuOpen ? <X className="h-6 w-6" /> : <SlidersHorizontal className="h-6 w-6" />}
         </button>
@@ -258,7 +270,7 @@ export default function ExplorePage() {
           {/* View Mode Toggle */}
           <div className="flex rounded-xl border border-border overflow-hidden text-sm font-medium mb-4">
             <button
-              onClick={() => { handleViewModeChange('all'); setMenuOpen(false); }}
+              onClick={() => handleViewModeChange('all')}
               className={cn(
                 'flex-1 py-2.5 text-center transition-colors',
                 viewMode === 'all' ? 'bg-cyan-500/10 text-cyan-500 font-semibold' : 'hover:bg-muted',
@@ -267,7 +279,7 @@ export default function ExplorePage() {
               All
             </button>
             <button
-              onClick={() => { handleViewModeChange('spots'); setMenuOpen(false); }}
+              onClick={() => handleViewModeChange('spots')}
               className={cn(
                 'flex-1 py-2.5 text-center border-x border-border transition-colors',
                 viewMode === 'spots' ? 'bg-cyan-500/10 text-cyan-500 font-semibold' : 'hover:bg-muted',
@@ -276,7 +288,7 @@ export default function ExplorePage() {
               🏄 Spots
             </button>
             <button
-              onClick={() => { handleViewModeChange('amenities'); setMenuOpen(false); }}
+              onClick={() => handleViewModeChange('amenities')}
               className={cn(
                 'flex-1 py-2.5 text-center transition-colors',
                 viewMode === 'amenities' ? 'bg-cyan-500/10 text-cyan-500 font-semibold' : 'hover:bg-muted',
@@ -287,60 +299,68 @@ export default function ExplorePage() {
           </div>
 
           {/* Amenity Filter Chips — Multi-select */}
-          {viewMode !== 'spots' && (
-            <div>
-              <p className="text-xs text-muted-foreground mb-2 font-medium">Filter by type (tap multiple):</p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  onClick={() => setSelectedTypes(new Set())}
-                  className={cn(
-                    'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
-                    selectedTypes.size === 0
-                      ? 'bg-primary/10 border-primary/30 text-primary'
-                      : 'border-border hover:bg-muted',
-                  )}
-                >
-                  All
-                </button>
-                {amenityTypes.map((type) => {
-                  const isActive = selectedTypes.has(type);
-                  return (
-                    <button
-                      key={type}
-                      onClick={() => {
-                        const next = new Set(selectedTypes);
-                        if (next.has(type)) next.delete(type); else next.add(type);
-                        setSelectedTypes(next);
-                      }}
-                      className={cn(
-                        'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex items-center gap-1',
-                        isActive
-                          ? 'bg-primary/10 border-primary/30 text-primary'
-                          : 'border-border hover:bg-muted',
-                      )}
-                    >
-                      {amenityFilterIcons[type]}
-                      {amenityTypeLabels[type] || type}
-                    </button>
-                  );
-                })}
-              </div>
+          <div>
+            <p className="text-xs text-muted-foreground mb-2 font-medium">Filter by type (tap multiple):</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => {
+                  if (selectedTypes.size === 0) {
+                    // Deselect All — populate with all types so chips light up individually
+                    setSelectedTypes(new Set(amenityTypes));
+                  } else {
+                    // Select All — clear all selections
+                    setSelectedTypes(new Set());
+                  }
+                }}
+                className={cn(
+                  'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors',
+                  selectedTypes.size === 0
+                    ? 'bg-primary/10 border-primary/30 text-primary'
+                    : 'border-border hover:bg-muted',
+                )}
+              >
+                All/None
+              </button>
+              {amenityTypes.map((type) => {
+                const isActive = selectedTypes.has(type);
+                return (
+                  <button
+                    key={type}
+                    onClick={() => {
+                      const next = new Set(selectedTypes);
+                      if (next.has(type)) next.delete(type); else next.add(type);
+                      setSelectedTypes(next);
+                    }}
+                    className={cn(
+                      'px-3 py-1.5 rounded-full text-xs font-medium border transition-colors flex items-center gap-1',
+                      isActive
+                        ? 'bg-primary/10 border-primary/30 text-primary'
+                        : 'border-border hover:bg-muted',
+                    )}
+                  >
+                    {amenityFilterIcons[type]}
+                    {amenityTypeLabels[type] || type}
+                  </button>
+                );
+              })}
             </div>
-          )}
+          </div>
 
           {/* Action buttons row */}
           <div className="mt-5 flex gap-3">
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setViewMode('all');
-                setSelectedTypes(new Set());
-                setMenuOpen(false);
-              }}
-              className="flex-1 py-2.5 rounded-xl border-2 border-red-400 text-sm font-medium hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
-            >
-              Clear all
-            </button>
+            <div className="flex-1 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 p-[1.5px]">
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setViewMode('all');
+                  setSelectedTypes(new Set());
+                  // Keep menu open so user can continue filtering
+                }}
+                className="w-full py-2.5 rounded-xl bg-white dark:bg-gray-900 text-sm font-medium text-black dark:text-white hover:bg-pink-50 dark:hover:bg-pink-950/20 transition-colors"
+              >
+                Clear all
+              </button>
+            </div>
             <button
               onClick={() => setMenuOpen(false)}
               className="flex-[2] py-2.5 rounded-xl bg-cyan-500 text-white font-medium text-sm active:scale-[0.98] transition-transform"
@@ -379,108 +399,124 @@ export default function ExplorePage() {
         {/* Detail panel backdrop */}
         {(selectedSpot || selectedAmenity) && (
           <div
-            className="fixed inset-0 top-0 z-20 bg-black/20 backdrop-blur-[1px]"
+            className="fixed inset-0 top-0 z-[1050] bg-black/20 backdrop-blur-[1px]"
             onClick={handleClearSelection}
           />
         )}
 
         {/* Detail Panel — overlays map when something is selected */}
         <aside className={cn(
-          'fixed right-0 top-0 bottom-0 z-30 w-full sm:w-96 bg-card/95 backdrop-blur-lg border-l border-border shadow-2xl overflow-y-auto transition-transform duration-300',
+          'fixed right-0 top-16 bottom-0 z-[1060] w-full sm:w-96 bg-card/95 backdrop-blur-lg border-l border-border shadow-2xl overflow-y-auto transition-transform duration-300',
           selectedSpot || selectedAmenity ? 'translate-x-0' : 'translate-x-full',
         )}>
           {/* Detail View */}
           {selectedSpot && (
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold flex items-center gap-2">
-                  <span>{waveTypeIcons[selectedSpot.waveType]}</span>
-                  {selectedSpot.name}
-                </h2>
-                <button
-                  onClick={handleClearSelection}
-                  className="p-1 rounded-lg hover:bg-muted transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Quick Info Tags */}
-              <div className="flex flex-wrap gap-2 mb-3">
-                <span className={cn(
-                  'px-2 py-0.5 rounded-full text-xs font-medium border',
-                  difficultyColors[selectedSpot.difficulty],
-                )}>
-                  {selectedSpot.difficulty}
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
-                  {selectedSpot.waveType.replace('-', ' ')}
-                </span>
-                {selectedSpot.location.region && (
-                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 border border-gray-200">
-                    {selectedSpot.location.region}
-                  </span>
-                )}
-              </div>
-
-              {selectedSpot.beachName && (
-                <p className="text-sm text-muted-foreground mb-2">{selectedSpot.beachName}</p>
-              )}
-
-              <p className="text-sm mb-4">{selectedSpot.description}</p>
-
-              {/* Spot Details Grid */}
-              <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-                <div className="p-2 rounded-lg bg-muted/50">
-                  <span className="text-xs text-muted-foreground block">Wave Type</span>
-                  <span className="font-medium capitalize">{selectedSpot.waveType.replace('-', ' ')}</span>
-                </div>
-                <div className="p-2 rounded-lg bg-muted/50">
-                  <span className="text-xs text-muted-foreground block">Difficulty</span>
-                  <span className="font-medium capitalize">{selectedSpot.difficulty}</span>
-                </div>
-                {selectedSpot.bestSeason && (
-                  <div className="p-2 rounded-lg bg-muted/50">
-                    <span className="text-xs text-muted-foreground block">Best Season</span>
-                    <span className="font-medium">{selectedSpot.bestSeason}</span>
+            <div>
+              {/* Gradient accent bar */}
+              <div className="h-1 bg-gradient-to-r from-teal-400 to-cyan-500" />
+              
+              <div className="p-4">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-lg shadow-md">
+                      {waveTypeIcons[selectedSpot.waveType]}
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold leading-tight">{selectedSpot.name}</h2>
+                      {selectedSpot.beachName && (
+                        <p className="text-xs text-muted-foreground">{selectedSpot.beachName}</p>
+                      )}
+                    </div>
                   </div>
-                )}
-                {selectedSpot.swellDirection && (
-                  <div className="p-2 rounded-lg bg-muted/50">
-                    <span className="text-xs text-muted-foreground block">Swell Dir.</span>
-                    <span className="font-medium">{selectedSpot.swellDirection}</span>
-                  </div>
-                )}
-                <div className="p-2 rounded-lg bg-muted/50 col-span-2">
-                  <span className="text-xs text-muted-foreground block">Coordinates</span>
-                  <span className="font-medium font-mono text-xs">
-                    {selectedSpot.location.lat.toFixed(4)}, {selectedSpot.location.lon.toFixed(4)}
+                  <button
+                    onClick={handleClearSelection}
+                    className="p-1.5 rounded-xl hover:bg-muted transition-colors group"
+                  >
+                    <X className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </button>
+                </div>
+
+                {/* Quick Info Tags */}
+                <div className="flex flex-wrap gap-1.5 mb-4">
+                  <span className={cn(
+                    'px-2.5 py-0.5 rounded-full text-xs font-medium border',
+                    difficultyColors[selectedSpot.difficulty],
+                  )}>
+                    {selectedSpot.difficulty}
                   </span>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-br from-teal-400/10 to-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-teal-200 dark:border-teal-800">
+                    {selectedSpot.waveType.replace('-', ' ')}
+                  </span>
+                  {selectedSpot.location.region && (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                      {selectedSpot.location.region}
+                    </span>
+                  )}
+                </div>
+
+                {/* Description */}
+                <div className="p-3 rounded-xl bg-muted/80 mb-4">
+                  <p className="text-sm leading-relaxed text-foreground/80">{selectedSpot.description}</p>
+                </div>
+
+                {/* Spot Details Grid */}
+                <div className="grid grid-cols-2 gap-2.5 text-sm mb-4">
+                  <div className="p-3 rounded-xl bg-muted/70">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Wave Type</span>
+                    <span className="font-semibold capitalize">{selectedSpot.waveType.replace('-', ' ')}</span>
+                  </div>
+                  <div className="p-3 rounded-xl bg-muted/70">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Difficulty</span>
+                    <span className="font-semibold capitalize">{selectedSpot.difficulty}</span>
+                  </div>
+                  {selectedSpot.bestSeason && (
+                    <div className="p-3 rounded-xl bg-muted/70">
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Best Season</span>
+                      <span className="font-semibold">{selectedSpot.bestSeason}</span>
+                    </div>
+                  )}
+                  {selectedSpot.swellDirection && (
+                    <div className="p-3 rounded-xl bg-muted/70">
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Swell Dir.</span>
+                      <span className="font-semibold">{selectedSpot.swellDirection}</span>
+                    </div>
+                  )}
+                  <div className="p-3 rounded-xl bg-muted/70 col-span-2">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Coordinates</span>
+                    <span className="font-semibold font-mono text-xs">
+                      {selectedSpot.location.lat.toFixed(4)}, {selectedSpot.location.lon.toFixed(4)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Nearby Amenities */}
               {spotAmenities.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-cyan-400" />
-                    Nearby Amenities ({spotAmenities.length})
-                  </h3>
+                <div className="mb-2">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="h-px flex-1 bg-gradient-to-r from-teal-400/30 to-transparent" />
+                    <h3 className="text-xs font-semibold flex items-center gap-1.5 text-muted-foreground">
+                      <MapPin className="h-3.5 w-3.5 text-cyan-400" />
+                      Nearby Amenities ({spotAmenities.length})
+                    </h3>
+                    <div className="h-px flex-1 bg-gradient-to-l from-teal-400/30 to-transparent" />
+                  </div>
                   <div className="space-y-2">
                     {spotAmenities.map((amenity) => (
                       <button
                         key={amenity.id}
                         onClick={() => handleAmenitySelect(amenity)}
-                        className="w-full flex items-start gap-2.5 p-2.5 rounded-lg border border-border hover:bg-muted transition-colors text-left"
+                        className="w-full flex items-start gap-3 p-3 rounded-xl border border-border/60 hover:border-teal-400/30 hover:bg-gradient-to-r hover:from-teal-400/[0.03] hover:to-transparent transition-all text-left group"
                       >
                         <div className={cn(
-                          'w-8 h-8 rounded-full flex items-center justify-center text-sm shrink-0',
+                          'w-9 h-9 rounded-xl flex items-center justify-center text-sm shrink-0 shadow-sm',
                           amenityColors[amenity.type],
                         )}>
                           {amenityFilterIcons[amenity.type] || <Building2 className="h-4 w-4" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{amenity.name}</p>
+                          <p className="text-sm font-medium truncate group-hover:text-foreground transition-colors">{amenity.name}</p>
                           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                             <span>{amenityTypeLabels[amenity.type] || amenity.type}</span>
                             {amenity.distanceFromSpot && (
@@ -498,7 +534,7 @@ export default function ExplorePage() {
               )}
 
               {spotAmenities.length === 0 && (
-                <p className="text-xs text-muted-foreground italic mt-2">
+                <p className="text-xs text-muted-foreground italic mt-2 mb-2">
                   No amenity data yet for this spot.
                 </p>
               )}
@@ -507,60 +543,94 @@ export default function ExplorePage() {
 
           {/* Amenity Detail View */}
           {selectedAmenity && !selectedSpot && (
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold">{selectedAmenity.name}</h2>
-                <button
-                  onClick={handleClearSelection}
-                  className="p-1 rounded-lg hover:bg-muted transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-2 mb-3">
-                <span className={cn(
-                  'px-2 py-0.5 rounded-full text-xs font-medium',
-                  amenityColors[selectedAmenity.type],
-                )}>
-                  {amenityTypeLabels[selectedAmenity.type] || selectedAmenity.type}
-                </span>
-              </div>
-
-              {selectedAmenity.address && (
-                <p className="text-sm text-muted-foreground mb-2">{selectedAmenity.address}</p>
-              )}
-              {selectedAmenity.notes && (
-                <p className="text-sm mb-3">{selectedAmenity.notes}</p>
-              )}
-              {selectedAmenity.distanceFromSpot && (
-                <p className="text-sm text-muted-foreground mb-3">
-                  📍 {selectedAmenity.distanceFromSpot} from surf spot
-                </p>
-              )}
-
-              {/* Link to parent surf spot */}
-              {parentSpot && (
-                <button
-                  onClick={() => handleSpotSelect(parentSpot)}
-                  className="w-full flex items-center gap-2 p-3 rounded-lg border border-border bg-muted/50 hover:bg-muted transition-colors text-left mt-2"
-                >
-                  <span className="text-lg">{waveTypeIcons[parentSpot.waveType]}</span>
-                  <div>
-                    <p className="text-sm font-medium">Near: {parentSpot.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {parentSpot.difficulty} • {parentSpot.waveType.replace('-', ' ')} • {parentSpot.location.region}
-                    </p>
+            <div>
+              {/* Gradient accent bar */}
+              <div className="h-1 bg-gradient-to-r from-teal-400 to-cyan-500" />
+              
+              <div className="p-4">
+                {/* Header */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      'w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-md',
+                      amenityColors[selectedAmenity.type],
+                    )}>
+                      {amenityFilterIcons[selectedAmenity.type] || <Building2 className="h-5 w-5" />}
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-bold leading-tight">{selectedAmenity.name}</h2>
+                      <p className="text-xs text-muted-foreground">{selectedAmenity.type}</p>
+                    </div>
                   </div>
-                  <MapPin className="h-4 w-4 text-cyan-400 ml-auto shrink-0" />
-                </button>
-              )}
+                  <button
+                    onClick={handleClearSelection}
+                    className="p-1.5 rounded-xl hover:bg-muted transition-colors group"
+                  >
+                    <X className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </button>
+                </div>
 
-              <div className="mt-4 p-2 rounded-lg bg-muted/50">
-                <span className="text-xs text-muted-foreground block">Coordinates</span>
-                <span className="font-medium font-mono text-xs">
-                  {selectedAmenity.location.lat.toFixed(4)}, {selectedAmenity.location.lon.toFixed(4)}
-                </span>
+                {/* Type tag */}
+                <div className="flex items-center gap-2 mb-4">
+                  <span className={cn(
+                    'px-2.5 py-0.5 rounded-full text-xs font-medium',
+                    amenityColors[selectedAmenity.type],
+                  )}>
+                    {amenityTypeLabels[selectedAmenity.type] || selectedAmenity.type}
+                  </span>
+                </div>
+
+                {/* Info cards */}
+                <div className="space-y-2.5 mb-4">
+                  {selectedAmenity.address && (
+                    <div className="p-3 rounded-xl bg-muted/70">
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Address</span>
+                      <p className="text-sm">{selectedAmenity.address}</p>
+                    </div>
+                  )}
+                  {selectedAmenity.notes && (
+                    <div className="p-3 rounded-xl bg-muted/70">
+                      <p className="text-sm">{selectedAmenity.notes}</p>
+                    </div>
+                  )}
+                  {selectedAmenity.distanceFromSpot && (
+                    <div className="p-3 rounded-xl bg-muted/70">
+                      <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Distance</span>
+                      <p className="text-sm">📍 {selectedAmenity.distanceFromSpot} from surf spot</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Rating & Verification */}
+                {selectedAmenity && (
+                  <AmenityRating amenityId={selectedAmenity.id} amenityName={selectedAmenity.name} />
+                )}
+
+                {/* Link to parent surf spot */}
+                {parentSpot && (
+                  <button
+                    onClick={() => handleSpotSelect(parentSpot)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl border border-border bg-gradient-to-br from-teal-400/5 to-cyan-500/5 hover:from-teal-400/10 hover:to-cyan-500/10 transition-all text-left mb-3"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-sm shadow-sm shrink-0">
+                      {waveTypeIcons[parentSpot.waveType]}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium">Near: {parentSpot.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {parentSpot.difficulty} • {parentSpot.waveType.replace('-', ' ')} • {parentSpot.location.region}
+                      </p>
+                    </div>
+                    <MapPin className="h-4 w-4 text-cyan-400 shrink-0" />
+                  </button>
+                )}
+
+                <div className="p-3 rounded-xl bg-muted/70">
+                  <span className="text-[10px] uppercase tracking-wider text-muted-foreground block mb-0.5">Coordinates</span>
+                  <span className="font-semibold font-mono text-xs">
+                    {selectedAmenity.location.lat.toFixed(4)}, {selectedAmenity.location.lon.toFixed(4)}
+                  </span>
+                </div>
               </div>
             </div>
           )}
