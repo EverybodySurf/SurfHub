@@ -110,11 +110,11 @@ export default function SwellForecastClient({
   const getWeatherIcon = (weatherSummary: string) => {
     const weather = weatherSummary.toLowerCase();
     if (weather.includes('rain') || weather.includes('storm')) {
-      return <CloudRain className="h-8 w-8 text-blue-600" />;
+      return <CloudRain className="h-8 w-8 text-cyan-500" />;
     } else if (weather.includes('cloud') || weather.includes('overcast')) {
-      return <Cloud className="h-8 w-8 text-gray-600" />;
+      return <Cloud className="h-8 w-8 text-teal-400" />;
     } else {
-      return <Sun className="h-8 w-8 text-yellow-500" />;
+      return <Sun className="h-8 w-8 text-emerald-400" />;
     }
   };
 
@@ -129,7 +129,7 @@ export default function SwellForecastClient({
           <Card className="lg:col-span-1">
             <CardHeader className="pb-4">
               <CardTitle className="text-2xl flex items-center gap-2 text-card-foreground">
-                <MapPin className="h-8 w-8 text-card-foreground" />
+                <MapPin className="h-8 w-8 text-cyan-400" />
                 Search
               </CardTitle>
             </CardHeader>
@@ -142,10 +142,10 @@ export default function SwellForecastClient({
                       placeholder="Enter surf spot or location..."
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      className="w-full"
+                      className="w-full bg-muted/60 border-0 rounded-xl focus:ring-2 focus:ring-teal-400/50"
                       disabled={isLoading}
                     />
-                    <Button type="submit" disabled={isLoading} className="w-full">
+                    <Button type="submit" disabled={isLoading} variant="gradient" className="w-full">
                       <Search className="h-4 w-4 mr-2" />
                       {isLoading ? 'Searching...' : 'Search'}
                     </Button>
@@ -205,10 +205,10 @@ export default function SwellForecastClient({
                 placeholder="Enter surf spot or location..."
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className="flex-1"
+                className="flex-1 bg-muted/60 border-0 rounded-xl focus:ring-2 focus:ring-teal-400/50"
                 disabled={isLoading}
               />
-              <Button type="submit" disabled={isLoading}>
+              <Button type="submit" disabled={isLoading} className="bg-gradient-to-r from-pink-400 to-purple-500 text-white hover:from-pink-500 hover:to-purple-600">
                 <Search className="h-4 w-4 mr-2" />
                 {isLoading ? 'Searching...' : 'Search'}
               </Button>

@@ -17,18 +17,18 @@ export default function SwellForecasterPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
+    <div className="container mx-auto px-4 pt-24 md:pt-28 pb-8 md:pb-12">
       {/* Page title - conditional rendering based on forecast state */}
       {!hasForecast ? (
         <div className="flex flex-col items-center text-center mb-12">
-          <BarChart3 className="h-16 w-16 text-primary mb-4" />
+          <BarChart3 className="h-16 w-16 text-cyan-400 mb-4" />
           <h2 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Surf Reports
           </h2>
         </div>
       ) : (
         <div className="flex items-center gap-3 mb-6 animate-in slide-in-from-top-2 duration-500 px-4">
-          <BarChart3 className="h-8 w-8 text-primary" />
+          <BarChart3 className="h-8 w-8 text-cyan-400" />
           <h1 className="text-3xl font-bold text-foreground">Surf Reports</h1>
         </div>
       )}

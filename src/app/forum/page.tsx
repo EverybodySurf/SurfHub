@@ -13,7 +13,7 @@ export default function ForumPage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="flex flex-col items-center text-center mb-12">
-        <Users className="h-16 w-16 text-primary mb-4" />
+        <Users className="h-16 w-16 text-cyan-400 mb-4" />
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
           Community Forum
         </h1>
@@ -42,7 +42,7 @@ export default function ForumPage() {
         <p className="mt-2 text-muted-foreground mb-6">
           We are building a space for you to connect, learn, and share the stoke.
         </p>
-        <Button asChild size="lg">
+        <Button asChild size="lg" variant="gradient">
           <Link href="/">Back to Home</Link>
         </Button>
       </div>

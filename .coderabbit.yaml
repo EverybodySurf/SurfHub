@@ -1,0 +1,24 @@
+# CodeRabbit Configuration
+# https://docs.coderabbit.ai/guides/configure-coderabbit
+
+reviews:
+  profile: chill
+  base_branches:
+    - staging
+    - main
+  review_status: true
+  auto_review:
+    enabled: true
+    drafts: false
+  poem: false
+  path_filters:
+    - "!node_modules/**"
+    - "!.next/**"
+    - "!dist/**"
+    - "!build/**"
+chat:
+  auto_reply: true
+knowledge_base:
+  learnings:
+    scope: local
+  usage: false

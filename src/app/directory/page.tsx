@@ -41,7 +41,7 @@ export default function DirectoryPage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="flex flex-col items-center text-center mb-12">
-        <List className="h-16 w-16 text-primary mb-4" />
+        <List className="h-16 w-16 text-cyan-400 mb-4" />
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
           Surf Directory
         </h1>
@@ -58,7 +58,7 @@ export default function DirectoryPage() {
             </div>
             <CardHeader>
               <div className="flex items-center mb-2">
-                <category.icon className="h-8 w-8 text-primary mr-3" />
+                <category.icon className="h-8 w-8 text-cyan-400 mr-3" />
                 <CardTitle className="text-2xl">{category.name}</CardTitle>
               </div>
             </CardHeader>
@@ -66,7 +66,7 @@ export default function DirectoryPage() {
               <p className="text-muted-foreground">{category.description}</p>
             </CardContent>
             <CardContent className="mt-auto">
-              <Button asChild className="w-full">
+              <Button asChild variant="gradient" className="w-full">
                 <Link href={category.href}>Explore {category.name}</Link>
               </Button>
             </CardContent>

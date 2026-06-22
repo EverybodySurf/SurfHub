@@ -93,7 +93,7 @@ function LoginContent() {
                   <Label htmlFor="password">Password</Label>
                   <Input id="password" name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
                 </div>
-                <Button className="w-full" type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Log In'}</Button>
+                <Button variant="gradient" className="w-full" type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Log In'}</Button>
                 {error && <div className="text-red-500">{error}</div>}
               </form>
             </TabsContent>
@@ -107,7 +107,7 @@ function LoginContent() {
                   <Label htmlFor="password">Password</Label>
                   <Input id="password" name="password" type="password" required value={password} onChange={e => setPassword(e.target.value)} />
                 </div>
-                <Button className="w-full" type="submit" disabled={loading}>{loading ? 'Signing up...' : 'Sign Up'}</Button>
+                <Button variant="gradient" className="w-full" type="submit" disabled={loading}>{loading ? 'Signing up...' : 'Sign Up'}</Button>
                 {error && <div className="text-red-500">{error}</div>}
               </form>
             </TabsContent>

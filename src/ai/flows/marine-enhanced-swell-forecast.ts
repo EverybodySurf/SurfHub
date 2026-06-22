@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { ai } from '../genkit';
 import { SurfQualityCalculator, SURF_SPOTS, type SurfConditions, type SpotConfiguration } from '../../lib/surf-quality-calculator';
-import GlobalMarineDataService, { type MarineConditions } from '../../lib/global-marine-data';
+import { MarineDataManager, type MarineConditions } from '../../lib/marine';
 
 // Input schema - just needs location
 const MarineEnhancedInputSchema = z.object({
@@ -20,10 +20,10 @@ const MarineEnhancedOutputSchema = z.object({
   
   // Real marine data
       marineData: z.object({
-        waveHeight: z.number().describe('Significant wave height in meters'),
-        primarySwellHeight: z.number().describe('Primary swell height in meters'),
-        primarySwellPeriod: z.number().describe('Primary swell period in seconds'), 
-        primarySwellDirection: z.number().describe('Primary swell direction in degrees'),
+        waveHeight: z.number().optional().describe('Significant wave height in meters'),
+        primarySwellHeight: z.number().optional().describe('Primary swell height in meters'),
+        primarySwellPeriod: z.number().optional().describe('Primary swell period in seconds'), 
+        primarySwellDirection: z.number().optional().describe('Primary swell direction in degrees'),
         secondarySwellHeight: z.number().optional().describe('Secondary swell height in meters'),
         secondarySwellPeriod: z.number().optional().describe('Secondary swell period in seconds'),
         secondarySwellDirection: z.number().optional().describe('Secondary swell direction in degrees'),
@@ -31,8 +31,8 @@ const MarineEnhancedOutputSchema = z.object({
         windWavePeriod: z.number().optional().describe('Wind wave period in seconds'),
         windWaveDirection: z.number().optional().describe('Wind wave direction in degrees'),
         seaTemperature: z.number().optional().describe('Sea surface temperature in Celsius'),
-        windSpeed: z.number().describe('Wind speed in m/s'),
-        windDirection: z.number().describe('Wind direction in degrees'),
+        windSpeed: z.number().optional().describe('Wind speed in m/s'),
+        windDirection: z.number().optional().describe('Wind direction in degrees'),
         // New oceanographic data
         currentHeight: z.number().optional().describe('Current tide height in meters'),
         nextHighTide: z.string().optional().describe('Time of next high tide'),
@@ -65,11 +65,11 @@ const MarineEnhancedOutputSchema = z.object({
 // Function to convert marine data to surf conditions
 function marineDataToSurfConditions(marine: MarineConditions): SurfConditions {
   return {
-    waveHeight: marine.waves.significantHeight,
-    wavePeriod: marine.waves.primarySwellPeriod,
-    swellDirection: marine.waves.primarySwellDirection,
-    windSpeed: marine.wind.speed,
-    windDirection: marine.wind.direction,
+    waveHeight: marine.waves.significantHeight ?? 0,
+    wavePeriod: marine.waves.primarySwellPeriod ?? 0,
+    swellDirection: marine.waves.primarySwellDirection ?? 0,
+    windSpeed: marine.wind.speed ?? 0,
+    windDirection: marine.wind.direction ?? 0,
     location: marine.location.name,
   };
 }
@@ -156,25 +156,64 @@ export const marineEnhancedSwellForecastFlow = ai.defineFlow(
       const stormglassApiKey = process.env.STORMGLASS_API_KEY;
       const worldWeatherApiKey = process.env.WORLD_WEATHER_API_KEY;
       
-      if (!openWeatherApiKey) {
-        throw new Error('OpenWeather API key not configured');
+      let marineConditions: MarineConditions;
+      let coordinates: { lat: number; lon: number };
+
+      if (openWeatherApiKey) {
+        // Full marine data manager with all available sources
+        const marineService = new MarineDataManager(
+          openWeatherApiKey,
+          stormglassApiKey,
+          worldWeatherApiKey
+        );
+        coordinates = await marineService.getLocationCoordinates(input.location);
+        marineConditions = await marineService.getMarineConditions(
+          coordinates.lat,
+          coordinates.lon,
+          input.location
+        );
+      } else {
+        // No API keys — use free Open-Meteo marine API directly
+        console.log('Using Open-Meteo free marine API (no API key needed)');
+        
+        // Geocode location via free Open-Meteo API
+        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(input.location)}&count=1&language=en&format=json`);
+        const geoData = await geoRes.json();
+        if (!geoData.results?.length) throw new Error(`Location "${input.location}" not found`);
+        coordinates = { lat: geoData.results[0].latitude, lon: geoData.results[0].longitude };
+        
+        // Fetch marine data from free Open-Meteo API
+        const params = [
+          'wave_height', 'wave_direction', 'wave_period',
+          'swell_wave_height', 'swell_wave_direction', 'swell_wave_period',
+          'secondary_swell_wave_height', 'secondary_swell_wave_period', 'secondary_swell_wave_direction',
+          'sea_surface_temperature',
+        ].join(',');
+        const marineRes = await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${coordinates.lat}&longitude=${coordinates.lon}&current=${params}&timezone=auto`);
+        if (!marineRes.ok) throw new Error(`Open-Meteo API error: ${marineRes.status}`);
+        const current = (await marineRes.json()).current;
+        if (!current) throw new Error('No marine data available');
+
+        marineConditions = {
+          location: { name: input.location, lat: coordinates.lat, lon: coordinates.lon },
+          waves: {
+            significantHeight: current.wave_height ?? 1.0,
+            primarySwellHeight: current.swell_wave_height ?? current.wave_height ?? 1.0,
+            primarySwellPeriod: current.swell_wave_period ?? current.wave_period ?? 8,
+            primarySwellDirection: current.swell_wave_direction ?? current.wave_direction ?? 225,
+            secondarySwellHeight: current.secondary_swell_wave_height ?? undefined,
+            secondarySwellPeriod: current.secondary_swell_wave_period ?? undefined,
+            secondarySwellDirection: current.secondary_swell_wave_direction ?? undefined,
+            windWaveHeight: undefined,
+            windWavePeriod: undefined,
+            windWaveDirection: undefined,
+          },
+          wind: { speed: 5, direction: 270 },
+          weather: { temperature: current.sea_surface_temperature ?? 20, pressure: 1013, humidity: 70, visibility: 10000, description: 'Marine conditions' },
+          dataSource: 'openmeteo',
+          timestamp: new Date().toISOString(),
+        };
       }
-      
-      const marineService = new GlobalMarineDataService(
-        openWeatherApiKey,
-        stormglassApiKey,
-        worldWeatherApiKey
-      );
-      
-      // Get location coordinates
-      const coordinates = await marineService.getLocationCoordinates(input.location);
-      
-      // Get marine conditions
-      const marineConditions = await marineService.getMarineConditions(
-        coordinates.lat,
-        coordinates.lon,
-        input.location
-      );
       
       // Convert to surf conditions format
       const surfConditions = marineDataToSurfConditions(marineConditions);
@@ -189,15 +228,16 @@ export const marineEnhancedSwellForecastFlow = ai.defineFlow(
       );
       
       // Generate enhanced AI analysis
+      const fmt = (v: number | undefined | null, decimals = 1) => v != null ? v.toFixed(decimals) : 'N/A';
       const prompt = `
         Analyze the surf conditions for ${input.location} using real marine data:
         
         MARINE CONDITIONS (from ${marineConditions.dataSource.toUpperCase()}):
-        - Significant Wave Height: ${marineConditions.waves.significantHeight.toFixed(1)}m
-        - Primary Swell: ${marineConditions.waves.primarySwellHeight.toFixed(1)}m @ ${marineConditions.waves.primarySwellPeriod}s from ${marineConditions.waves.primarySwellDirection}°
-        - Wind Waves: ${marineConditions.waves.windWaveHeight.toFixed(1)}m @ ${marineConditions.waves.windWavePeriod}s
-        - Wind: ${marineConditions.wind.speed.toFixed(1)} m/s from ${marineConditions.wind.direction}°
-        - Weather: ${marineConditions.weather.description}, ${marineConditions.weather.temperature}°C
+        - Significant Wave Height: ${fmt(marineConditions.waves.significantHeight)}m
+        - Primary Swell: ${fmt(marineConditions.waves.primarySwellHeight)}m @ ${fmt(marineConditions.waves.primarySwellPeriod)}s from ${fmt(marineConditions.waves.primarySwellDirection)}°
+        - Wind Waves: ${fmt(marineConditions.waves.windWaveHeight)}m @ ${fmt(marineConditions.waves.windWavePeriod)}s
+        - Wind: ${fmt(marineConditions.wind.speed)} m/s from ${fmt(marineConditions.wind.direction)}°
+        - Weather: ${marineConditions.weather.description}, ${fmt(marineConditions.weather.temperature)}°C
         
         SURF SPOT ANALYSIS:
         - Spot Type: ${spotConfig.type}
@@ -216,17 +256,38 @@ export const marineEnhancedSwellForecastFlow = ai.defineFlow(
         Mention the data source quality and any limitations. Give recommendations for different skill levels.
       `;
 
-      const aiResponse = await ai.generate({
-        prompt: prompt,
-        model: 'googleai/gemini-1.5-flash',
-      });
+      // Try AI text generation — fall back to template when quota exceeded
+      let aiText: string;
+      try {
+        const aiResponse = await ai.generate({
+          prompt: prompt,
+          model: 'googleai/gemini-2.0-flash',
+        });
+        aiText = aiResponse.text;
+      } catch (aiError: any) {
+        console.log('AI generation unavailable — using template-based forecast');
+        // Generate template-based forecast from real marine data
+        const waveQual = surfQuality.breakdown.waveHeight > 0.6 ? 'good' : surfQuality.breakdown.waveHeight > 0.3 ? 'moderate' : 'small';
+        const windQual = surfQuality.breakdown.wind > 0.6 ? 'favorable' : surfQuality.breakdown.wind > 0.3 ? 'marginal' : 'poor';
+        aiText = [
+          `Surf report for ${input.location}`,
+          `Wave height: ${fmt(marineConditions.waves.significantHeight)}m, period ${fmt(marineConditions.waves.primarySwellPeriod)}s`,
+          `Swell direction: ${fmt(marineConditions.waves.primarySwellDirection)}°, ${waveQual} waves`,
+          `Wind: ${fmt(marineConditions.wind.speed)} m/s from ${fmt(marineConditions.wind.direction)}°, ${windQual}`,
+          `Sea temperature: ${fmt(marineConditions.weather.temperature)}°C`,
+          `Overall surfability: ${surfQuality.overallScore}/10 — ${surfQuality.rating}`,
+          surfQuality.description,
+          marineConditions.waves.secondarySwellHeight ? `Secondary swell: ${fmt(marineConditions.waves.secondarySwellHeight)}m` : '',
+          `Data source: ${marineConditions.dataSource.toUpperCase()}`,
+        ].filter(Boolean).join('. ');
+      }
 
       return {
         location: input.location,
-        conditions: aiResponse.text,
+        conditions: aiText,
         recommendation: surfQuality.description,
-        windConditions: `${marineConditions.wind.speed.toFixed(1)} m/s from ${marineConditions.wind.direction}° (${surfQuality.breakdown.wind > 0.7 ? 'Favorable' : surfQuality.breakdown.wind > 0.4 ? 'Marginal' : 'Poor'})`,
-        weatherSummary: `${marineConditions.weather.description}, ${marineConditions.weather.temperature}°C`,
+        windConditions: `${fmt(marineConditions.wind.speed)} m/s from ${fmt(marineConditions.wind.direction)}° (${surfQuality.breakdown.wind > 0.7 ? 'Favorable' : surfQuality.breakdown.wind > 0.4 ? 'Marginal' : 'Poor'})`,
+        weatherSummary: `${marineConditions.weather.description}, ${fmt(marineConditions.weather.temperature)}°C`,
         surfabilityScore: surfQuality.overallScore,
         
         marineData: {
@@ -279,12 +340,12 @@ export const marineEnhancedSwellForecastFlow = ai.defineFlow(
         surfabilityScore: 5,
         
         marineData: {
-          waveHeight: 1.0,
-          primarySwellHeight: 0.8,
-          primarySwellPeriod: 8,
-          primarySwellDirection: 180,
-          windSpeed: 5,
-          windDirection: 270,
+          waveHeight: undefined,
+          primarySwellHeight: undefined,
+          primarySwellPeriod: undefined,
+          primarySwellDirection: undefined,
+          windSpeed: undefined,
+          windDirection: undefined,
           dataSource: 'unavailable',
         },
         

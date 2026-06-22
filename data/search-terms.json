@@ -1,0 +1,13 @@
+{
+  "sources": {
+    "unsplash-surfing": {
+      "searchQuery": "Surfing & Ocean Style",
+      "active": true
+    },
+    "pexels-surfing": {
+      "searchQuery": "Surfing & Ocean Style",
+      "active": true
+    }
+  },
+  "lastUpdated": null
+}

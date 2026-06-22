@@ -13,7 +13,7 @@ export default function MarketplacePage() {
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <div className="flex flex-col items-center text-center mb-12">
-        <ShoppingBag className="h-16 w-16 text-primary mb-4" />
+        <ShoppingBag className="h-16 w-16 text-cyan-400 mb-4" />
         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
           Community Marketplace
         </h1>
@@ -42,7 +42,7 @@ export default function MarketplacePage() {
         <p className="mt-2 text-muted-foreground mb-6">
           Whether you're looking for a new board or offering lessons, this will be your go-to spot.
         </p>
-         <Button asChild size="lg">
+         <Button asChild size="lg" variant="gradient">
           <Link href="/">Return Home</Link>
         </Button>
       </div>
