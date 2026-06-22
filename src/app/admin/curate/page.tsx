@@ -166,7 +166,7 @@ export default function CuratePage() {
   }
   
   return (
-    <div className="min-h-screen bg-background p-8">
+    <div className="min-h-screen bg-background px-8 pt-24 pb-8">
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-8">
         <h1 className="text-2xl font-bold text-foreground mb-2">
