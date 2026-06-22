@@ -24,6 +24,8 @@ export async function GET() {
         approved: queue.approved.length,
         rejected: queue.rejected.length,
       },
+    }, {
+      headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
     });
   } catch (error) {
     // Return empty queue if file doesn't exist

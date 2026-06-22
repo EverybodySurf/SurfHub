@@ -64,7 +64,7 @@ function LoginContent() {
     if (error) {
       setError(error.message);
     } else {
-      window.location.href = '/confirm-request';
+      window.location.href = '/auth/confirm-request';
     }
   }
 

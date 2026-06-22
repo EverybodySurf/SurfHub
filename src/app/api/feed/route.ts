@@ -1,5 +1,50 @@
 import { NextResponse } from 'next/server';
 import { scrapeYouTube } from '@/lib/scrapers';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
+import type { PendingItem } from '@/lib/curate/criteria';
+
+const CURATE_PATH = join(process.cwd(), 'data', 'queue.json');
+
+/** Read approved curation items from queue.json */
+async function getApprovedItems(): Promise<PendingItem[]> {
+  try {
+    const data = await readFile(CURATE_PATH, 'utf-8');
+    const queue = JSON.parse(data);
+    return queue.approved || [];
+  } catch {
+    return [];
+  }
+}
+
+/** Map a curated PendingItem to a feed item shape */
+const CURATED_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=400&auto=format';
+
+/** Map a curated PendingItem to a feed item shape */
+function curatedToFeedItem(item: PendingItem) {
+  // Use the submitted image, or fall back to a default surf image
+  const image = item.image || CURATED_FALLBACK_IMAGE;
+
+  return {
+    id: `curated_${item.id}`,
+    feed: item.feed,
+    size: item.type === 'reel' ? 'tall' : 'horizontal',
+    type: item.type === 'video' || item.type === 'reel' ? 'video' : item.type,
+    title: item.title,
+    content: item.content,
+    source: item.creator || 'Curated',
+    location: item.location,
+    image,
+    thumbnailFallback: image,
+    videoUrl: item.videoUrl,
+    videoType: item.videoType || 'youtube',
+    timestamp: item.submittedAt,
+    hasValidTimestamp: true,
+    platform: item.source,
+    curated: true,
+    isShort: item.type === 'reel',
+  };
+}
 
 // Filter items to only those within last 72 hours (3 days for broader content)
 function filterBy72Hours(items: any[]): { filtered: any[], warnings: string[] } {
@@ -85,8 +130,8 @@ async function detectShorts(videoIds: string[]): Promise<Map<string, boolean>> {
 
   return shortsMap;
 }
-// ── Simple in-memory cache (10 minute TTL) ──
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+// ── Simple in-memory cache (6 hour TTL — refreshed by cron every 3hr) ──
+const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
 const feedCache = new Map<string, { data: any; timestamp: number }>();
 
 function getCachedFeed(feed: string): any | null {
@@ -101,15 +146,23 @@ function setCachedFeed(feed: string, data: any) {
   feedCache.set(feed, { data, timestamp: Date.now() });
 }
 
+/** Force-refresh the cache — called by cron every 3 hours */
+export async function refreshFeedCache(): Promise<void> {
+  feedCache.clear();
+}
+
 // Unified feed endpoint — aggregates all scraped content with 24hr filter
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const feed = searchParams.get('feed') || 'all'; // feelgood, local, global, all
+  const forceRefresh = searchParams.get('refresh') === 'true';
 
-  // Check cache first
-  const cached = getCachedFeed(feed);
-  if (cached) {
-    return NextResponse.json(cached);
+  // Check cache first (skip if force refresh)
+  if (!forceRefresh) {
+    const cached = getCachedFeed(feed);
+    if (cached) {
+      return NextResponse.json(cached);
+    }
   }
   const useMock = searchParams.get('mock') === 'true';
   const filter24h = searchParams.get('filter24h') !== 'false'; // Default: true
@@ -141,22 +194,26 @@ export async function GET(request: Request) {
         const result = await scrapeYouTube(query, MAX_RESULTS);
         if (result.success && result.items.length > 0) {
           console.log(`🎥 "${query}" → ${result.items.length} videos for ${targetFeed}`);
-          const mappedVideos = result.items.map((v: any) => ({
-            id: `yt_${v.id}`,
-            feed: targetFeed,
-            size: 'horizontal',
-            type: 'video',
-            title: v.title || '',
-            content: v.title?.slice(0, 100) || '',
-            source: v.source || '',
-            videoUrl: v.videoUrl || '',
-            image: v.image || `https://i.ytimg.com/vi/${v.id}/maxresdefault.jpg`,
-            timestamp: v.timestamp,
-            hasValidTimestamp: v.hasValidTimestamp,
-            platform: 'youtube',
-            channelId: v.channelId || '',
-            channelTitle: v.channelTitle || v.source || '',
-          }));
+          const mappedVideos = result.items.map((v: any) => {
+            const videoId = v.id;
+            return {
+              id: `yt_${videoId}`,
+              feed: targetFeed,
+              size: 'horizontal',
+              type: 'video',
+              title: v.title || '',
+              content: v.title?.slice(0, 100) || '',
+              source: v.source || '',
+              videoUrl: v.videoUrl || '',
+              image: `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg`,
+              thumbnailFallback: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+              timestamp: v.timestamp,
+              hasValidTimestamp: v.hasValidTimestamp,
+              platform: 'youtube',
+              channelId: v.channelId || '',
+              channelTitle: v.channelTitle || v.source || '',
+            };
+          });
           youtubeItems.push(...mappedVideos);
         } else {
           console.log(`🎥 "${query}" → no results`);
@@ -222,8 +279,12 @@ export async function GET(request: Request) {
   ];
   
   // Merge: real scraped + mock fallback
-  const allContent = [...youtubeItems, ...mockContent];
-  console.log(`📊 Merge: yt=${youtubeItems.length}, mock=${mockContent.length}, total=${allContent.length}`);
+  // Merge curated approved content (takes priority)
+  const allCurated = await getApprovedItems();
+  const curatedItems = allCurated.map(curatedToFeedItem);
+
+  const allContent = [...curatedItems, ...youtubeItems, ...mockContent];
+  console.log(`📊 Merge: curated=${curatedItems.length}, yt=${youtubeItems.length}, mock=${mockContent.length}, total=${allContent.length}`);
   
   // Apply 72hr filter
   let filteredContent = allContent;
