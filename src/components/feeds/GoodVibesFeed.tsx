@@ -212,23 +212,23 @@ export function GoodVibesFeed() {
 
   return (
     <div className="w-full max-w-full mx-auto">
+      {/* Curated / non-YouTube content grid — newest first */}
+      {nonYoutubeItems.length > 0 && (
+        <div className="grid grid-cols-4 gap-4 auto-rows-auto mb-8">
+          {nonYoutubeItems.map((item) => (
+            <VibesCard key={item.id} item={item} />
+          ))}
+        </div>
+      )}
+
       {/* YouTube video grid */}
       {orderedItems.length > 0 && (
-        <div className="grid grid-cols-4 gap-4 auto-rows-auto mb-8">
+        <div className="grid grid-cols-4 gap-4 auto-rows-auto">
           {orderedItems.map((item) => {
             const props = toYoutubePlayerProps(item);
             if (!props) return null;
             return <YouTubePlayer key={item.id} {...props} />;
           })}
-        </div>
-      )}
-
-      {/* Curated / non-YouTube content grid */}
-      {nonYoutubeItems.length > 0 && (
-        <div className="grid grid-cols-4 gap-4 auto-rows-auto">
-          {nonYoutubeItems.map((item) => (
-            <VibesCard key={item.id} item={item} />
-          ))}
         </div>
       )}
 
