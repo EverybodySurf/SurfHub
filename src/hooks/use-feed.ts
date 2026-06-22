@@ -47,11 +47,7 @@ export function useFeed(feedType: 'feelgood' | 'local' | 'global'): UseFeedResul
       setError(null);
 
       try {
-<<<<<<< HEAD
         const res = await fetch(`/api/feed?feed=${feedType}&_t=${Date.now()}`);
-=======
-        const res = await fetch(`/api/feed?feed=${feedType}`);
->>>>>>> origin/staging
         if (!res.ok) {
           throw new Error(`API responded with ${res.status}`);
         }
