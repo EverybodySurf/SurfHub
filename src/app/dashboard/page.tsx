@@ -6,10 +6,9 @@ import dynamic from 'next/dynamic'
 import { createClient } from '@/utils/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import { AppSidebar } from "@/components/app-sidebar"
-import { SectionCards } from "@/components/section-cards"
+import { DashboardStats } from "@/components/dashboard-stats"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import data from "./data.json"
 
 // Lazy-load heavy components to reduce initial bundle
 const ChartAreaInteractive = dynamic(
@@ -79,74 +78,57 @@ function DashboardContent() {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              <div>Current tab: {tab}</div>
-              {tab === "dashboard" && (
-                <div className="px-4 lg:px-6">
-                  <SectionCards />
-                </div>
-              )}
-              {tab === "surf-reports" && (
-                <div className="px-4 lg:px-6">
-                  <ChartAreaInteractive />
-                </div>
-              )}
-              {tab === "marketplace" && (
-                <div className="px-4 lg:px-6">
-                  {/* <ProfileComponent user={user} /> <--inserted here */}
-                </div>
-              )}
-              {tab === "directory-tools" && (
-                <div className="px-4 lg:px-6">
-                  {/* <ProfileComponent user={user} /> <--inserted here */}
-                </div>
-              )}
-              {tab === "forum-activity" && (
-                <div className="px-4 lg:px-6">
-                  {/* <ProfileComponent user={user} /> <--inserted here */}
-                </div>
-              )}
-              {tab === "analytics" && (
-                <div className="px-4 lg:px-6">
-                  {/* <ProfileComponent user={user} /> <--inserted here */}
-                </div>
-              )}
-              {tab === "direct-messaging" && user && (
-                <div className="px-4 lg:px-6">
-                  <RealtimeChat 
-                    roomName="my-chat-room" username={username} />
-                </div>
-              )}
-              {tab === "events" && (
-                <div className="px-4 lg:px-6">
-                  {/* <ProfileComponent user={user} /> <--inserted here */}
-                </div>
-              )}
-              {tab === "profile" && (
-                <div className="px-4 lg:px-6">
-                  <div className="max-w-2xl mx-auto">
-                    <h2 className="text-2xl font-bold mb-6">My Profile</h2>
-                    <AccountForm mode="edit" />
-                  </div>
-                </div>
-              )}
-              {/* Default dashboard content if no tab is set */}
-              {!tab && (
-                <>
-                  <div className="px-4 lg:px-6">
-                    <SectionCards />
-                  </div>
-                  <div className="px-4 lg:px-6">
-                    <ChartAreaInteractive />
-                  </div>
-                  <div className="px-4 lg:px-6">
-                    <DataTable data={data} />
-                  </div>
-                </>
-              )}
+        <div className="flex flex-1 flex-col @container/main">
+          <div className="flex flex-col gap-6 px-6 py-6">
+            {/* Dashboard header */}
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Welcome back, {username}
+              </p>
             </div>
+
+            {/* Tab content */}
+            {(!tab || tab === "dashboard") && (
+              <DashboardStats />
+            )}
+            {tab === "surf-reports" && (
+              <ChartAreaInteractive />
+            )}
+            {tab === "marketplace" && (
+              <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+                Marketplace — coming in a future update
+              </div>
+            )}
+            {tab === "directory-tools" && (
+              <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+                Directory Tools — coming in a future update
+              </div>
+            )}
+            {tab === "forum-activity" && (
+              <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+                Forum Activity — coming in a future update
+              </div>
+            )}
+            {tab === "analytics" && (
+              <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+                Analytics — coming in a future update
+              </div>
+            )}
+            {tab === "direct-messaging" && user && (
+              <RealtimeChat roomName="my-chat-room" username={username} />
+            )}
+            {tab === "events" && (
+              <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+                Events — coming in a future update
+              </div>
+            )}
+            {tab === "profile" && (
+              <div className="max-w-2xl">
+                <h2 className="text-2xl font-bold mb-6">My Profile</h2>
+                <AccountForm mode="edit" />
+              </div>
+            )}
           </div>
         </div>
       </SidebarInset>
