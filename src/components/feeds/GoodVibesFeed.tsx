@@ -247,5 +247,6 @@ export function GoodVibesFeed() {
           Content refreshes daily • Curated for soul & nature
         </p>
       </div>
+    </div>
   );
 }
