@@ -205,15 +205,41 @@ export function GoodVibesFeed() {
   // Remaining shorts — packed into rows of 4 naturally by col-span-1
   while (si < shorts.length) orderedItems.push(shorts[si++]);
 
+  // Non-YouTube items (curated photos, stories, Instagram) rendered as VibesCards
+  const nonYoutubeItems = apiItems
+    .filter(i => !isYoutubeItem(i))
+    .map(mapApiToVibesItem);
+
   return (
     <div className="w-full max-w-full mx-auto">
-      <div className="grid grid-cols-4 gap-4 auto-rows-auto">
-        {orderedItems.map((item) => {
-          const props = toYoutubePlayerProps(item);
-          if (!props) return null;
-          return <YouTubePlayer key={item.id} {...props} />;
-        })}
-      </div>
+      {/* YouTube video grid */}
+      {orderedItems.length > 0 && (
+        <div className="grid grid-cols-4 gap-4 auto-rows-auto mb-8">
+          {orderedItems.map((item) => {
+            const props = toYoutubePlayerProps(item);
+            if (!props) return null;
+            return <YouTubePlayer key={item.id} {...props} />;
+          })}
+        </div>
+      )}
+
+      {/* Curated / non-YouTube content grid */}
+      {nonYoutubeItems.length > 0 && (
+        <div className="grid grid-cols-4 gap-4 auto-rows-auto">
+          {nonYoutubeItems.map((item) => (
+            <VibesCard key={item.id} item={item} />
+          ))}
+        </div>
+      )}
+
+      {/* Fallback when neither YouTube nor curated items exist */}
+      {orderedItems.length === 0 && nonYoutubeItems.length === 0 && (
+        <div className="grid grid-cols-4 gap-4 auto-rows-auto">
+          {finalItems.map((item) => (
+            <VibesCard key={item.id} item={item} />
+          ))}
+        </div>
+      )}
 
       {/* Refresh hint */}
       <div className="mt-8 text-center">
@@ -221,6 +247,5 @@ export function GoodVibesFeed() {
           Content refreshes daily • Curated for soul & nature
         </p>
       </div>
-    </div>
   );
 }
