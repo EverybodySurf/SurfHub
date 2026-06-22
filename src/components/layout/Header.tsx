@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
-import { Waves, List, MapPin, BarChart3, Users, ShoppingBag, Menu, LayoutDashboard, X, CircleUserRound, LogOut, ChevronDown } from 'lucide-react';
+import { Waves, List, MapPin, BarChart3, Users, ShoppingBag, Menu, LayoutDashboard, SlidersHorizontal, X, CircleUserRound, LogOut, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggleButton } from '@/components/theme/theme-toggle-button';
 import type { Session } from '@supabase/supabase-js';
@@ -44,11 +44,13 @@ export function Header() {
   const navItems = [
     { href: '/', label: 'Home', icon: Waves },
     { href: '/surf-map', label: 'Surf/Amenities Map', icon: MapPin },
+    { href: '/#feed-section', label: 'Feeds', icon: LayoutDashboard },
     { href: '/swell-forecaster', label: 'Surf Reports', icon: BarChart3 },
     { href: '/directory', label: 'Directory', icon: List, comingSoon: true },
     { href: '/forum', label: 'Forum', icon: Users, comingSoon: true },
     { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag, comingSoon: true },
     ...(session ? [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }] : []),
+    ...(session ? [{ href: "/admin", label: "Admin", icon: SlidersHorizontal, admin: true }] : []),
   ];
 
   const handleSignOut = async () => {

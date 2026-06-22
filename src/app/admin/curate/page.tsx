@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { AdminHeader } from '@/components/admin-header';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PendingItem, FeedType, scoreContent } from '@/lib/curate/criteria';
@@ -44,7 +45,7 @@ export default function CuratePage() {
   // Fetch pending items
   const fetchQueue = async () => {
     try {
-      const res = await fetch('/api/curate/queue');
+      const res = await fetch('/api/curate/queue?_t=' + Date.now());
       const data = await res.json();
       setQueue(data);
     } catch (error) {
@@ -166,9 +167,9 @@ export default function CuratePage() {
   }
   
   return (
-    <div className="min-h-screen bg-background p-8">
-      {/* Header */}
-      <div className="max-w-6xl mx-auto mb-8">
+    <div className="min-h-screen bg-background px-8 pt-24 pb-8">
+      <div className="max-w-6xl mx-auto">
+        <AdminHeader />
         <h1 className="text-2xl font-bold text-foreground mb-2">
           Content Curation
         </h1>
