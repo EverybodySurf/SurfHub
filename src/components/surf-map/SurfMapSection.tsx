@@ -44,7 +44,11 @@ export default function SurfMapSection() {
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
-    const check = () => setMapVisible(el.getBoundingClientRect().bottom > 64);
+    const check = () => {
+      const rect = el.getBoundingClientRect();
+      // Visible when: top has entered viewport (or is above it) AND bottom hasn't scrolled past header
+      setMapVisible(rect.top < window.innerHeight && rect.bottom > 64);
+    };
     check();
     window.addEventListener('scroll', check, { passive: true });
     return () => window.removeEventListener('scroll', check);
