@@ -32,10 +32,24 @@ export default function SurfMapSection() {
   const [selectedAmenity, setSelectedAmenity] = useState<Amenity | null>(null);
   const [sidebarTab, setSidebarTab] = useState<'spots' | 'amenities'>('spots');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mapVisible, setMapVisible] = useState(true);
+  const sectionRef = useRef<HTMLDivElement>(null);
   const sheetStartY = useRef(0);
   const [sheetOffset, setSheetOffset] = useState(0);
 
   useEffect(() => { setMounted(true); }, []);
+
+  // Only show the FAB when the map section is in the viewport
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([entry]) => setMapVisible(entry.isIntersecting),
+      { threshold: 0 },
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const spots = guadeloupeSurfSpots;
   const amenities = guadeloupeAmenities;
@@ -98,15 +112,15 @@ export default function SurfMapSection() {
   const clearAllFilters = () => { setSearchQuery(''); setViewMode('all'); setSelectedTypes(new Set()); };
 
   return (
-    <div className="h-full w-full flex flex-col bg-background overflow-hidden">
-      {/* FAB */}
-      <div className="fixed bottom-6 right-4 z-50 flex flex-row items-center gap-3">
+    <div ref={sectionRef} className="h-full w-full flex flex-col bg-background overflow-hidden">
+      {/* FAB — only visible when map section is in viewport */}
+      <div className={`fixed bottom-6 right-4 z-50 flex flex-row items-center gap-3 transition-opacity duration-300 ${mapVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         {hasActiveFilters && (
-          <div className="rounded-full bg-gradient-to-br from-pink-500 to-purple-600 shadow-lg p-[1.5px]">
-            <button onClick={clearAllFilters} className="bg-white text-black dark:text-white text-xs px-3 py-1.5 rounded-full">
-              Clear filters
-            </button>
-          </div>
+          <button onClick={clearAllFilters}
+            className="bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg hover:from-pink-600 hover:to-purple-700 transition-all active:scale-95"
+          >
+            Clear filters
+          </button>
         )}
         <button onClick={() => setMenuOpen(!menuOpen)}
           className="h-14 w-14 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-white shadow-xl flex items-center justify-center active:scale-95 transition-all shrink-0"
