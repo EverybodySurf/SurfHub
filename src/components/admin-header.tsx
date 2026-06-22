@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowLeft, SlidersHorizontal, Image, Radio } from 'lucide-react';
+import { ArrowLeft, SlidersHorizontal, Image, RadioTower } from 'lucide-react';
 
 const adminTabs = [
   { href: '/admin/curate', label: 'Content', icon: SlidersHorizontal },
-  { href: '/admin/sources', label: 'Sources', icon: Radio },
+  { href: '/admin/sources', label: 'Sources', icon: RadioTower },
   { href: '/admin/hero', label: 'Hero Images', icon: Image },
 ];
 
