@@ -44,8 +44,8 @@ export function Header() {
   const navItems = [
     { href: '/', label: 'Home', icon: Waves },
     { href: '/surf-map', label: 'Surf/Amenities Map', icon: MapPin },
-    { href: '/swell-forecaster', label: 'Surf Reports', icon: BarChart3 },
     { href: '/#feed-section', label: 'Feeds', icon: LayoutDashboard },
+    { href: '/swell-forecaster', label: 'Surf Reports', icon: BarChart3 },
     { href: '/directory', label: 'Directory', icon: List, comingSoon: true },
     { href: '/forum', label: 'Forum', icon: Users, comingSoon: true },
     { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag, comingSoon: true },
