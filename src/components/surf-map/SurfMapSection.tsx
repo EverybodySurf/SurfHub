@@ -39,16 +39,15 @@ export default function SurfMapSection() {
 
   useEffect(() => { setMounted(true); }, []);
 
-  // Only show the FAB when the map section is in the viewport
+  // FAB visible while map section is in view. Disappears when
+  // the bottom of the map scrolls past the bottom of the header (64px).
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => setMapVisible(entry.isIntersecting),
-      { threshold: 0 },
-    );
-    obs.observe(el);
-    return () => obs.disconnect();
+    const check = () => setMapVisible(el.getBoundingClientRect().bottom > 64);
+    check();
+    window.addEventListener('scroll', check, { passive: true });
+    return () => window.removeEventListener('scroll', check);
   }, []);
 
   const spots = guadeloupeSurfSpots;
