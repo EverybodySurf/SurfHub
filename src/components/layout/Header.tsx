@@ -43,11 +43,11 @@ export function Header() {
 
   const navItems = [
     { href: '/', label: 'Home', icon: Waves },
-    { href: '/swell-forecaster', label: 'Surf Reports', icon: BarChart3 },
     { href: '/surf-map', label: 'Surf/Amenities Map', icon: MapPin },
-    { href: '/directory', label: 'Directory', icon: List },
-    { href: '/forum', label: 'Forum', icon: Users },
-    { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag },
+    { href: '/swell-forecaster', label: 'Surf Reports', icon: BarChart3 },
+    { href: '/directory', label: 'Directory', icon: List, comingSoon: true },
+    { href: '/forum', label: 'Forum', icon: Users, comingSoon: true },
+    { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag, comingSoon: true },
     ...(session ? [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }] : []),
   ];
 
@@ -116,6 +116,7 @@ export function Header() {
             <nav className="grid grid-cols-1 gap-1">
               {navItems.map((item) => {
                 const isActive = pathname === item.href;
+                const isComingSoon = (item as any).comingSoon;
                 return (
                   <Link
                     key={item.href}
@@ -127,8 +128,13 @@ export function Header() {
                     }`}
                     onClick={() => setMenuOpen(false)}
                   >
-                    <item.icon className={`h-5 w-5 ${isActive ? 'text-cyan-500' : 'text-cyan-400'}`} />
-                    {item.label}
+                    <item.icon className={`h-5 w-5 shrink-0 ${isActive ? 'text-cyan-500' : 'text-cyan-400'}`} />
+                    <span className="flex-1">{item.label}</span>
+                    {isComingSoon && (
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-500 border border-amber-500/30 rounded-full px-2 py-0.5">
+                        Soon
+                      </span>
+                    )}
                   </Link>
                 );
               })}
