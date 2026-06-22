@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { SlidersHorizontal, Image } from 'lucide-react';
+import { SlidersHorizontal, Image, Radio } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Admin - SurfHub',
@@ -14,6 +14,13 @@ const adminSections = [
     title: 'Content Curation',
     description: 'Review, approve, and manage feed content. Add new items from Instagram, YouTube, and more.',
     color: 'from-cyan-400 to-teal-500',
+  },
+  {
+    href: '/admin/sources',
+    icon: Radio,
+    title: 'Content Sources',
+    description: 'Manage YouTube channels, Instagram accounts, TikTok accounts, and hashtags that feed content into SurfHub.',
+    color: 'from-amber-500 to-orange-600',
   },
   {
     href: '/admin/hero',
