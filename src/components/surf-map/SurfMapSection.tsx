@@ -284,11 +284,9 @@ function FilterSheet({
         </div>
 
         <div className="mt-5 flex gap-3">
-          <div className="flex-1 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 p-[1.5px]">
-            <button onClick={onClearAll} className="w-full py-2.5 rounded-xl bg-white dark:bg-gray-900 text-sm font-medium text-black dark:text-white hover:bg-pink-50 dark:hover:bg-pink-950/20 transition-colors">
-              Clear all
-            </button>
-          </div>
+          <button onClick={onClearAll} className="flex-1 py-2.5 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 text-white text-sm font-medium hover:from-pink-600 hover:to-purple-700 transition-all active:scale-95">
+            Clear all
+          </button>
           <button onClick={onClose} className="flex-[2] py-2.5 rounded-xl bg-cyan-500 text-white font-medium text-sm active:scale-[0.98] transition-transform">
             Apply & Close
           </button>
