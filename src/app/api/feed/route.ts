@@ -1,5 +1,43 @@
 import { NextResponse } from 'next/server';
 import { scrapeYouTube } from '@/lib/scrapers';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
+import type { PendingItem } from '@/lib/curate/criteria';
+
+const CURATE_PATH = join(process.cwd(), 'data', 'queue.json');
+
+/** Read approved curation items from queue.json */
+async function getApprovedItems(): Promise<PendingItem[]> {
+  try {
+    const data = await readFile(CURATE_PATH, 'utf-8');
+    const queue = JSON.parse(data);
+    return queue.approved || [];
+  } catch {
+    return [];
+  }
+}
+
+/** Map a curated PendingItem to a feed item shape */
+function curatedToFeedItem(item: PendingItem) {
+  return {
+    id: `curated_${item.id}`,
+    feed: item.feed,
+    size: item.type === 'reel' ? 'tall' : 'horizontal',
+    type: item.type === 'video' || item.type === 'reel' ? 'video' : item.type,
+    title: item.title,
+    content: item.content,
+    source: item.creator || 'Curated',
+    location: item.location,
+    image: item.image,
+    videoUrl: item.videoUrl,
+    videoType: item.videoType || 'youtube',
+    timestamp: item.submittedAt,
+    hasValidTimestamp: true,
+    platform: item.source,
+    curated: true,
+    isShort: item.type === 'reel',
+  };
+}
 
 // Filter items to only those within last 72 hours (3 days for broader content)
 function filterBy72Hours(items: any[]): { filtered: any[], warnings: string[] } {
@@ -234,8 +272,12 @@ export async function GET(request: Request) {
   ];
   
   // Merge: real scraped + mock fallback
-  const allContent = [...youtubeItems, ...mockContent];
-  console.log(`📊 Merge: yt=${youtubeItems.length}, mock=${mockContent.length}, total=${allContent.length}`);
+  // Merge curated approved content (takes priority)
+  const allCurated = await getApprovedItems();
+  const curatedItems = allCurated.map(curatedToFeedItem);
+
+  const allContent = [...curatedItems, ...youtubeItems, ...mockContent];
+  console.log(`📊 Merge: curated=${curatedItems.length}, yt=${youtubeItems.length}, mock=${mockContent.length}, total=${allContent.length}`);
   
   // Apply 72hr filter
   let filteredContent = allContent;
