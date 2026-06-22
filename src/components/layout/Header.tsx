@@ -49,7 +49,7 @@ export function Header() {
     { href: '/forum', label: 'Forum', icon: Users, comingSoon: true },
     { href: '/marketplace', label: 'Marketplace', icon: ShoppingBag, comingSoon: true },
     ...(session ? [{ href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }] : []),
-    ...(session ? [{ href: "/admin/curate", label: "Curate", icon: SlidersHorizontal, admin: true }] : []),
+    ...(session ? [{ href: "/admin", label: "Admin", icon: SlidersHorizontal, admin: true }] : []),
   ];
 
   const handleSignOut = async () => {

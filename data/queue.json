@@ -1,5 +1,57 @@
 {
-  "pending": [],
+  "pending": [
+    {
+      "id": "test-1",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title": "Morning Glass — Guadeloupe Dawn Patrol",
+      "content": "Beautiful morning surf session at Caravelle Beach. Glassy conditions, peeling rights, empty lineup. This is what dawn patrol is all about.",
+      "creator": "@gwadasurf",
+      "location": "Caravelle, Sainte-Anne",
+      "feed": "feelgood",
+      "type": "video",
+      "image": "https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format",
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoType": "youtube",
+      "autoScore": 0.85,
+      "status": "pending",
+      "submittedAt": "2026-06-22T18:00:00.000Z"
+    },
+    {
+      "id": "test-2",
+      "source": "instagram",
+      "url": "https://instagram.com/p/test123",
+      "title": "La Chapelle Barrel — Best Ride of the Season",
+      "content": "Tucked deep inside at La Chapelle. One of the heaviest reef breaks in Guadeloupe. Pure adrenaline.",
+      "creator": "@gwada_shots",
+      "location": "La Chapelle, Le Moule",
+      "feed": "local",
+      "type": "reel",
+      "image": "https://images.unsplash.com/photo-1534190760962-754642a4dc2e?w=800&auto=format",
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoType": "instagram",
+      "autoScore": 0.92,
+      "status": "pending",
+      "submittedAt": "2026-06-22T18:05:00.000Z"
+    },
+    {
+      "id": "test-3",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title": "Pipeline 2026 — Winter Swell Hits the North Shore",
+      "content": "Massive northwest swell lighting up Pipeline. Some of the best barrels of the year so far.",
+      "creator": "@wsl",
+      "location": "Pipeline, Hawaii",
+      "feed": "global",
+      "type": "video",
+      "image": "https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format",
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoType": "youtube",
+      "autoScore": 0.78,
+      "status": "pending",
+      "submittedAt": "2026-06-22T18:10:00.000Z"
+    }
+  ],
   "approved": [],
   "rejected": []
 }
