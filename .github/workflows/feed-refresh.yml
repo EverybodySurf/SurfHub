@@ -1,0 +1,22 @@
+name: Refresh Feed Cache
+
+on:
+  schedule:
+    # Every hour — stays well within YouTube 10k daily quota
+    # Each run: 3 searches × 100 units = 300 units
+    # Per day: 24 × 300 = 7,200 units (72% of quota, plenty of headroom)
+    - cron: '0 * * * *'
+  workflow_dispatch: # Manual trigger for testing
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        feed: [feelgood, global, local]
+    steps:
+      - name: Refresh ${{ matrix.feed }} feed
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            "https://surfhub.vercel.app/api/feed?feed=${{ matrix.feed }}&refresh=true" \
+            && echo " ${{ matrix.feed }} refreshed"
