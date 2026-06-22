@@ -78,7 +78,7 @@ function DashboardContent() {
       <AppSidebar variant="inset" />
       <SidebarInset>
         <SiteHeader />
-        <div className="flex flex-1 flex-col @container/main">
+        <div className="flex flex-1 flex-col @container/main pt-16">
           <div className="flex flex-col gap-6 px-6 py-6">
             {/* Dashboard header */}
             <div>
