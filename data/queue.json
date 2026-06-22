@@ -1,11 +1,33 @@
 {
-  "pending": [
+  "pending": [],
+  "approved": [
+    {
+      "id": "queue-1782155237692",
+      "source": "instagram",
+      "url": "https://www.instagram.com/p/DZhHYcBihzy/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "title": "Summa spring",
+      "content": "Surf Art by @thomasfotomas",
+      "creator": "@thomasfotomas",
+      "location": "",
+      "feed": "feelgood",
+      "type": "photo",
+      "image": "",
+      "videoUrl": "https://www.instagram.com/p/DZhHYcBihzy/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "videoType": "instagram",
+      "autoScore": 0.25,
+      "status": "approved",
+      "submittedAt": "2026-06-22T19:07:17.692Z",
+      "reviewedAt": "2026-06-22T19:07:30.680Z",
+      "reviewedBy": "admin"
+    }
+  ],
+  "rejected": [
     {
       "id": "test-2",
       "source": "instagram",
       "url": "https://instagram.com/p/test123",
       "title": "La Chapelle Barrel — Best Ride of the Season",
-      "content": "Tucked deep inside at La Chapelle. One of the heaviest reef breaks in Guadeloupe. Pure adrenaline.",
+      "content": "Tucked deep inside at La Chapelle. Pure adrenaline.",
       "creator": "@gwada_shots",
       "location": "La Chapelle, Le Moule",
       "feed": "local",
@@ -14,35 +36,18 @@
       "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "videoType": "instagram",
       "autoScore": 0.92,
-      "status": "pending",
-      "submittedAt": "2026-06-22T18:05:00.000Z"
+      "status": "rejected",
+      "submittedAt": "2026-06-22T18:05:00.000Z",
+      "reviewedAt": "2026-06-22T19:02:53.336Z",
+      "reviewedBy": "admin",
+      "rejectionReason": "Not suitable"
     },
-    {
-      "id": "test-3",
-      "source": "youtube",
-      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "title": "Pipeline 2026 — Winter Swell Hits the North Shore",
-      "content": "Massive northwest swell lighting up Pipeline. Some of the best barrels of the year so far.",
-      "creator": "@wsl",
-      "location": "Pipeline, Hawaii",
-      "feed": "global",
-      "type": "video",
-      "image": "https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format",
-      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "videoType": "youtube",
-      "autoScore": 0.78,
-      "status": "pending",
-      "submittedAt": "2026-06-22T18:10:00.000Z"
-    }
-  ],
-  "approved": [],
-  "rejected": [
     {
       "id": "test-1",
       "source": "youtube",
       "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
       "title": "Morning Glass — Guadeloupe Dawn Patrol",
-      "content": "Beautiful morning surf session at Caravelle Beach. Glassy conditions, peeling rights, empty lineup. This is what dawn patrol is all about.",
+      "content": "Beautiful morning surf session at Caravelle Beach. Glassy conditions, peeling rights, empty lineup.",
       "creator": "@gwadasurf",
       "location": "Caravelle, Sainte-Anne",
       "feed": "feelgood",
@@ -53,7 +58,27 @@
       "autoScore": 0.85,
       "status": "rejected",
       "submittedAt": "2026-06-22T18:00:00.000Z",
-      "reviewedAt": "2026-06-22T18:59:25.792Z",
+      "reviewedAt": "2026-06-22T19:03:08.706Z",
+      "reviewedBy": "admin",
+      "rejectionReason": "Not suitable"
+    },
+    {
+      "id": "test-3",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title": "Pipeline 2026 — Winter Swell Hits the North Shore",
+      "content": "Massive northwest swell lighting up Pipeline.",
+      "creator": "@wsl",
+      "location": "Pipeline, Hawaii",
+      "feed": "global",
+      "type": "video",
+      "image": "https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format",
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoType": "youtube",
+      "autoScore": 0.78,
+      "status": "rejected",
+      "submittedAt": "2026-06-22T18:10:00.000Z",
+      "reviewedAt": "2026-06-22T19:03:17.838Z",
       "reviewedBy": "admin",
       "rejectionReason": "Not suitable"
     }
