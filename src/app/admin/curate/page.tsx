@@ -44,7 +44,7 @@ export default function CuratePage() {
   // Fetch pending items
   const fetchQueue = async () => {
     try {
-      const res = await fetch('/api/curate/queue');
+      const res = await fetch('/api/curate/queue?_t=' + Date.now());
       const data = await res.json();
       setQueue(data);
     } catch (error) {

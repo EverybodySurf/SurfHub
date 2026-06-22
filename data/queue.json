@@ -1,23 +1,6 @@
 {
   "pending": [
     {
-      "id": "test-1",
-      "source": "youtube",
-      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "title": "Morning Glass — Guadeloupe Dawn Patrol",
-      "content": "Beautiful morning surf session at Caravelle Beach. Glassy conditions, peeling rights, empty lineup. This is what dawn patrol is all about.",
-      "creator": "@gwadasurf",
-      "location": "Caravelle, Sainte-Anne",
-      "feed": "feelgood",
-      "type": "video",
-      "image": "https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format",
-      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      "videoType": "youtube",
-      "autoScore": 0.85,
-      "status": "pending",
-      "submittedAt": "2026-06-22T18:00:00.000Z"
-    },
-    {
       "id": "test-2",
       "source": "instagram",
       "url": "https://instagram.com/p/test123",
@@ -53,5 +36,26 @@
     }
   ],
   "approved": [],
-  "rejected": []
+  "rejected": [
+    {
+      "id": "test-1",
+      "source": "youtube",
+      "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "title": "Morning Glass — Guadeloupe Dawn Patrol",
+      "content": "Beautiful morning surf session at Caravelle Beach. Glassy conditions, peeling rights, empty lineup. This is what dawn patrol is all about.",
+      "creator": "@gwadasurf",
+      "location": "Caravelle, Sainte-Anne",
+      "feed": "feelgood",
+      "type": "video",
+      "image": "https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format",
+      "videoUrl": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "videoType": "youtube",
+      "autoScore": 0.85,
+      "status": "rejected",
+      "submittedAt": "2026-06-22T18:00:00.000Z",
+      "reviewedAt": "2026-06-22T18:59:25.792Z",
+      "reviewedBy": "admin",
+      "rejectionReason": "Not suitable"
+    }
+  ]
 }
