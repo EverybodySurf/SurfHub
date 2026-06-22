@@ -18,7 +18,13 @@ async function getApprovedItems(): Promise<PendingItem[]> {
 }
 
 /** Map a curated PendingItem to a feed item shape */
+const CURATED_FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=400&auto=format';
+
+/** Map a curated PendingItem to a feed item shape */
 function curatedToFeedItem(item: PendingItem) {
+  // Use the submitted image, or fall back to a default surf image
+  const image = item.image || CURATED_FALLBACK_IMAGE;
+
   return {
     id: `curated_${item.id}`,
     feed: item.feed,
@@ -28,7 +34,8 @@ function curatedToFeedItem(item: PendingItem) {
     content: item.content,
     source: item.creator || 'Curated',
     location: item.location,
-    image: item.image,
+    image,
+    thumbnailFallback: image,
     videoUrl: item.videoUrl,
     videoType: item.videoType || 'youtube',
     timestamp: item.submittedAt,
