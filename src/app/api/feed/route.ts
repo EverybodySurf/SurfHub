@@ -332,7 +332,7 @@ export async function GET(request: Request) {
   let twitterItems: any[] = [];
   const vpsTwitter = await readVpsScrapeFile('x-feed.json');
   if (vpsTwitter.length > 0) {
-    twitterItems = vpsTwitter.filter((p: any) => feed === 'all' || p.feed === feed || p.feed === 'all');
+    twitterItems = vpsTwitter.filter((p: any) => feed === 'all' || p.feed === feed);
     console.log(`🐦 VPS data: ${twitterItems.length} Tweets for ${feed}`);
   }
   
