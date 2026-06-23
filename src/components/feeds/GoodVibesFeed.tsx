@@ -224,6 +224,7 @@ export function GoodVibesFeed() {
               content={item.content || ''}
               image={item.image || ''}
               source={(item as any).source}
+              postUrl={(item as any).postUrl}
             />
           ))}
         </div>

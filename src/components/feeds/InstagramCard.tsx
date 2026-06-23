@@ -9,14 +9,27 @@ interface InstagramCardProps {
   title: string;
   content: string;
   image: string;
-  feed?: string;
   source?: string;
+  postUrl?: string;
 }
 
-export function InstagramCard({ title, content, image, source }: InstagramCardProps) {
+/** Extract Instagram shortcode from postUrl or id */
+function extractShortcode(image: string, postUrl?: string): string | null {
+  if (postUrl) {
+    const match = postUrl.match(/\/(p|reel)\/([^/?#]+)/);
+    return match ? match[2] : null;
+  }
+  // Fallback: try to extract from CDN URL
+  return null;
+}
+
+const EMBED_BASE = 'https://www.instagram.com/p';
+
+export function InstagramCard({ title, content, image, source, postUrl }: InstagramCardProps) {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const shortcode = extractShortcode(image, postUrl);
 
   const clearTimer = useCallback(() => {
     if (hoverTimer.current) {
@@ -97,7 +110,7 @@ export function InstagramCard({ title, content, image, source }: InstagramCardPr
         </div>
       </div>
 
-      {/* Image modal — full-screen view */}
+      {/* Modal — embed Instagram post if we have shortcode */}
       {showModal && (
         <div
           className="fixed inset-0 z-[2000] bg-black/90 backdrop-blur-lg flex items-center justify-center"
@@ -105,22 +118,40 @@ export function InstagramCard({ title, content, image, source }: InstagramCardPr
         >
           <button
             onClick={() => setShowModal(false)}
-            className="absolute top-6 right-6 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="absolute top-20 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
 
-          <div className="relative w-full max-w-3xl max-h-[90vh] m-8" onClick={e => e.stopPropagation()}>
-            <Image
-              src={image}
-              alt={title || 'Instagram post'}
-              width={1200}
-              height={1600}
-              className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
-            />
-            <div className="mt-4 text-white/80">
-              <p className="text-sm">{content || title}</p>
-            </div>
+          <div className="relative w-full max-w-lg max-h-[90vh] m-8" onClick={e => e.stopPropagation()}>
+            {shortcode ? (
+              <>
+                <div className="aspect-[9/16] max-h-[80vh]">
+                  <iframe
+                    src={`${EMBED_BASE}/${shortcode}/embed/`}
+                    className="w-full h-full rounded-lg"
+                    allow="autoplay; encrypted-media"
+                    title={title}
+                  />
+                </div>
+                <div className="mt-3 text-white/70">
+                  <p className="text-sm">{content || title}</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <Image
+                  src={image}
+                  alt={title || 'Instagram post'}
+                  width={1200}
+                  height={1600}
+                  className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
+                />
+                <div className="mt-4 text-white/80">
+                  <p className="text-sm">{content || title}</p>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

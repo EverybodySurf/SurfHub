@@ -106,6 +106,7 @@ async function main() {
             content: p.caption || '',
             source: '@instagram',
             image: p.image || '',
+            postUrl: p.postUrl || '',
             timestamp: scrapedAt,
             hasValidTimestamp: false,
             platform: 'instagram',
