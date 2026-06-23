@@ -157,11 +157,19 @@ export async function GET(request: Request) {
   const feed = searchParams.get('feed') || 'all'; // feelgood, local, global, all
   const forceRefresh = searchParams.get('refresh') === 'true';
 
+  // Always load curated items fresh (never cached — approvals must appear immediately)
+  const allCurated = await getApprovedItems();
+  const curatedItems = allCurated.map(curatedToFeedItem);
+
   // Check cache first (skip if force refresh)
   if (!forceRefresh) {
     const cached = getCachedFeed(feed);
     if (cached) {
-      return NextResponse.json(cached);
+      // Merge curated items into cached response (prepended, deduped)
+      const curatedIds = new Set(curatedItems.map(i => i.id));
+      const nonCurated = cached.items.filter((i: any) => !curatedIds.has(i.id));
+      const merged = [...curatedItems, ...nonCurated];
+      return NextResponse.json({ ...cached, items: merged, count: merged.length });
     }
   }
   const useMock = searchParams.get('mock') === 'true';
@@ -279,9 +287,7 @@ export async function GET(request: Request) {
   ];
   
   // Merge: real scraped + mock fallback
-  // Merge curated approved content (takes priority)
-  const allCurated = await getApprovedItems();
-  const curatedItems = allCurated.map(curatedToFeedItem);
+  // Curated items already loaded above — merge with scraped/mock
 
   const allContent = [...curatedItems, ...youtubeItems, ...mockContent];
   console.log(`📊 Merge: curated=${curatedItems.length}, yt=${youtubeItems.length}, mock=${mockContent.length}, total=${allContent.length}`);
