@@ -28,6 +28,7 @@ export default function CuratePage() {
   // Form state
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [fetchingMeta, setFetchingMeta] = useState(false);
   const [formData, setFormData] = useState({
     source: 'instagram',
     url: '',
@@ -43,6 +44,32 @@ export default function CuratePage() {
     originalPublishedAt: '',
   });
   
+  // Auto-fetch metadata from URL
+  const autoFetchMeta = async (url: string) => {
+    if (!url) return;
+    setFetchingMeta(true);
+    try {
+      const res = await fetch(`/api/curate/fetch-meta?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      if (data.platform) {
+        setFormData(prev => ({
+          ...prev,
+          source: data.platform,
+          title: data.title || prev.title,
+          image: data.image || prev.image,
+          creator: data.creator || prev.creator,
+          videoUrl: data.videoUrl || prev.videoUrl,
+          type: data.platform === 'youtube' ? 'video' : data.platform === 'instagram' ? 'photo' : prev.type,
+          videoType: data.platform === 'youtube' ? 'youtube' : data.platform === 'instagram' ? 'instagram' : prev.videoType,
+        }));
+      }
+    } catch {
+      // Auto-fetch failed silently
+    } finally {
+      setFetchingMeta(false);
+    }
+  };
+
   // Fetch pending items
   const fetchQueue = async () => {
     try {
@@ -345,14 +372,22 @@ export default function CuratePage() {
                 
                 <div>
                   <label className="text-sm text-muted-foreground mb-1 block">URL *</label>
-                  <input
-                    type="url"
-                    required
-                    value={formData.url}
-                    onChange={(e) => setFormData({...formData, url: e.target.value})}
-                    placeholder="https://instagram.com/reel/..."
-                    className="w-full px-3 py-2 rounded bg-background border border-border text-foreground"
-                  />
+                  <div className="relative">
+                    <input
+                      type="url"
+                      required
+                      value={formData.url}
+                      onChange={(e) => setFormData({...formData, url: e.target.value})}
+                      onBlur={(e) => autoFetchMeta(e.target.value)}
+                      placeholder="https://youtube.com/watch?v=... or Instagram/X URL"
+                      className="w-full px-3 py-2 rounded bg-background border border-border text-foreground pr-8"
+                    />
+                    {fetchingMeta && (
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground animate-pulse">
+                        ↻
+                      </span>
+                    )}
+                  </div>
                 </div>
                 
                 <div>
@@ -437,7 +472,10 @@ export default function CuratePage() {
               {/* Row 4: Image, Video URL (optional) */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm text-muted-foreground mb-1 block">Image URL (optional)</label>
+                  <label className="text-sm text-muted-foreground mb-1 block">
+                    Image URL{' '}
+                    <span className="text-xs text-muted-foreground/60">(auto-filled from URL)</span>
+                  </label>
                   <input
                     type="url"
                     value={formData.image}
