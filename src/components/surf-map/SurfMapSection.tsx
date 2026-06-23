@@ -117,7 +117,7 @@ export default function SurfMapSection() {
   return (
     <div ref={sectionRef} className="h-full w-full flex flex-col bg-background overflow-hidden">
       {/* FAB — only visible when map section is in viewport */}
-      <div className={`fixed bottom-6 right-4 z-[1050] flex flex-row items-center gap-3 transition-opacity duration-300 ${mapVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`fixed bottom-24 sm:bottom-16 right-4 z-[1050] flex flex-row items-center gap-3 transition-opacity duration-300 ${mapVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         {hasActiveFilters && (
           <button onClick={clearAllFilters}
             className="bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg hover:from-pink-600 hover:to-purple-700 transition-all active:scale-95"
