@@ -127,7 +127,7 @@ export function InstagramCard({ title, content, image, source, postUrl }: Instag
             <X className="h-6 w-6" />
           </button>
 
-          <div className="relative w-full max-w-lg max-h-[90vh] m-8" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full max-w-[500px] max-h-[90vh] m-8" onClick={e => e.stopPropagation()}>
             {shortcode ? (
               <>
                 <div className="aspect-[9/16] max-h-[80vh]">

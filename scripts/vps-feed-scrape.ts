@@ -7,8 +7,8 @@
 // Usage: npx tsx scripts/vps-feed-scrape.ts
 // ──────────────────────────────────────────────
 
-import { writeFileSync, readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
+import { join, dirname } from 'path';
 import { chromium } from 'playwright';
 
 const CDP_URL = 'http://127.0.0.1:9224';
@@ -170,6 +170,28 @@ async function main() {
     seenImgs.add(p.image);
     return true;
   });
+
+  // Download Instagram images to local cache (persists beyond CDN token expiry)
+  const IMG_DIR = join(process.cwd(), 'public', 'uploads', 'ig');
+  mkdirSync(IMG_DIR, { recursive: true });
+  let downloaded = 0;
+  for (const post of results.instagram) {
+    const shortcode = post.id.replace('ig_', '');
+    const localPath = join(IMG_DIR, `${shortcode}.jpg`);
+    if (!existsSync(localPath) && post.image) {
+      try {
+        const resp = await fetch(post.image);
+        if (resp.ok) {
+          const buffer = Buffer.from(await resp.arrayBuffer());
+          writeFileSync(localPath, buffer);
+          downloaded++;
+        }
+      } catch {}
+    }
+    // Replace CDN URL with local path
+    post.image = `/uploads/ig/${shortcode}.jpg`;
+  }
+  if (downloaded > 0) console.log(`  💾 Downloaded ${downloaded} new images to local cache`);
 
   // Write data files
   writeFileSync(join(DATA_DIR, 'ig-feed.json'), JSON.stringify(results.instagram, null, 2));
