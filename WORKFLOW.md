@@ -15,7 +15,7 @@ main ── feature/foo ── PR ──→ staging ── PR ──→ main
 ### 1. Start a feature
 
 ```bash
-./scripts/start-feature.sh "Short description"
+./scripts/engineering-protocol "Short description"
 ```
 
 This creates a branch `feature/short-description` from `main`.
@@ -59,7 +59,7 @@ When staging is ready, open a PR from `staging` → `main`. This should be small
 
 | Command | What it does |
 |---------|-------------|
-| `./scripts/start-feature.sh "name"` | Creates branch, tells you where you are |
+| `./scripts/engineering-protocol "name"` | Creates branch, tells you where you are |
 | `./scripts/finish-feature.sh` | Commits + pushes + opens PR to staging |
 | `./scripts/check-pr-size.sh` | Counts lines changed vs 1,000 limit |
 

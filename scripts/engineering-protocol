@@ -2,11 +2,11 @@
 set -euo pipefail
 
 # ──────────────────────────────────────────────
-# start-feature.sh — Begin a new feature branch
+# engineering-protocol — Begin a new feature branch
 # ──────────────────────────────────────────────
 # Usage:
-#   ./scripts/start-feature.sh "Add surf spot forecast widget"
-#   ./scripts/start-feature.sh   (prompts for name)
+#   ./scripts/engineering-protocol "Add surf spot forecast widget"
+#   ./scripts/engineering-protocol   (prompts for name)
 # ──────────────────────────────────────────────
 
 GREEN='\033[0;32m'

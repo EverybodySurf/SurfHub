@@ -25,7 +25,7 @@ BRANCH=$(git branch --show-current)
 if [[ "$BRANCH" != feature/* ]]; then
   echo -e "${RED}Error: You're on '$BRANCH', not a feature branch.${NC}"
   echo "  Feature branches look like: feature/my-feature"
-  echo "  Start one with: ./scripts/start-feature.sh"
+  echo "  Start one with: ./scripts/engineering-protocol"
   exit 1
 fi
 
