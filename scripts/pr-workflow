@@ -2,13 +2,13 @@
 set -euo pipefail
 
 # ──────────────────────────────────────────────
-# engineering-protocol — Agentic build workflow
+# pr-workflow — Branch → build → PR in one command
 # ──────────────────────────────────────────────
 # Usage:
-#   ./scripts/engineering-protocol start "Feature name"
-#   ./scripts/engineering-protocol finish "Commit message"
-#   ./scripts/engineering-protocol check [--verbose]
-#   ./scripts/engineering-protocol help
+#   ./scripts/pr-workflow start "name"
+#   ./scripts/pr-workflow finish "msg"
+#   ./scripts/pr-workflow check [--verbose]
+#   ./scripts/pr-workflow help
 # ──────────────────────────────────────────────
 
 RED='\033[0;31m'
@@ -30,12 +30,12 @@ show_help() {
   echo "━━━ Engineering Protocol — v1 ━━━"
   echo ""
   echo "  Usage:"
-  echo "    ./scripts/engineering-protocol start \"Feature name\""
-  echo "    ./scripts/engineering-protocol finish \"Commit message\""
-  echo "    ./scripts/engineering-protocol check [--verbose]"
-  echo "    ./scripts/engineering-protocol help"
+  echo "    ./scripts/pr-workflow start \"Feature name\""
+  echo "    ./scripts/pr-workflow finish \"Commit message\""
+  echo "    ./scripts/pr-workflow check [--verbose]"
+  echo "    ./scripts/pr-workflow help"
   echo ""
-  echo "  The full protocol is documented at:"
+  echo "  The Engineering Protocol is documented at:"
   echo "    https://github.com/EverybodySurf/engineering-protocol"
   echo ""
 }
@@ -80,7 +80,7 @@ start_feature() {
   echo "   1. Phase 1: Context — I'll read only the files we need"
   echo "   2. Phase 2: Architecture — policy split from mechanics"
   echo "   3. Build your feature in this branch (< 1,000 lines)"
-  echo "   4. When ready: ./scripts/engineering-protocol finish"
+  echo "   4. When ready: ./scripts/pr-workflow finish"
   echo "   5. Phase 4: Cleanup — extract dupes after PR merges"
   echo ""
   echo "  Current branch: $(git branch --show-current)"
@@ -95,7 +95,7 @@ finish_feature() {
   if [[ "$branch" != feature/* ]]; then
     echo -e "${RED}Error: You're on '$branch', not a feature branch.${NC}"
     echo "  Feature branches look like: feature/my-feature"
-    echo "  Start one with: ./scripts/engineering-protocol start \"name\""
+    echo "  Start one with: ./scripts/pr-workflow start \"name\""
     exit 1
   fi
 
