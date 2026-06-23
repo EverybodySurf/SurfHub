@@ -34,13 +34,13 @@ export function VideoModal({ videoId, title, isShort, onClose }: VideoModalProps
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm"
+      className="fixed inset-0 z-[1300] flex items-center justify-center bg-black/90 backdrop-blur-sm"
       onClick={onClose}
     >
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+        className="absolute top-20 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
         aria-label="Close video"
       >
         <X className="h-6 w-6" />
