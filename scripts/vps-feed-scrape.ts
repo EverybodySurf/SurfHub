@@ -26,9 +26,7 @@ const TAB_DEFS: TabTarget[] = [
   { label: 'IG Global',       type: 'instagram', feed: 'global',   url: 'https://www.instagram.com/explore/search/keyword/?q=%23surfing' },
   { label: 'IG Local',        type: 'instagram', feed: 'local',    url: 'https://www.instagram.com/explore/search/keyword/?q=%23surfingguadeloupe' },
   { label: 'IG FeelGood',     type: 'instagram', feed: 'feelgood', url: 'https://www.instagram.com/explore/search/keyword/?q=%23soulsurfing' },
-  { label: 'X Global',        type: 'twitter',   feed: 'global',   url: 'https://x.com/search?q=surfing&f=tweets' },
-  { label: 'X Local',         type: 'twitter',   feed: 'local',    url: 'https://x.com/search?q=surfing%20Guadeloupe&f=tweets' },
-  { label: 'X FeelGood',      type: 'twitter',   feed: 'feelgood', url: 'https://x.com/search?q=soul%20surfing&f=tweets' },
+  { label: 'X Surfing',       type: 'twitter',   feed: 'all',      url: 'https://x.com/search?q=surfing&f=tweets' },
 ];
 
 async function sleep(ms: number) {
