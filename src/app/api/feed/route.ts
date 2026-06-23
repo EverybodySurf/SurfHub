@@ -332,6 +332,21 @@ export async function GET(request: Request) {
     filteredContent = filteredContent.filter(item => item.feed === feed);
   }
   
+  // Sanitize images — replace video page URLs with proper thumbnails
+  filteredContent = filteredContent.map((item: any) => {
+    const img = item.image || '';
+    // If image is a YouTube video URL (not a thumbnail), derive thumbnail
+    if (img.includes('youtube.com/watch') || img.includes('youtu.be/') || img.includes('youtube.com/embed')) {
+      const vid = img.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})(?:[?&]|$)/)?.[1];
+      if (vid) {
+        item.image = `https://i.ytimg.com/vi/${vid}/mqdefault.jpg`;
+      } else {
+        item.image = ''; // clear bad URL, component will handle
+      }
+    }
+    return item;
+  });
+  
   const hasReal = youtubeItems.length > 0;
   const itemsWithoutTimestamp = filteredContent.filter(item => !item.hasValidTimestamp).length;
   
