@@ -1,10 +1,24 @@
 import { NextResponse } from 'next/server';
 import { scrapeYouTube, scrapeInstagram } from '@/lib/scrapers';
 import { readFile } from 'fs/promises';
+import { existsSync } from 'fs';
 import { join } from 'path';
 import type { PendingItem } from '@/lib/curate/criteria';
 
 const CURATE_PATH = join(process.cwd(), 'data', 'queue.json');
+
+/** Read items from VPS-scraped data files (no browser needed) */
+async function readVpsScrapeFile(filename: string): Promise<any[]> {
+  try {
+    const path = join(process.cwd(), 'data', filename);
+    if (!existsSync(path)) return [];
+    const data = await readFile(path, 'utf-8');
+    const items = JSON.parse(data);
+    return Array.isArray(items) ? items : [];
+  } catch {
+    return [];
+  }
+}
 
 /** Read approved curation items from queue.json */
 async function getApprovedItems(): Promise<PendingItem[]> {
@@ -175,9 +189,6 @@ export async function GET(request: Request) {
   // YouTube scraping
   let youtubeItems: any[] = [];
   
-  // Instagram scraping (browser-based, graceful fallback)
-  let instagramItems: any[] = [];
-  
   if (!useMock) {
     // YouTube - use YouTube Data API v3 (FREE, real timestamps)
     // Feed-specific queries for targeted content — more queries & more results per query
@@ -262,51 +273,59 @@ export async function GET(request: Request) {
     }
   }
   
-  // Instagram scraping (browser-based, runs alongside YouTube)
+  // Instagram — try VPS scraped data first, fall back to browser
+  let instagramItems: any[] = [];
+  
   if (!useMock) {
-    const instagramQueries: Record<string, string> = {
-      feelgood: 'surfingwaves',
-      global: 'surfing',
-      local: 'guadeloupesurf',
-    };
-    
-    const queriesToRun = feed === 'all'
-      ? Object.values(instagramQueries)
-      : [instagramQueries[feed]].filter(Boolean);
-    
-    for (const hashtag of queriesToRun) {
-      try {
-        const result = await scrapeInstagram(hashtag);
-        if (result.success && result.items.length > 0) {
-          console.log(`📸 Instagram "${hashtag}" → ${result.items.length} posts`);
-          const mapped = result.items.map((p: any) => ({
-            id: `ig_${p.id}`,
-            feed: feed !== 'all' ? feed : 'global',
-            size: 'tall', // Instagram always in portrait/shorts format
-            type: p.type || 'photo',
-            title: p.caption?.slice(0, 80) || 'Instagram Post',
-            content: p.caption || '',
-            source: p.source || '@instagram',
-            image: p.image || '',
-            timestamp: p.timestamp,
-            hasValidTimestamp: p.hasValidTimestamp,
-            platform: 'instagram',
-            instagram: true,
-          }));
-          instagramItems.push(...mapped);
-        }
-      } catch (e) {
-        console.log(`📸 Instagram query "${hashtag}" failed:`, e);
-      }
+    // Try VPS-scraped data file first (no browser needed)
+    const vpsItems = await readVpsScrapeFile('ig-feed.json');
+    if (vpsItems.length > 0) {
+      instagramItems = vpsItems.filter((p: any) => feed === 'all' || p.feed === feed);
+      console.log(`📸 VPS data: ${instagramItems.length} Instagram posts for ${feed}`);
     }
     
-    // Deduplicate by image URL
-    const seenImgs = new Set<string>();
-    instagramItems = instagramItems.filter(item => {
-      if (seenImgs.has(item.image)) return false;
-      seenImgs.add(item.image);
-      return true;
-    });
+    // Fall back to browser scraping
+    if (instagramItems.length === 0) {
+      const instagramQueries: Record<string, string> = {
+        feelgood: 'surfingwaves',
+        global: 'surfing',
+        local: 'guadeloupesurf',
+      };
+      const queriesToRun = feed === 'all'
+        ? Object.values(instagramQueries)
+        : [instagramQueries[feed]].filter(Boolean);
+      for (const hashtag of queriesToRun) {
+        try {
+          const result = await scrapeInstagram(hashtag);
+          if (result.success && result.items.length > 0) {
+            console.log(`📸 Browser Instagram "${hashtag}" → ${result.items.length} posts`);
+            instagramItems.push(...result.items.map((p: any) => ({
+              id: `ig_${p.id}`,
+              feed: feed !== 'all' ? feed : 'global',
+              size: 'tall',
+              type: p.type || 'photo',
+              title: p.caption?.slice(0, 80) || 'Instagram Post',
+              content: p.caption || '',
+              source: p.source || '@instagram',
+              image: p.image || '',
+              timestamp: p.timestamp,
+              hasValidTimestamp: p.hasValidTimestamp,
+              platform: 'instagram',
+              instagram: true,
+            })));
+          }
+        } catch (e) {
+          console.log(`📸 Instagram query "${hashtag}" failed:`, e);
+        }
+      }
+      // Deduplicate by image URL
+      const seenImgs = new Set<string>();
+      instagramItems = instagramItems.filter((item: any) => {
+        if (seenImgs.has(item.image)) return false;
+        seenImgs.add(item.image);
+        return true;
+      });
+    }
   }
   
   // Blend curated + YouTube + Instagram, sorted by original publish date
