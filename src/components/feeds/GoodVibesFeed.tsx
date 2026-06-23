@@ -223,7 +223,6 @@ export function GoodVibesFeed() {
               title={item.title || item.content || ''}
               content={item.content || ''}
               image={item.image || ''}
-              feed={(item as any).feed}
               source={(item as any).source}
             />
           ))}
