@@ -1,1 +1,56 @@
-[]
+[
+  {
+    "id": "source-1782235862656",
+    "type": "youtube-channel",
+    "label": "Sterling Spencer",
+    "url": "https://www.youtube.com/@STERLINGSPENCER",
+    "feed": "global",
+    "active": true,
+    "addedAt": "2026-06-23T17:31:02.656Z"
+  },
+  {
+    "id": "source-1782235937728",
+    "type": "youtube-channel",
+    "label": "WSL",
+    "url": "https://www.youtube.com/@wsl",
+    "feed": "global",
+    "active": true,
+    "addedAt": "2026-06-23T17:32:17.728Z"
+  },
+  {
+    "id": "source-1782235990386",
+    "type": "youtube-channel",
+    "label": "Ben Gravy",
+    "url": "https://www.youtube.com/@BenGravyy",
+    "feed": "global",
+    "active": true,
+    "addedAt": "2026-06-23T17:33:10.386Z"
+  },
+  {
+    "id": "source-1782236529572",
+    "type": "youtube-channel",
+    "label": "Vaimiti Teiefitu",
+    "url": "https://www.youtube.com/@vaimititeiefitu",
+    "feed": "global",
+    "active": true,
+    "addedAt": "2026-06-23T17:42:09.572Z"
+  },
+  {
+    "id": "source-1782236613042",
+    "type": "youtube-channel",
+    "label": "Romain Alexis",
+    "url": "https://www.youtube.com/@Romain_Alexis",
+    "feed": "local",
+    "active": true,
+    "addedAt": "2026-06-23T17:43:33.042Z"
+  },
+  {
+    "id": "source-1782236769835",
+    "type": "youtube-channel",
+    "label": "Jordan Oueslati",
+    "url": "https://www.youtube.com/@jordanoueslati",
+    "feed": "local",
+    "active": true,
+    "addedAt": "2026-06-23T17:46:09.835Z"
+  }
+]

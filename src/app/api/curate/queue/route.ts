@@ -53,6 +53,11 @@ export async function POST(request: Request) {
       image: body.image,
       videoUrl: body.videoUrl,
       videoType: body.videoType,
+      originalPublishedAt: body.originalPublishedAt
+        ? body.originalPublishedAt.includes('T')
+          ? body.originalPublishedAt
+          : body.originalPublishedAt + 'T12:00:00.000Z'
+        : undefined,
       autoScore: body.autoScore || 0.5,
       status: 'pending',
       submittedAt: new Date().toISOString(),

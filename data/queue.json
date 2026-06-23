@@ -1,38 +1,5 @@
 {
-  "pending": [
-    {
-      "id": "queue-1782233567591",
-      "source": "instagram",
-      "url": "https://instagram.com/p/test-curate-1",
-      "title": "Empty Lineup at Le Moule",
-      "content": "Just me and the sunrise at Le Moule. Offshore wind, 3ft and glassy. This is why we live here.",
-      "creator": "@gwadasurfer",
-      "location": "Le Moule, Guadeloupe",
-      "feed": "local",
-      "type": "photo",
-      "image": "https://images.pexels.com/photos/1006985/pexels-photo-1006985.jpeg?auto=compress&cs=tinysrgb&w=600",
-      "autoScore": 0.82,
-      "status": "pending",
-      "submittedAt": "2026-06-23T16:52:47.591Z"
-    },
-    {
-      "id": "queue-1782233567645",
-      "source": "youtube",
-      "url": "https://youtube.com/watch?v=test-curate-2",
-      "title": "Soul Surfing in Guadeloupe",
-      "content": "A peaceful morning surf session at La Caravelle. Watch the sunrise paint the water gold.",
-      "creator": "Gwada Surf TV",
-      "location": "Guadeloupe",
-      "feed": "feelgood",
-      "type": "video",
-      "image": "https://images.pexels.com/photos/165992/pexels-photo-165992.jpeg?auto=compress&cs=tinysrgb&w=600",
-      "videoUrl": "https://youtube.com/watch?v=test-curate-2",
-      "videoType": "youtube",
-      "autoScore": 0.88,
-      "status": "pending",
-      "submittedAt": "2026-06-23T16:52:47.645Z"
-    }
-  ],
+  "pending": [],
   "approved": [
     {
       "id": "demo-sunrise",
@@ -90,7 +57,84 @@
       "submittedAt": "2026-06-23T16:27:00.000Z",
       "reviewedAt": "2026-06-23T16:32:00.000Z",
       "reviewedBy": "admin"
+    },
+    {
+      "id": "queue-1782236309425",
+      "source": "youtube",
+      "url": "https://youtu.be/7hWGS_CTTws?si=_G_REde-zx7Qsf_R",
+      "title": " Immersion in Guadeloupe Islands: Surf & Encounters with Vaimiti Teiefitu",
+      "content": "A surf film from the heart of Guadeloupe Islands based on its own people.   Chapters : 0:00 Intro 01:35 Surf with Alix Dulac at Anse-Bertrand 02:17 Meeting Virginie Cabre 03:52 A Surf at Le Moule with Thomas Debierre 06:40 Sunset Surf ar Anse Bertrand with Anna Danielou 07:08 Meeting Cyril Villoing 07:46 A rainy surf in Port-Louis 08:06 Full moon from la pointe de la Grande Vigie 08:15 One last surf in Port-Louis 09:25 Outro 10:05 Credits  Starring Vaimiti Teiefitu With Alix Dulac, Virginie Cabre, Thomas Debierre & Cyril Villoing Directed filmed & edited by Simon Levalois-Bazer Produced by ‪@ilesdeGuadeloupe‬ ‪@GuadeloupeIslands‬",
+      "creator": "@vaimititeiefitu,‎⁨@ilesdeGuadeloupe",
+      "location": "Guadeloupe",
+      "feed": "local",
+      "type": "video",
+      "image": "https://www.youtube.com/watch?v=7hWGS_CTTws",
+      "videoUrl": "https://youtu.be/7hWGS_CTTws?si=_G_REde-zx7Qsf_R",
+      "videoType": "youtube",
+      "autoScore": 0.9500000000000001,
+      "status": "approved",
+      "submittedAt": "2026-06-23T17:38:29.425Z",
+      "reviewedAt": "2026-06-23T17:38:43.471Z",
+      "reviewedBy": "admin"
+    },
+    {
+      "id": "queue-1782237126094",
+      "source": "youtube",
+      "url": "https://youtu.be/WNcMxwtnIBI?si=1zBGRPYwgV9ncfuX",
+      "title": " LANMÈ - Full Movie",
+      "content": "LANMÈ - The Caribbean surf culture in motion | Starring Vaimiti  Traveling across the Atlantic from Tahiti to Guadeloupe, our teamrider Vai discovers an island that feels unexpectedly familiar, where island culture echoes her own. Through stories of heritage, fear, and love for the ocean, the film explores the island’s evolving relationship with the sea. It celebrates a culture in motion—where tradition meets change, and the waves become a space for connection, freedom, and joy.",
+      "creator": "@ProtestMovieChannel",
+      "location": "Guadeloupe",
+      "feed": "local",
+      "type": "video",
+      "image": "https://www.youtube.com/watch?v=WNcMxwtnIBI",
+      "videoUrl": "https://www.youtube.com/watch?v=WNcMxwtnIBI",
+      "videoType": "youtube",
+      "autoScore": 0.65,
+      "status": "approved",
+      "submittedAt": "2026-06-23T17:52:06.094Z",
+      "reviewedAt": "2026-06-23T17:52:11.401Z",
+      "reviewedBy": "admin"
     }
   ],
-  "rejected": []
+  "rejected": [
+    {
+      "id": "queue-1782233567645",
+      "source": "youtube",
+      "url": "https://youtube.com/watch?v=test-curate-2",
+      "title": "Soul Surfing in Guadeloupe",
+      "content": "A peaceful morning surf session at La Caravelle. Watch the sunrise paint the water gold.",
+      "creator": "Gwada Surf TV",
+      "location": "Guadeloupe",
+      "feed": "feelgood",
+      "type": "video",
+      "image": "https://images.pexels.com/photos/165992/pexels-photo-165992.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "videoUrl": "https://youtube.com/watch?v=test-curate-2",
+      "videoType": "youtube",
+      "autoScore": 0.88,
+      "status": "rejected",
+      "submittedAt": "2026-06-23T16:52:47.645Z",
+      "reviewedAt": "2026-06-23T17:28:33.777Z",
+      "reviewedBy": "admin",
+      "rejectionReason": "Not suitable"
+    },
+    {
+      "id": "queue-1782233567591",
+      "source": "instagram",
+      "url": "https://instagram.com/p/test-curate-1",
+      "title": "Empty Lineup at Le Moule",
+      "content": "Just me and the sunrise at Le Moule. Offshore wind, 3ft and glassy. This is why we live here.",
+      "creator": "@gwadasurfer",
+      "location": "Le Moule, Guadeloupe",
+      "feed": "local",
+      "type": "photo",
+      "image": "https://images.pexels.com/photos/1006985/pexels-photo-1006985.jpeg?auto=compress&cs=tinysrgb&w=600",
+      "autoScore": 0.82,
+      "status": "rejected",
+      "submittedAt": "2026-06-23T16:52:47.591Z",
+      "reviewedAt": "2026-06-23T17:28:43.493Z",
+      "reviewedBy": "admin",
+      "rejectionReason": "Not suitable"
+    }
+  ]
 }

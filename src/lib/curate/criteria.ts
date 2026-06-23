@@ -111,7 +111,8 @@ export interface PendingItem {
   videoType?: 'youtube' | 'instagram' | 'tiktok';
   autoScore: number; // 0-1, calculated by scoreContent()
   status: 'pending' | 'approved' | 'rejected';
-  submittedAt: string; // ISO timestamp
+  submittedAt: string; // ISO timestamp (when submitted to queue)
+  originalPublishedAt?: string; // ISO timestamp (when posted on original platform)
   reviewedAt?: string;
   reviewedBy?: string;
   rejectionReason?: string;

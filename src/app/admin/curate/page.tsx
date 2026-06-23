@@ -40,6 +40,7 @@ export default function CuratePage() {
     image: '',
     videoUrl: '',
     videoType: '',
+    originalPublishedAt: '',
   });
   
   // Fetch pending items
@@ -131,6 +132,7 @@ export default function CuratePage() {
           image: formData.image,
           videoUrl: formData.videoUrl || formData.url,
           videoType: videoType,
+          originalPublishedAt: formData.originalPublishedAt || undefined,
           autoScore,
         }),
       });
@@ -148,6 +150,7 @@ export default function CuratePage() {
         image: '',
         videoUrl: '',
         videoType: '',
+        originalPublishedAt: '',
       });
       setShowForm(false);
       await fetchQueue();
@@ -451,6 +454,22 @@ export default function CuratePage() {
                     value={formData.videoUrl}
                     onChange={(e) => setFormData({...formData, videoUrl: e.target.value})}
                     placeholder="Same as URL if video content"
+                    className="w-full px-3 py-2 rounded bg-background border border-border text-foreground"
+                  />
+                </div>
+              </div>
+              
+              {/* Row 5: Original publish date */}
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="text-sm text-muted-foreground mb-1 block">
+                    Original publish date{' '}
+                    <span className="text-xs text-muted-foreground/60">(leave blank for today)</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.originalPublishedAt}
+                    onChange={(e) => setFormData({...formData, originalPublishedAt: e.target.value})}
                     className="w-full px-3 py-2 rounded bg-background border border-border text-foreground"
                   />
                 </div>

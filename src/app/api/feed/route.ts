@@ -38,8 +38,8 @@ function curatedToFeedItem(item: PendingItem) {
     thumbnailFallback: image,
     videoUrl: item.videoUrl,
     videoType: item.videoType || 'youtube',
-    timestamp: item.submittedAt,
-    hasValidTimestamp: true,
+    timestamp: item.originalPublishedAt || item.submittedAt,
+    hasValidTimestamp: !!item.originalPublishedAt,
     platform: item.source,
     curated: true,
     isShort: item.type === 'reel',
@@ -282,7 +282,7 @@ export async function GET(request: Request) {
           const mapped = result.items.map((p: any) => ({
             id: `ig_${p.id}`,
             feed: feed !== 'all' ? feed : 'global',
-            size: p.type === 'reel' ? 'tall' : 'horizontal',
+            size: 'tall', // Instagram always in portrait/shorts format
             type: p.type || 'photo',
             title: p.caption?.slice(0, 80) || 'Instagram Post',
             content: p.caption || '',
