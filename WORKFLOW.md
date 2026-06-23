@@ -15,7 +15,7 @@ main ── feature/foo ── PR ──→ staging ── PR ──→ main
 ### 1. Start a feature
 
 ```bash
-./scripts/start-feature.sh "Short description"
+./scripts/pr-workflow start "Short description"
 ```
 
 This creates a branch `feature/short-description` from `main`.
@@ -27,7 +27,7 @@ Work in your branch. Keep it under 1,000 lines of changed code. If it's bigger, 
 ### 3. Finish it
 
 ```bash
-./scripts/finish-feature.sh
+./scripts/pr-workflow finish "Commit message"
 ```
 
 This commits your work, pushes the branch, and opens a PR targeting `staging` with a pre-filled description and checklist.
@@ -59,9 +59,9 @@ When staging is ready, open a PR from `staging` → `main`. This should be small
 
 | Command | What it does |
 |---------|-------------|
-| `./scripts/start-feature.sh "name"` | Creates branch, tells you where you are |
-| `./scripts/finish-feature.sh` | Commits + pushes + opens PR to staging |
-| `./scripts/check-pr-size.sh` | Counts lines changed vs 1,000 limit |
+| `./scripts/pr-workflow start "name"` | Creates a feature branch from main |
+| `./scripts/pr-workflow finish "msg"` | Commits, pushes, opens PR to staging |
+| `./scripts/pr-workflow check` | Counts lines changed vs 1,000 limit |
 
 ## Exceptions
 
