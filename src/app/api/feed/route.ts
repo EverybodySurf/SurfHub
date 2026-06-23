@@ -197,7 +197,7 @@ export async function GET(request: Request) {
     const youtubeQueries: Record<string, { query: string, feed: string }> = {
       feelgood: { query: 'soul surfing', feed: 'feelgood' },
       global: { query: 'surfing', feed: 'global' },
-      local: { query: 'Guadeloupe surf', feed: 'local' },
+      local: { query: 'surfing guadeloupe', feed: 'local' },
     };
     
     // Determine which queries to run based on feed param
@@ -287,9 +287,9 @@ export async function GET(request: Request) {
     // Fall back to browser scraping
     if (instagramItems.length === 0) {
       const instagramQueries: Record<string, string> = {
-        feelgood: 'surfing',
+        feelgood: 'soulsurfing',
         global: 'surfing',
-        local: 'guadeloupe',
+        local: 'surfingguadeloupe',
       };
       const queriesToRun = feed === 'all'
         ? Object.values(instagramQueries)
