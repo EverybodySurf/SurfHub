@@ -2,53 +2,249 @@
 set -euo pipefail
 
 # ──────────────────────────────────────────────
-# engineering-protocol — Begin a new feature branch
+# engineering-protocol — Agentic build workflow
 # ──────────────────────────────────────────────
 # Usage:
-#   ./scripts/engineering-protocol "Add surf spot forecast widget"
-#   ./scripts/engineering-protocol   (prompts for name)
+#   ./scripts/engineering-protocol start "Feature name"
+#   ./scripts/engineering-protocol finish "Commit message"
+#   ./scripts/engineering-protocol check [--verbose]
+#   ./scripts/engineering-protocol help
 # ──────────────────────────────────────────────
 
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
-# Get feature name
-NAME="${1:-}"
-if [ -z "$NAME" ]; then
-  echo "Feature name (short, e.g. 'Add surf spot forecast'):"
-  read -r NAME
-fi
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_DIR"
 
-# Sanitize: lowercase, replace spaces with hyphens, strip special chars
-BRANCH="feature/$(echo "$NAME" \
-  | tr '[:upper:]' '[:lower:]' \
-  | sed 's/[^a-z0-9 -]//g' \
-  | sed 's/ /-/g' \
-  | sed 's/--*/-/g' \
-  | sed 's/^-//;s/-$//')"
+# ════════════════════════════════════════════════
+# Help
+# ════════════════════════════════════════════════
 
-echo ""
-echo "━━━ Start Feature ━━━"
-echo ""
+show_help() {
+  echo ""
+  echo "━━━ Engineering Protocol — v1 ━━━"
+  echo ""
+  echo "  Usage:"
+  echo "    ./scripts/engineering-protocol start \"Feature name\""
+  echo "    ./scripts/engineering-protocol finish \"Commit message\""
+  echo "    ./scripts/engineering-protocol check [--verbose]"
+  echo "    ./scripts/engineering-protocol help"
+  echo ""
+  echo "  The full protocol is documented at:"
+  echo "    https://github.com/EverybodySurf/engineering-protocol"
+  echo ""
+}
 
-# Make sure we're on main
-git checkout main
-git pull origin main
+# ════════════════════════════════════════════════
+# Commands
+# ════════════════════════════════════════════════
 
-# Create branch
-git checkout -b "$BRANCH"
+start_feature() {
+  local name="${1:-}"
 
-echo ""
-echo -e "${GREEN}✅ Branch created: ${CYAN}$BRANCH${NC}"
-echo -e "${GREEN}⚡ Engineering Protocol activated — full build mode engaged${NC}"
-echo ""
-echo "  Next:"
-echo "   1. Phase 1: Context — I’ll read only the files we need"
-echo "   2. Phase 2: Architecture — policy split from mechanics"
-echo "   3. Build your feature in this branch (< 1,000 lines)"
-echo "   4. When ready: ./scripts/finish-feature.sh"
-echo "   5. Phase 4: Cleanup — extract dupes after PR merges"
-echo ""
-echo "  Current branch: $(git branch --show-current)"
-echo ""
+  if [ -z "$name" ]; then
+    echo "Feature name (short, e.g. 'Add surf spot forecast'):"
+    read -r name
+  fi
+
+  # Sanitize: lowercase, replace spaces with hyphens, strip special chars
+  local branch
+  branch="feature/$(echo "$name" \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed 's/[^a-z0-9 -]//g' \
+    | sed 's/ /-/g' \
+    | sed 's/--*/-/g' \
+    | sed 's/^-//;s/-$//')"
+
+  echo ""
+  echo "━━━ Start Feature ━━━"
+  echo ""
+
+  # Make sure we're on main
+  git checkout main
+  git pull origin main
+
+  # Create branch
+  git checkout -b "$branch"
+
+  echo ""
+  echo -e "${GREEN}✅ Branch created: ${CYAN}$branch${NC}"
+  echo -e "${GREEN}⚡ Engineering Protocol activated — full build mode engaged${NC}"
+  echo ""
+  echo "  Next:"
+  echo "   1. Phase 1: Context — I'll read only the files we need"
+  echo "   2. Phase 2: Architecture — policy split from mechanics"
+  echo "   3. Build your feature in this branch (< 1,000 lines)"
+  echo "   4. When ready: ./scripts/engineering-protocol finish"
+  echo "   5. Phase 4: Cleanup — extract dupes after PR merges"
+  echo ""
+  echo "  Current branch: $(git branch --show-current)"
+  echo ""
+}
+
+finish_feature() {
+  local branch
+  branch=$(git branch --show-current)
+
+  # Validate we're on a feature branch
+  if [[ "$branch" != feature/* ]]; then
+    echo -e "${RED}Error: You're on '$branch', not a feature branch.${NC}"
+    echo "  Feature branches look like: feature/my-feature"
+    echo "  Start one with: ./scripts/engineering-protocol start \"name\""
+    exit 1
+  fi
+
+  echo ""
+  echo "━━━ Finish Feature: $branch ━━━"
+  echo ""
+
+  # Check PR size
+  check_pr_size
+  echo ""
+
+  # Check for uncommitted changes
+  if ! git diff --quiet || ! git diff --cached --quiet; then
+    local msg="${1:-}"
+    if [ -z "$msg" ]; then
+      echo "Commit message (describes what changed, not how):"
+      read -r msg
+    fi
+
+    git add -A
+    git commit -m "$msg"
+    echo -e "${GREEN}✓ Committed${NC}"
+  fi
+
+  # Push
+  echo "Pushing branch..."
+  git push -u origin "$branch"
+  echo -e "${GREEN}✓ Pushed${NC}"
+  echo ""
+
+  # Build PR description from branch name
+  local description
+  description=$(echo "$branch" | sed 's/^feature\///' | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
+
+  # Open PR into staging
+  echo "Opening PR → staging..."
+  gh pr create \
+    --base staging \
+    --head "$branch" \
+    --title "$description" \
+    --body "## What
+
+$description
+
+## Checklist
+
+- [ ] Under 1,000 lines changed
+- [ ] Built and tested locally
+- [ ] No new warnings or errors
+- [ ] CodeRabbit review addressed
+" 2>&1 | tee /tmp/pr-url.txt
+
+  local pr_url
+  pr_url=$(grep -o 'https://github.com/.*/pull/[0-9]*' /tmp/pr-url.txt | head -1)
+
+  echo ""
+  echo -e "${GREEN}━━━ Done! ━━━${NC}"
+  echo ""
+  echo -e "  PR: ${CYAN}$pr_url${NC}"
+  echo "  Branch: $branch"
+  echo ""
+  echo "  Next: wait for CodeRabbit review, push fixes to same branch."
+  echo ""
+}
+
+check_pr_size() {
+  local branch
+  branch=$(git branch --show-current)
+
+  # Determine what to diff against
+  local base
+  if [ "$branch" = "staging" ]; then
+    base="origin/main"
+  elif [[ "$branch" == feature/* ]]; then
+    base="main"
+  else
+    base="origin/main"
+  fi
+
+  # Get stats
+  local add del total files percent limit
+  add=$(git diff "$base" --numstat | awk '{a+=$1} END {print a}')
+  del=$(git diff "$base" --numstat | awk '{d+=$2} END {print d}')
+  add=${add:-0}
+  del=${del:-0}
+  total=$((add + del))
+  files=$(git diff "$base" --name-only | wc -l)
+
+  limit=1000
+  percent=$((total * 100 / limit))
+
+  echo ""
+  echo "━━━ PR Size Check ━━━"
+  echo "  Branch: $branch"
+  echo "  Diffing against: $base"
+  echo ""
+  echo -e "  Lines changed: ${CYAN}$total${NC} (+$add / -$del)"
+  echo -e "  Files touched:  ${CYAN}$files${NC}"
+  echo "  Limit:          $limit"
+
+  echo ""
+  if [ "$total" -le "$limit" ]; then
+    echo -e "  ${GREEN}✅ Under limit by $((limit - total)) lines${NC}"
+  else
+    echo -e "  ${RED}❌ Over limit by $((total - limit)) lines${NC}"
+    echo ""
+    echo "  Suggestions:"
+    echo "    • Split into stacked features"
+    echo "      (merge one PR, rebase next, repeat)"
+    echo "    • Check if generated files are accidentally included"
+    echo "    • Exclude non-essential changes for a later PR"
+  fi
+  echo ""
+
+  if [ "${1:-}" = "--verbose" ]; then
+    echo "━━━ Files ━━━"
+    git diff "$base" --stat
+    echo ""
+  fi
+}
+
+# ════════════════════════════════════════════════
+# Dispatch
+# ════════════════════════════════════════════════
+
+case "${1:-}" in
+  start)
+    shift
+    start_feature "${1:-}"
+    ;;
+  finish)
+    shift
+    finish_feature "${1:-}"
+    ;;
+  check)
+    shift
+    check_pr_size "${1:-}"
+    ;;
+  help|--help|-h)
+    show_help
+    ;;
+  # Legacy: bare name = start (backwards compat)
+  *)
+    if [ $# -eq 0 ]; then
+      # No args at all → show help
+      show_help
+    else
+      # Bare string → treat as feature name to start
+      start_feature "$*"
+    fi
+    ;;
+esac
