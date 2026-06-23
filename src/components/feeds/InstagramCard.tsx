@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import Image from 'next/image';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
@@ -28,6 +27,7 @@ const EMBED_BASE = 'https://www.instagram.com/p';
 export function InstagramCard({ title, content, image, source, postUrl }: InstagramCardProps) {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shortcode = extractShortcode(image, postUrl);
 
@@ -61,16 +61,20 @@ export function InstagramCard({ title, content, image, source, postUrl }: Instag
         onClick={handleClick}
       >
         <div className="relative aspect-[9/16] w-full">
-          <Image
-            src={image}
+          <img
+            src={imgError ? '' : image}
             alt={title || 'Instagram post'}
-            fill
             className={cn(
-              'object-cover transition-all duration-500',
+              'absolute inset-0 w-full h-full object-cover transition-all duration-500',
               hover ? 'scale-110 brightness-75' : 'scale-100'
             )}
-            sizes="(max-width: 768px) 100vw, 33vw"
+            onError={() => setImgError(true)}
           />
+          {imgError && (
+            <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+              <span className="text-white/40 text-sm">📸 Instagram</span>
+            </div>
+          )}
 
           {/* Gradient overlays */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
@@ -140,12 +144,11 @@ export function InstagramCard({ title, content, image, source, postUrl }: Instag
               </>
             ) : (
               <>
-                <Image
+                <img
                   src={image}
                   alt={title || 'Instagram post'}
-                  width={1200}
-                  height={1600}
                   className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                 />
                 <div className="mt-4 text-white/80">
                   <p className="text-sm">{content || title}</p>

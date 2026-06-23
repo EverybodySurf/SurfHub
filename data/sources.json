@@ -52,5 +52,14 @@
     "feed": "local",
     "active": true,
     "addedAt": "2026-06-23T17:46:09.835Z"
+  },
+  {
+    "id": "source-1782245287364",
+    "type": "youtube-channel",
+    "label": "Surfers of Bali",
+    "url": "https://www.youtube.com/@SurfersofBali",
+    "feed": "global",
+    "active": true,
+    "addedAt": "2026-06-23T20:08:07.364Z"
   }
 ]

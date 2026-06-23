@@ -207,7 +207,7 @@ export function GoodVibesFeed() {
   while (si < shorts.length) orderedItems.push(shorts[si++]);
 
   // Non-YouTube items — Instagram gets InstagramCard, others get VibesCard
-  const instagramItems = apiItems.filter(i => (i as any).instagram || i.platform === 'instagram');
+  const instagramItems = apiItems.filter(i => !i.id.startsWith('curated_') && ((i as any).instagram || i.platform === 'instagram'));
   const otherNonYoutube = apiItems
     .filter(i => !isYoutubeItem(i) && !((i as any).instagram || i.platform === 'instagram'))
     .map(mapApiToVibesItem);
