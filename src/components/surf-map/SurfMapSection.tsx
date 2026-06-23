@@ -32,27 +32,11 @@ export default function SurfMapSection() {
   const [selectedAmenity, setSelectedAmenity] = useState<Amenity | null>(null);
   const [sidebarTab, setSidebarTab] = useState<'spots' | 'amenities'>('spots');
   const [menuOpen, setMenuOpen] = useState(false);
-  const [mapVisible, setMapVisible] = useState(true);
   const sectionRef = useRef<HTMLDivElement>(null);
   const sheetStartY = useRef(0);
   const [sheetOffset, setSheetOffset] = useState(0);
 
   useEffect(() => { setMounted(true); }, []);
-
-  // FAB visible while map section is in view. Disappears when
-  // the bottom of the map scrolls past the bottom of the header (64px).
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const check = () => {
-      const rect = el.getBoundingClientRect();
-      // Visible when: top has entered viewport (or is above it) AND bottom hasn't scrolled past header
-      setMapVisible(rect.top < window.innerHeight && rect.bottom > 64);
-    };
-    check();
-    window.addEventListener('scroll', check, { passive: true });
-    return () => window.removeEventListener('scroll', check);
-  }, []);
 
   const spots = guadeloupeSurfSpots;
   const amenities = guadeloupeAmenities;
@@ -116,22 +100,6 @@ export default function SurfMapSection() {
 
   return (
     <div ref={sectionRef} className="h-full w-full flex flex-col bg-background overflow-hidden">
-      {/* FAB — only visible when map section is in viewport */}
-      <div className={`fixed bottom-24 sm:bottom-16 right-4 z-[1050] flex flex-row items-center gap-3 transition-opacity duration-300 ${mapVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        {hasActiveFilters && (
-          <button onClick={clearAllFilters}
-            className="bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg hover:from-pink-600 hover:to-purple-700 transition-all active:scale-95"
-          >
-            Clear filters
-          </button>
-        )}
-        <button onClick={() => setMenuOpen(!menuOpen)}
-          className="h-14 w-14 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-white shadow-xl flex items-center justify-center active:scale-95 transition-all shrink-0"
-        >
-          {menuOpen ? <X className="h-6 w-6" /> : <SlidersHorizontal className="h-6 w-6" />}
-        </button>
-      </div>
-
       {/* Filter Sheet */}
       {menuOpen && <FilterSheet
         searchQuery={searchQuery} onSearchChange={setSearchQuery}
@@ -147,6 +115,21 @@ export default function SurfMapSection() {
       {/* Map + Details */}
       <main className="flex-1 flex overflow-hidden">
         <div className="flex-1 relative">
+          {/* FAB — anchored to map container bottom-right, like zoom buttons */}
+          <div className="absolute bottom-24 sm:bottom-16 right-4 z-[1050] flex flex-row items-center gap-3">
+            {hasActiveFilters && (
+              <button onClick={clearAllFilters}
+                className="bg-gradient-to-br from-pink-500 to-purple-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg hover:from-pink-600 hover:to-purple-700 transition-all active:scale-95"
+              >
+                Clear filters
+              </button>
+            )}
+            <button onClick={() => setMenuOpen(!menuOpen)}
+              className="h-14 w-14 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 hover:from-teal-500 hover:to-cyan-600 text-white shadow-xl flex items-center justify-center active:scale-95 transition-all shrink-0"
+            >
+              {menuOpen ? <X className="h-6 w-6" /> : <SlidersHorizontal className="h-6 w-6" />}
+            </button>
+          </div>
           {mounted ? (
             <UnifiedMap
               spots={spots} amenities={amenities}
