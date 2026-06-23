@@ -328,11 +328,19 @@ export async function GET(request: Request) {
     }
   }
   
-  // Blend curated + YouTube + Instagram, sorted by original publish date
-  let allContent = [...curatedItems, ...youtubeItems, ...instagramItems].sort((a: any, b: any) => {
+  // Twitter/X — from VPS scraped data (no browser needed)
+  let twitterItems: any[] = [];
+  const vpsTwitter = await readVpsScrapeFile('x-feed.json');
+  if (vpsTwitter.length > 0) {
+    twitterItems = vpsTwitter.filter((p: any) => feed === 'all' || p.feed === feed);
+    console.log(`🐦 VPS data: ${twitterItems.length} Tweets for ${feed}`);
+  }
+  
+  // Blend everything sorted by publish date
+  let allContent = [...curatedItems, ...youtubeItems, ...instagramItems, ...twitterItems].sort((a: any, b: any) => {
     return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime();
   });
-  console.log(`📊 Feed: curated=${curatedItems.length}, yt=${youtubeItems.length}, ig=${instagramItems.length}, total=${allContent.length}`);
+  console.log(`📊 Feed: curated=${curatedItems.length}, yt=${youtubeItems.length}, ig=${instagramItems.length}, tw=${twitterItems.length}, total=${allContent.length}`);
   
 
   
@@ -379,6 +387,7 @@ export async function GET(request: Request) {
     counts: {
       youtube: youtubeItems.length,
       instagram: instagramItems.length,
+      twitter: twitterItems.length,
     },
     warnings: warnings.length > 0 ? warnings : undefined,
     timestampStatus: {
