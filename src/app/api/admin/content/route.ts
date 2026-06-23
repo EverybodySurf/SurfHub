@@ -45,15 +45,18 @@ export async function GET() {
 
   // Queue.json curated items
   let curated: any[] = [];
+  let pendingItems: any[] = [];
   try {
     const q = JSON.parse(await readFile(join(DATA_DIR, 'queue.json'), 'utf-8'));
-    curated = [...(q.approved || []), ...(q.pending || [])];
+    curated = [...(q.approved || [])];
+    pendingItems = [...(q.pending || [])];
   } catch {}
 
   const items = [
-    ...curated.map((i: any) => toReviewItem(i, 'curated', hiddenIds)),
-    ...instagram.map((i: any) => toReviewItem(i, 'instagram', hiddenIds)),
-    ...twitter.map((i: any) => toReviewItem(i, 'twitter', hiddenIds)),
+    ...pendingItems.map((i: any) => ({ ...toReviewItem(i, 'curated', hiddenIds), status: 'pending' })),
+    ...curated.map((i: any) => ({ ...toReviewItem(i, 'curated', hiddenIds), status: 'approved' })),
+    ...instagram.map((i: any) => ({ ...toReviewItem(i, 'instagram', hiddenIds), status: 'auto' })),
+    ...twitter.map((i: any) => ({ ...toReviewItem(i, 'twitter', hiddenIds), status: 'auto' })),
   ];
 
   return NextResponse.json({
@@ -61,10 +64,12 @@ export async function GET() {
     count: items.length,
     stats: {
       total: items.length,
+      pending: pendingItems.length,
       visible: items.filter(i => !i.hidden).length,
       hidden: items.filter(i => i.hidden).length,
       bySource: {
         curated: curated.length,
+        pending: pendingItems.length,
         instagram: instagram.length,
         twitter: twitter.length,
       },
@@ -86,6 +91,29 @@ export async function POST(request: Request) {
       }
     } else if (action === 'unhide') {
       hidden = hidden.filter((h: any) => h.id !== itemId);
+    } else if (action === 'approve') {
+      // Approve a pending queue item
+      const q = JSON.parse(await readFile(join(DATA_DIR, 'queue.json'), 'utf-8'));
+      const idx = q.pending.findIndex((i: any) => i.id === itemId);
+      if (idx >= 0) {
+        const item = q.pending.splice(idx, 1)[0];
+        item.status = 'approved';
+        item.reviewedAt = new Date().toISOString();
+        item.reviewedBy = 'admin';
+        q.approved.push(item);
+        await writeFile(join(DATA_DIR, 'queue.json'), JSON.stringify(q, null, 2));
+      }
+    } else if (action === 'reject') {
+      const q = JSON.parse(await readFile(join(DATA_DIR, 'queue.json'), 'utf-8'));
+      const idx = q.pending.findIndex((i: any) => i.id === itemId);
+      if (idx >= 0) {
+        const item = q.pending.splice(idx, 1)[0];
+        item.status = 'rejected';
+        item.reviewedAt = new Date().toISOString();
+        item.reviewedBy = 'admin';
+        q.rejected.push(item);
+        await writeFile(join(DATA_DIR, 'queue.json'), JSON.stringify(q, null, 2));
+      }
     } else if (action === 'move-feed') {
       // Move item between feeds — we store feed overrides
       const overrides = await readJSON(join(DATA_DIR, 'feed-overrides.json'));
