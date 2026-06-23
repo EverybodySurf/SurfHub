@@ -9,7 +9,7 @@ import { scrapeInstagram, scrapeTwitter } from '../src/lib/scrapers';
 import { writeFileSync } from 'fs';
 import { join } from 'path';
 
-const DATA_DIR = join(import.meta.dirname, '..', 'data');
+const DATA_DIR = join(process.cwd(), 'data');
 
 interface ScrapedFeedItem {
   id: string;
