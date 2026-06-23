@@ -359,6 +359,22 @@ export async function GET(request: Request) {
     filteredContent = filteredContent.filter(item => item.feed === feed);
   }
   
+  // Apply hidden items + feed overrides
+  const [hiddenIds, feedOverrides] = await Promise.all([
+    readVpsScrapeFile('hidden-content.json').then(h => new Set(h.map((x: any) => x.id))).catch(() => new Set()),
+    readVpsScrapeFile('feed-overrides.json').catch(() => []),
+  ]);
+  const feedOverrideMap = new Map(feedOverrides.map((o: any) => [o.id, o.feed]));
+  
+  filteredContent = filteredContent
+    .filter((item: any) => !hiddenIds.has(item.id))
+    .map((item: any) => {
+      // Apply feed override if exists
+      const overrideFeed = feedOverrideMap.get(item.id);
+      if (overrideFeed) item.feed = overrideFeed;
+      return item;
+    });
+  
   // Sanitize images — replace video page URLs with proper thumbnails
   filteredContent = filteredContent.map((item: any) => {
     const img = item.image || '';

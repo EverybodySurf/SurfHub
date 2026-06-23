@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Play, Heart, Quote, Sparkles, Loader2 } from 'lucide-react';
 import { useFeed, type FeedItem } from '@/hooks/use-feed';
 import { YouTubePlayer } from '@/components/feeds/YouTubePlayer';
+import { InstagramCard } from '@/components/feeds/InstagramCard';
 import { extractYoutubeId, isYoutubeItem, toYoutubePlayerProps } from '@/lib/youtube-utils';
 
 interface VibesItem {
@@ -205,17 +206,34 @@ export function GoodVibesFeed() {
   // Remaining shorts — packed into rows of 4 naturally by col-span-1
   while (si < shorts.length) orderedItems.push(shorts[si++]);
 
-  // Non-YouTube items (curated photos, stories, Instagram) rendered as VibesCards
-  const nonYoutubeItems = apiItems
-    .filter(i => !isYoutubeItem(i))
+  // Non-YouTube items — Instagram gets InstagramCard, others get VibesCard
+  const instagramItems = apiItems.filter(i => (i as any).instagram || i.platform === 'instagram');
+  const otherNonYoutube = apiItems
+    .filter(i => !isYoutubeItem(i) && !((i as any).instagram || i.platform === 'instagram'))
     .map(mapApiToVibesItem);
 
   return (
     <div className="w-full max-w-full mx-auto">
-      {/* Curated / non-YouTube content grid — newest first */}
-      {nonYoutubeItems.length > 0 && (
+      {/* Instagram grid — image-full cards, newest first */}
+      {instagramItems.length > 0 && (
         <div className="grid grid-cols-4 gap-4 auto-rows-auto mb-8">
-          {nonYoutubeItems.map((item) => (
+          {instagramItems.map((item) => (
+            <InstagramCard
+              key={item.id}
+              title={item.title || item.content || ''}
+              content={item.content || ''}
+              image={item.image || ''}
+              feed={(item as any).feed}
+              source={(item as any).source}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Other curated content grid — newest first */}
+      {otherNonYoutube.length > 0 && (
+        <div className="grid grid-cols-4 gap-4 auto-rows-auto mb-8">
+          {otherNonYoutube.map((item) => (
             <VibesCard key={item.id} item={item} />
           ))}
         </div>
@@ -232,8 +250,8 @@ export function GoodVibesFeed() {
         </div>
       )}
 
-      {/* Fallback when neither YouTube nor curated items exist */}
-      {orderedItems.length === 0 && nonYoutubeItems.length === 0 && (
+      {/* Fallback when neither YouTube, Instagram, nor curated items exist */}
+      {orderedItems.length === 0 && instagramItems.length === 0 && otherNonYoutube.length === 0 && (
         <div className="grid grid-cols-4 gap-4 auto-rows-auto">
           {finalItems.map((item) => (
             <VibesCard key={item.id} item={item} />
