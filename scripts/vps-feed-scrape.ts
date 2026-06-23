@@ -33,8 +33,8 @@ async function main() {
 
   // Scrape Instagram — surf hashtags
   const igHashtags: Record<string, string> = {
-    feelgood: 'surfingwaves',
-    local: 'guadeloupesurf',
+    feelgood: 'surfing',
+    local: 'guadeloupe',
     global: 'surfing',
   };
 
@@ -57,9 +57,9 @@ async function main() {
 
   // Scrape X/Twitter
   const xQueries: Record<string, string> = {
-    feelgood: 'surf waves soul surfing',
+    feelgood: 'surfing',
     local: 'Guadeloupe surf',
-    global: 'big waves surfing',
+    global: 'surfing',
   };
 
   for (const [feed, query] of Object.entries(xQueries)) {

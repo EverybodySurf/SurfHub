@@ -195,8 +195,8 @@ export async function GET(request: Request) {
     const MAX_RESULTS = 50;
     // Single query per feed to stay within YouTube API rate limits
     const youtubeQueries: Record<string, { query: string, feed: string }> = {
-      feelgood: { query: 'soul surfing waves ocean', feed: 'feelgood' },
-      global: { query: 'surfing big waves', feed: 'global' },
+      feelgood: { query: 'soul surfing', feed: 'feelgood' },
+      global: { query: 'surfing', feed: 'global' },
       local: { query: 'Guadeloupe surf', feed: 'local' },
     };
     
@@ -287,9 +287,9 @@ export async function GET(request: Request) {
     // Fall back to browser scraping
     if (instagramItems.length === 0) {
       const instagramQueries: Record<string, string> = {
-        feelgood: 'surfingwaves',
+        feelgood: 'surfing',
         global: 'surfing',
-        local: 'guadeloupesurf',
+        local: 'guadeloupe',
       };
       const queriesToRun = feed === 'all'
         ? Object.values(instagramQueries)
