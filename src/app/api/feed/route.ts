@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { scrapeYouTube } from '@/lib/scrapers';
+import { scrapeYouTube, scrapeInstagram } from '@/lib/scrapers';
 import { readFile } from 'fs/promises';
 import { join } from 'path';
 import type { PendingItem } from '@/lib/curate/criteria';
@@ -46,34 +46,29 @@ function curatedToFeedItem(item: PendingItem) {
   };
 }
 
-// Filter items to only those within last 72 hours (3 days for broader content)
-function filterBy72Hours(items: any[]): { filtered: any[], warnings: string[] } {
+// Filter items to only those within last 90 days
+function filterByAge(items: any[]): { filtered: any[], warnings: string[] } {
   const now = new Date();
-  const hoursAgo = new Date(now.getTime() - 72 * 60 * 60 * 1000); // 72 hours
+  const maxAge = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000); // 90 days
   
   const warnings: string[] = [];
   
   const filtered = items.filter(item => {
-    // Check if item has valid timestamp
-    if (!item.timestamp) {
-      warnings.push(`${item.id || 'unknown'}: no timestamp (included with warning)`);
-      return true; // Include with warning
-    }
+    // No timestamp = include (mock/curated items)
+    if (!item.timestamp) return true;
     
     const publishedAt = new Date(item.timestamp);
     
-    // Check if timestamp is valid
+    // Invalid timestamp = include with warning
     if (isNaN(publishedAt.getTime())) {
       warnings.push(`${item.id}: invalid timestamp "${item.timestamp}" (included with warning)`);
-      return true; // Include with warning
+      return true;
     }
     
-    // Check if within 72 hours
-    if (publishedAt >= hoursAgo) {
-      return true; // Fresh content (within 72hr)
-    }
+    // Outside 90-day window = exclude
+    if (publishedAt < maxAge) return false;
     
-    return false; // Older than 24 hours - exclude
+    return true;
   });
   
   return { filtered, warnings };
@@ -165,18 +160,23 @@ export async function GET(request: Request) {
   if (!forceRefresh) {
     const cached = getCachedFeed(feed);
     if (cached) {
-      // Merge curated items into cached response (prepended, deduped)
+      // Merge curated items into cached response (sorted by recency)
       const curatedIds = new Set(curatedItems.map(i => i.id));
       const nonCurated = cached.items.filter((i: any) => !curatedIds.has(i.id));
-      const merged = [...curatedItems, ...nonCurated];
+      const merged = [...curatedItems, ...nonCurated].sort((a: any, b: any) => {
+        return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime();
+      });
       return NextResponse.json({ ...cached, items: merged, count: merged.length });
     }
   }
   const useMock = searchParams.get('mock') === 'true';
-  const filter24h = searchParams.get('filter24h') !== 'false'; // Default: true
+  const filter24h = searchParams.get('filter24h') !== 'false'; // Default: true (90 days)
   
-  // YouTube scraping only — browser scrapers removed for reliability
+  // YouTube scraping
   let youtubeItems: any[] = [];
+  
+  // Instagram scraping (browser-based, graceful fallback)
+  let instagramItems: any[] = [];
   
   if (!useMock) {
     // YouTube - use YouTube Data API v3 (FREE, real timestamps)
@@ -262,42 +262,67 @@ export async function GET(request: Request) {
     }
   }
   
-  // Mock fallback content (used when scrapers fail — included with platform='youtube'
-  // so the feed components treat them as real video cards)
-  const mockContent = [
-    // HARDCODED YOUTUBE VIDEOS (fallback when API quota exhausted)
-    { id: 'fb_yt_1', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Morning Glass', content: 'Perfect morning surf session', source: 'SurfVision', image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
-    { id: 'fb_yt_2', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Soul Surfing', content: 'Let the ocean heal your soul', source: 'WaveRider', image: 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
-    { id: 'fb_yt_3', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Wave Wisdom', content: 'What the ocean teaches us', source: 'CoastalVibes', image: 'https://images.unsplash.com/photo-1534190760962-754642a4dc2e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
-    { id: 'fb_yt_4', feed: 'feelgood', size: 'tall', type: 'video', title: 'Empty Lineup', content: 'Just you and the swell', source: 'SurfStories', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-    { id: 'fb_yt_5', feed: 'feelgood', size: 'tall', type: 'video', title: 'Golden Hour', content: 'When light hits the water just right', source: 'OceanVibes', image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-    { id: 'fb_yt_6', feed: 'feelgood', size: 'tall', type: 'video', title: 'Drift Days', content: 'Where time slows down', source: 'SurfLife', image: 'https://images.unsplash.com/photo-1559827260-dc66d52b21d4?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-    { id: 'fb_yt_7', feed: 'feelgood', size: 'tall', type: 'video', title: 'Ocean Breath', content: 'Breathe in the salt air', source: 'CoastalCalm', image: 'https://images.unsplash.com/photo-1455729552865-3658e0c677dd?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-    { id: 'fb_yt_8', feed: 'feelgood', size: 'horizontal', type: 'video', title: 'Sunrise Paddle', content: 'Dawn patrol at its finest', source: 'SurfVision', image: 'https://images.unsplash.com/photo-1506905925346-21b49c82b1dd?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
-    { id: 'fb_yt_9', feed: 'global', size: 'horizontal', type: 'video', title: 'Pipeline Masters', content: 'Best rides from the North Shore', source: 'WSL', image: 'https://images.unsplash.com/photo-1659927005364-9ba5f84af96d?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
-    { id: 'fb_yt_10', feed: 'global', size: 'horizontal', type: 'video', title: 'Teahupo\'o 2026', content: 'Heavy barrels from Tahiti', source: 'SurfWorld', image: 'https://images.unsplash.com/photo-1505142468610-359797ca27ae?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
-    { id: 'fb_yt_11', feed: 'global', size: 'tall', type: 'video', title: 'Barrel of the Year', content: 'Riding the wave of a lifetime', source: 'BigWaveTV', image: 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-    { id: 'fb_yt_12', feed: 'global', size: 'tall', type: 'video', title: 'Surfing Mentawai', content: 'Paradise found in Indonesia', source: 'SurfTribe', image: 'https://images.unsplash.com/photo-1534190760962-754642a4dc2e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-    { id: 'fb_yt_13', feed: 'global', size: 'tall', type: 'video', title: 'Jaws at Sunset', content: 'Big wave legends charging', source: 'MegaSwell', image: 'https://images.unsplash.com/photo-1468581264422-2543c2b0e77e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-    { id: 'fb_yt_14', feed: 'local', size: 'horizontal', type: 'video', title: 'Caravelle Session', content: 'Morning waves in Sainte-Anne', source: 'GwadaSurf', image: 'https://images.unsplash.com/photo-1518837695005-2081c6f8a49d?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
-    { id: 'fb_yt_15', feed: 'local', size: 'tall', type: 'video', title: 'Anse Bertrand', content: 'North coast powerhouse', source: 'LocalSurf', image: 'https://images.unsplash.com/photo-1455729552865-3658e0c677dd?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-    { id: 'fb_yt_16', feed: 'local', size: 'tall', type: 'video', title: 'La Chapelle', content: 'Reef break at its best', source: 'GwadaWaves', image: 'https://images.unsplash.com/photo-1500462918059-1e51d7e1e0cc?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-    { id: 'fb_yt_17', feed: 'local', size: 'horizontal', type: 'video', title: 'Pointe des Châteaux', content: 'Epic sunrise session', source: 'GwadaShots', image: 'https://images.unsplash.com/photo-1507525422833-0484b852f5be?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: false },
-    { id: 'fb_yt_18', feed: 'local', size: 'tall', type: 'video', title: 'Port Louis', content: 'Afternoon offshore glass', source: 'GwadaLocals', image: 'https://images.unsplash.com/photo-1534190760962-754642a4dc2e?w=800&auto=format', videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', timestamp: new Date().toISOString(), hasValidTimestamp: false, platform: 'youtube', isShort: true },
-  ];
+  // Instagram scraping (browser-based, runs alongside YouTube)
+  if (!useMock) {
+    const instagramQueries: Record<string, string> = {
+      feelgood: 'surfingwaves',
+      global: 'surfing',
+      local: 'guadeloupesurf',
+    };
+    
+    const queriesToRun = feed === 'all'
+      ? Object.values(instagramQueries)
+      : [instagramQueries[feed]].filter(Boolean);
+    
+    for (const hashtag of queriesToRun) {
+      try {
+        const result = await scrapeInstagram(hashtag);
+        if (result.success && result.items.length > 0) {
+          console.log(`📸 Instagram "${hashtag}" → ${result.items.length} posts`);
+          const mapped = result.items.map((p: any) => ({
+            id: `ig_${p.id}`,
+            feed: feed !== 'all' ? feed : 'global',
+            size: p.type === 'reel' ? 'tall' : 'horizontal',
+            type: p.type || 'photo',
+            title: p.caption?.slice(0, 80) || 'Instagram Post',
+            content: p.caption || '',
+            source: p.source || '@instagram',
+            image: p.image || '',
+            timestamp: p.timestamp,
+            hasValidTimestamp: p.hasValidTimestamp,
+            platform: 'instagram',
+            instagram: true,
+          }));
+          instagramItems.push(...mapped);
+        }
+      } catch (e) {
+        console.log(`📸 Instagram query "${hashtag}" failed:`, e);
+      }
+    }
+    
+    // Deduplicate by image URL
+    const seenImgs = new Set<string>();
+    instagramItems = instagramItems.filter(item => {
+      if (seenImgs.has(item.image)) return false;
+      seenImgs.add(item.image);
+      return true;
+    });
+  }
   
-  // Merge: real scraped + mock fallback
-  // Curated items already loaded above — merge with scraped/mock
+  // Blend curated + YouTube + Instagram, sorted by original publish date
+  let allContent = [...curatedItems, ...youtubeItems, ...instagramItems].sort((a: any, b: any) => {
+    return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime();
+  });
+  console.log(`📊 Feed: curated=${curatedItems.length}, yt=${youtubeItems.length}, ig=${instagramItems.length}, total=${allContent.length}`);
+  
 
-  const allContent = [...curatedItems, ...youtubeItems, ...mockContent];
-  console.log(`📊 Merge: curated=${curatedItems.length}, yt=${youtubeItems.length}, mock=${mockContent.length}, total=${allContent.length}`);
   
-  // Apply 72hr filter
+  // Apply 90-day age filter
   let filteredContent = allContent;
   let warnings: string[] = [];
   
   if (filter24h) {
-    const result = filterBy72Hours(allContent);
+    const result = filterByAge(allContent);
     filteredContent = result.filtered;
     warnings = result.warnings;
   }
@@ -319,7 +344,7 @@ export async function GET(request: Request) {
     count: filteredContent.length,
     counts: {
       youtube: youtubeItems.length,
-      mock: mockContent.length,
+      instagram: instagramItems.length,
     },
     warnings: warnings.length > 0 ? warnings : undefined,
     timestampStatus: {
@@ -327,7 +352,7 @@ export async function GET(request: Request) {
       withoutValidTimestamp: itemsWithoutTimestamp,
     },
     scrapedAt: new Date().toISOString(),
-    note: hasReal ? 'Real scraping + mock fallback' : 'All mock data',
+    note: hasReal ? 'Real YouTube + curated' : 'Curated only',
   };
 
   // Cache the response
