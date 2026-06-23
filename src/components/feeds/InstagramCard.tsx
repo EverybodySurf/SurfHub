@@ -10,6 +10,7 @@ interface InstagramCardProps {
   image: string;
   source?: string;
   postUrl?: string;
+  type?: string;
 }
 
 /** Extract Instagram shortcode from postUrl or id */
@@ -24,7 +25,7 @@ function extractShortcode(image: string, postUrl?: string): string | null {
 
 const EMBED_BASE = 'https://www.instagram.com/p';
 
-export function InstagramCard({ title, content, image, source, postUrl }: InstagramCardProps) {
+export function InstagramCard({ title, content, image, source, postUrl, type }: InstagramCardProps) {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [imgError, setImgError] = useState(false);
@@ -107,8 +108,13 @@ export function InstagramCard({ title, content, image, source, postUrl }: Instag
             </p>
           </div>
 
-          {/* Instagram indicator — bottom right */}
-          <div className="absolute bottom-3 right-3">
+          {/* Instagram + video indicator — bottom right */}
+          <div className="absolute bottom-3 right-3 flex gap-1.5 items-center">
+            {type === 'video' && (
+              <span className="text-[10px] text-white/90 font-medium bg-black/60 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                ▶ Reel
+              </span>
+            )}
             <span className="text-[10px] text-white/50 font-medium">📸</span>
           </div>
         </div>
