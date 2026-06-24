@@ -137,19 +137,31 @@ export function InstagramCard({ title, content, image, source, postUrl, type }: 
           <div className="relative w-full h-full max-w-[600px] flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
             {shortcode ? (
               <>
-                {/* Instagram embed — handles photos AND videos inline */}
-                <div className="w-full flex-1 flex items-center justify-center overflow-hidden">
-                  <div className="w-full h-full max-h-[85vh] flex items-center justify-center">
+                {/* Instagram embed — scaled & clipped to show only media (hide header/buttons) */}
+                <div className="w-full flex items-center justify-center overflow-hidden relative" style={{ height: '85vh' }}>
+                  {/* The iframe is oversized, then scaled down. Chrome gets pushed outside the clip area */}
+                  <div className="absolute" style={{
+                    width: '200%',
+                    height: '200%',
+                    top: '-25%',
+                    left: '-50%',
+                    transform: 'scale(0.55)',
+                    transformOrigin: 'center center',
+                  }}>
                     <iframe
-                      src={`${EMBED_BASE}/${shortcode}/embed/captioned/`}
-                      className="w-full h-full min-h-[70vh] rounded-lg"
+                      src={`${EMBED_BASE}/${shortcode}/embed/`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                        overflow: 'hidden',
+                      }}
                       allow="autoplay; encrypted-media"
                       title={title}
-                      style={{ border: 'none', overflow: 'hidden' }}
                     />
                   </div>
                 </div>
-                {/* Caption overlay — bottom of frame */}
+                {/* Caption overlay — bottom of modal */}
                 <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none">
                   <p className="text-sm text-white leading-tight drop-shadow-md">{content || title}</p>
                 </div>
