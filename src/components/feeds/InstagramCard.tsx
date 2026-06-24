@@ -121,48 +121,39 @@ export function InstagramCard({ title, content, image, source, postUrl, type }: 
         </div>
       </div>
 
-      {/* Modal — no embed for photos (show our own image + caption overlay), embed only for videos */}
+      {/* Modal — full-viewport Instagram embed */}
       {showModal && (
         <div
-          className="fixed inset-0 z-[2000] bg-black/95 flex items-center justify-center"
+          className="fixed inset-0 z-[2000] bg-black/95 flex flex-col items-center justify-center p-2"
           onClick={() => setShowModal(false)}
         >
           <button
             onClick={() => setShowModal(false)}
-            className="absolute top-20 right-4 z-10 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="absolute top-20 right-6 z-10 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
 
-          <div className="relative w-full h-full max-w-[600px] flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
+          <div className="relative w-full h-full flex items-center justify-center" onClick={e => e.stopPropagation()}>
             {shortcode ? (
               <>
-                {/* Instagram embed — scaled & clipped to show only media (hide header/buttons) */}
-                <div className="w-full flex items-center justify-center overflow-hidden relative" style={{ height: '85vh' }}>
-                  {/* The iframe is oversized, then scaled down. Chrome gets pushed outside the clip area */}
-                  <div className="absolute" style={{
-                    width: '200%',
-                    height: '200%',
-                    top: '-25%',
-                    left: '-50%',
-                    transform: 'scale(0.55)',
-                    transformOrigin: 'center center',
-                  }}>
-                    <iframe
-                      src={`${EMBED_BASE}/${shortcode}/embed/`}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                        overflow: 'hidden',
-                      }}
-                      allow="autoplay; encrypted-media"
-                      title={title}
-                    />
-                  </div>
+                {/* Instagram embed — fills viewport height/width, caption overlays on bottom */}
+                <div className="w-full h-full flex items-center justify-center overflow-hidden">
+                  <iframe
+                    src={`${EMBED_BASE}/${shortcode}/embed/`}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      maxWidth: '100vw',
+                      maxHeight: '100vh',
+                      border: 'none',
+                    }}
+                    allow="autoplay; encrypted-media"
+                    title={title}
+                  />
                 </div>
-                {/* Caption overlay — bottom of modal */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none">
+                {/* Caption overlay — slides over the bottom of content */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 pb-12 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none">
                   <p className="text-sm text-white leading-tight drop-shadow-md">{content || title}</p>
                 </div>
               </>
@@ -171,10 +162,10 @@ export function InstagramCard({ title, content, image, source, postUrl, type }: 
                 <img
                   src={image}
                   alt={title || 'Instagram post'}
-                  className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
+                  className="w-auto h-auto max-w-full max-h-[90vh] object-contain rounded-lg"
                   onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                 />
-                <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none">
+                <div className="absolute bottom-0 left-0 right-0 p-6 pb-12 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none">
                   <p className="text-sm text-white leading-tight drop-shadow-md">{content || title}</p>
                 </div>
               </>
