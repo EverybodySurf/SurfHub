@@ -31,7 +31,7 @@ export function InstagramCard({ title, content, image, source, postUrl, type }: 
   const [imgError, setImgError] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shortcode = extractShortcode(image, postUrl);
-  const isVideo = type === 'video';
+
 
   const clearTimer = useCallback(() => {
     if (hoverTimer.current) {
@@ -134,38 +134,36 @@ export function InstagramCard({ title, content, image, source, postUrl, type }: 
             <X className="h-6 w-6" />
           </button>
 
-          <div className="relative w-full h-full max-w-[500px] max-h-screen m-4 flex items-center justify-center" onClick={e => e.stopPropagation()}>
-            {isVideo && shortcode ? (
-
+          <div className="relative w-full h-full max-w-[600px] flex flex-col items-center justify-center" onClick={e => e.stopPropagation()}>
+            {shortcode ? (
               <>
-                <div className="w-full h-full max-h-screen flex items-center justify-center">
-                  <iframe
-                    src={`${EMBED_BASE}/${shortcode}/embed/`}
-                    className="w-full h-full max-h-screen rounded-lg"
-                    allow="autoplay; encrypted-media"
-                    title={title}
-                  />
+                {/* Instagram embed — handles photos AND videos inline */}
+                <div className="w-full flex-1 flex items-center justify-center overflow-hidden">
+                  <div className="w-full h-full max-h-[85vh] flex items-center justify-center">
+                    <iframe
+                      src={`${EMBED_BASE}/${shortcode}/embed/captioned/`}
+                      className="w-full h-full min-h-[70vh] rounded-lg"
+                      allow="autoplay; encrypted-media"
+                      title={title}
+                      style={{ border: 'none', overflow: 'hidden' }}
+                    />
+                  </div>
                 </div>
                 {/* Caption overlay — bottom of frame */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none">
-                  <p className="text-sm text-white leading-tight">{content || title}</p>
+                <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none">
+                  <p className="text-sm text-white leading-tight drop-shadow-md">{content || title}</p>
                 </div>
               </>
             ) : (
-
               <>
                 <img
                   src={image}
                   alt={title || 'Instagram post'}
-                  className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
-                  onError={(e) => {
-                    const el = e.target as HTMLElement;
-                    el.style.display = 'none';
-                  }}
+                  className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
+                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
                 />
-                {/* Caption overlay — fades in over the image */}
-                <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none">
-                  <p className="text-sm text-white leading-tight drop-shadow-sm">{content || title}</p>
+                <div className="absolute bottom-0 left-0 right-0 p-6 pb-10 bg-gradient-to-t from-black/90 via-black/50 to-transparent pointer-events-none">
+                  <p className="text-sm text-white leading-tight drop-shadow-md">{content || title}</p>
                 </div>
               </>
             )}
