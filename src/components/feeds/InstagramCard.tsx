@@ -134,16 +134,18 @@ export function InstagramCard({ title, content, image, source, postUrl, type }: 
             <X className="h-6 w-6" />
           </button>
 
-          <div className="relative w-screen h-screen" onClick={e => e.stopPropagation()}>
+          <div className="flex flex-col items-center justify-center w-screen h-screen" onClick={e => e.stopPropagation()}>
             {shortcode ? (
               <>
-                <iframe
-                  src={`${EMBED_BASE}/${shortcode}/embed/`}
-                  className="absolute inset-0 w-full h-full"
-                  style={{ border: 'none' }}
-                  allow="autoplay; encrypted-media"
-                  title={title}
-                />
+                <div className="w-full max-w-[500px] h-screen flex items-center justify-center">
+                  <iframe
+                    src={`${EMBED_BASE}/${shortcode}/embed/`}
+                    className="w-full h-full"
+                    style={{ border: 'none' }}
+                    allow="autoplay; encrypted-media"
+                    title={title}
+                  />
+                </div>
                 <div className="absolute bottom-0 left-0 right-0 p-6 pb-14 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none">
                   <p className="text-sm text-white leading-tight drop-shadow-md">{content || title}</p>
                 </div>
