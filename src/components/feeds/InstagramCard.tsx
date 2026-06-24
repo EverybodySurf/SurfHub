@@ -28,6 +28,7 @@ const EMBED_BASE = 'https://www.instagram.com/p';
 export function InstagramCard({ title, content, image, source, postUrl, type }: InstagramCardProps) {
   const [hover, setHover] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [fullScreen, setFullScreen] = useState(false);
   const [imgError, setImgError] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shortcode = extractShortcode(image, postUrl);
@@ -127,17 +128,36 @@ export function InstagramCard({ title, content, image, source, postUrl, type }: 
           className="fixed inset-0 z-[2000] bg-black"
           onClick={() => setShowModal(false)}
         >
-          <button
-            onClick={() => setShowModal(false)}
-            className="absolute top-6 right-6 z-10 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-          >
-            <X className="h-6 w-6" />
-          </button>
+          <div className="absolute top-6 right-6 z-10 flex gap-2">
+            <button
+              onClick={() => setFullScreen(!fullScreen)}
+              className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              title={fullScreen ? 'Exit full screen' : 'Full screen'}
+            >
+              <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                {fullScreen ? (
+                  <>
+                    <path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" />
+                  </>
+                ) : (
+                  <>
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                  </>
+                )}
+              </svg>
+            </button>
+            <button
+              onClick={() => setShowModal(false)}
+              className="p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
 
           <div className="flex flex-col items-center justify-center w-screen h-screen" onClick={e => e.stopPropagation()}>
             {shortcode ? (
               <>
-                <div className="w-full max-w-[500px] h-screen flex items-center justify-center">
+                <div className={`w-full ${fullScreen ? 'h-screen' : 'max-w-[500px] h-screen'} flex items-center justify-center`}>
                   <iframe
                     src={`${EMBED_BASE}/${shortcode}/embed/`}
                     className="w-full h-full"
