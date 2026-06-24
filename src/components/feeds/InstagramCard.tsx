@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { X } from 'lucide-react';
 
@@ -31,6 +31,7 @@ export function InstagramCard({ title, content, image, source, postUrl, type }: 
   const [imgError, setImgError] = useState(false);
   const hoverTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shortcode = extractShortcode(image, postUrl);
+  const isVideo = type === 'video';
 
   const clearTimer = useCallback(() => {
     if (hoverTimer.current) {
@@ -120,44 +121,51 @@ export function InstagramCard({ title, content, image, source, postUrl, type }: 
         </div>
       </div>
 
-      {/* Modal — embed Instagram post if we have shortcode */}
+      {/* Modal — no embed for photos (show our own image + caption overlay), embed only for videos */}
       {showModal && (
         <div
-          className="fixed inset-0 z-[2000] bg-black/90 backdrop-blur-lg flex items-center justify-center"
+          className="fixed inset-0 z-[2000] bg-black/95 flex items-center justify-center"
           onClick={() => setShowModal(false)}
         >
           <button
             onClick={() => setShowModal(false)}
-            className="absolute top-20 right-4 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="absolute top-20 right-4 z-10 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
           >
             <X className="h-6 w-6" />
           </button>
 
-          <div className="relative w-full max-w-[500px] max-h-[90vh] m-8" onClick={e => e.stopPropagation()}>
-            {shortcode ? (
+          <div className="relative w-full h-full max-w-[500px] max-h-screen m-4 flex items-center justify-center" onClick={e => e.stopPropagation()}>
+            {isVideo && shortcode ? (
+
               <>
-                <div className="aspect-[9/16] max-h-[80vh]">
+                <div className="w-full h-full max-h-screen flex items-center justify-center">
                   <iframe
                     src={`${EMBED_BASE}/${shortcode}/embed/`}
-                    className="w-full h-full rounded-lg"
+                    className="w-full h-full max-h-screen rounded-lg"
                     allow="autoplay; encrypted-media"
                     title={title}
                   />
                 </div>
-                <div className="mt-3 text-white/70">
-                  <p className="text-sm">{content || title}</p>
+                {/* Caption overlay — bottom of frame */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none">
+                  <p className="text-sm text-white leading-tight">{content || title}</p>
                 </div>
               </>
             ) : (
+
               <>
                 <img
                   src={image}
                   alt={title || 'Instagram post'}
-                  className="w-full h-auto max-h-[85vh] object-contain rounded-lg"
-                  onError={(e) => { (e.target as HTMLElement).style.display = 'none'; }}
+                  className="w-full h-auto max-h-[90vh] object-contain rounded-lg"
+                  onError={(e) => {
+                    const el = e.target as HTMLElement;
+                    el.style.display = 'none';
+                  }}
                 />
-                <div className="mt-4 text-white/80">
-                  <p className="text-sm">{content || title}</p>
+                {/* Caption overlay — fades in over the image */}
+                <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none">
+                  <p className="text-sm text-white leading-tight drop-shadow-sm">{content || title}</p>
                 </div>
               </>
             )}
