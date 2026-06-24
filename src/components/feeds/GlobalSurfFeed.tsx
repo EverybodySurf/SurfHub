@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Globe, Trophy, Plane, Newspaper, Waves } from 'lucide-react';
 import { useFeed, type FeedItem } from '@/hooks/use-feed';
 import { YouTubePlayer } from '@/components/feeds/YouTubePlayer';
+import { InstagramCard } from '@/components/feeds/InstagramCard';
 import { isYoutubeItem, toYoutubePlayerProps } from '@/lib/youtube-utils';
 
 interface GlobalItem {
@@ -211,8 +212,29 @@ export function GlobalSurfFeed() {
   // Remaining shorts — packed into rows of 4 naturally by col-span-1
   while (si < shorts.length) orderedItems.push(shorts[si++]);
 
+  // Instagram items
+  const instagramItems = apiItems.filter(i => !i.id.startsWith('curated_') && (i as any).platform === 'instagram');
+
   return (
     <div className="w-full max-w-full mx-auto">
+      {/* Instagram grid */}
+      {instagramItems.length > 0 && (
+        <div className="grid grid-cols-4 gap-4 auto-rows-auto mb-8">
+          {instagramItems.map((item) => (
+            <InstagramCard
+              key={item.id}
+              title={item.title || item.content || ''}
+              content={item.content || ''}
+              image={item.image || ''}
+              source={(item as any).source}
+              postUrl={(item as any).postUrl}
+              type={(item as any).type}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* YouTube grid */}
       <div className="grid grid-cols-4 gap-4 auto-rows-auto">
         {orderedItems.map((item) => {
           const props = toYoutubePlayerProps(item);

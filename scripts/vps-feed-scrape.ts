@@ -100,20 +100,35 @@ async function main() {
 
         console.log(`  📸 ${posts.length} posts found`);
         if (posts.length > 0) {
-          results.instagram.push(...posts.map((p: any) => ({
-            id: `ig_${p.id}`,
-            title: p.caption?.slice(0, 80) || 'Instagram post',
-            content: p.caption || '',
-            source: '@instagram',
-            image: p.image || '',
-            postUrl: p.postUrl || '',
-            timestamp: scrapedAt,
-            hasValidTimestamp: false,
-            platform: 'instagram',
-            feed: def.feed,
-            size: 'tall',
-            type: p.id?.startsWith('reel_') ? 'video' : 'photo',
-          })));
+          const mapped = await Promise.all(posts.map(async (p: any) => {
+            // Try to get high-res image via Instagram oEmbed
+            let highResImage = p.image || '';
+            const postUrl = p.postUrl || '';
+            if (postUrl) {
+              try {
+                const oembed = await fetch(`https://api.instagram.com/oembed?url=${encodeURIComponent(postUrl)}`);
+                if (oembed.ok) {
+                  const data = await oembed.json();
+                  if (data.thumbnail_url) highResImage = data.thumbnail_url;
+                }
+              } catch {}
+            }
+            return {
+              id: `ig_${p.id}`,
+              title: p.caption?.slice(0, 80) || 'Instagram post',
+              content: p.caption || '',
+              source: '@instagram',
+              image: highResImage,
+              postUrl,
+              timestamp: scrapedAt,
+              hasValidTimestamp: false,
+              platform: 'instagram',
+              feed: def.feed,
+              size: 'tall',
+              type: p.id?.startsWith('reel_') ? 'video' : 'photo',
+            };
+          }));
+          results.instagram.push(...mapped);
         }
       } catch (e: any) {
         console.log(`  ⚠️ Instagram scrape failed: ${e.message}`);
