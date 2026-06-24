@@ -2,9 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
+import { upsertProfile } from '@/services/profiles'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Avatar from './avatar'
 
@@ -26,12 +34,14 @@ export default function AccountForm({ mode, onSuccess }: AccountFormProps) {
     website: "",
     about: "",
     avatar_url: "",
+    home_break: "",
+    surf_level: "",
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState('')
 
-  // Fetch user and profile DATA for edit mode!
+  // Fetch user and profile data for edit mode
   useEffect(() => {
     if (mode === "edit") {
       (async () => {
@@ -45,10 +55,10 @@ export default function AccountForm({ mode, onSuccess }: AccountFormProps) {
             full_name: user.user_metadata?.full_name || "",
             username: user.user_metadata?.username || "",
           }))
-          // Fetch extended profile
+          // Fetch extended profile from Supabase
           const { data } = await supabase
             .from('profiles')
-            .select('website, avatar_url, about')
+            .select('website, avatar_url, about, home_break, surf_level')
             .eq('id', user.id)
             .single()
           if (data) {
@@ -57,6 +67,8 @@ export default function AccountForm({ mode, onSuccess }: AccountFormProps) {
               website: data.website || "",
               avatar_url: data.avatar_url || "",
               about: data.about || "",
+              home_break: data.home_break || "",
+              surf_level: data.surf_level || "",
             }))
           }
         }
@@ -64,31 +76,19 @@ export default function AccountForm({ mode, onSuccess }: AccountFormProps) {
       })()
     }
   }, [mode, supabase])
-  
-  //Handle input changes
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  // ..."a comment" :P...i'll start using more  comments. feels clean,spacious, and organized.
-  
-  
-  // Validation
   const validate = () => {
     if (!form.email) return "Email is required."
-    if (!form.full_name) return "name is required, but any name works."
+    if (!form.full_name) return "Name is required."
     if (!form.username) return "Username is required."
     if (mode === "signup" && !form.password) return "Password is required."
-    // Add more custom validation here (e.g., username format)
     return null
   }
 
-  //...creating is fresh.
-
-  //...lets submit after validation...
-  
-  // Submit handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
@@ -99,11 +99,10 @@ export default function AccountForm({ mode, onSuccess }: AccountFormProps) {
       setError(validationError)
       return
     }
-    
+
     setLoading(true)
     try {
       if (mode === "signup") {
-        // signup logic
         const { data, error } = await supabase.auth.signUp({
           email: form.email,
           password: form.password,
@@ -114,11 +113,7 @@ export default function AccountForm({ mode, onSuccess }: AccountFormProps) {
             },
           },
         })
-        if (error) {
-          setError(error.message)
-          return
-        }
-        // Insert extended profile
+        if (error) { setError(error.message); return }
         const user = data.user
         if (user) {
           const { error: profileError } = await supabase.from('profiles').insert({
@@ -126,151 +121,173 @@ export default function AccountForm({ mode, onSuccess }: AccountFormProps) {
             website: safe(form.website),
             avatar_url: safe(form.avatar_url),
             about: safe(form.about),
+            home_break: safe(form.home_break),
+            surf_level: safe(form.surf_level) as any,
             updated_at: new Date().toISOString(),
           })
-          if (profileError) {
-            setError(profileError.message)
-            return
-          }
+          if (profileError) { setError(profileError.message); return }
           if (onSuccess) onSuccess()
         }
       } else {
-        // Edit mode: update auth and profile
+        // Edit mode: update auth metadata + profile
         const { error: userError } = await supabase.auth.updateUser({
-          data: {
-            full_name: form.full_name,
-            username: form.username,
-          },
+          data: { full_name: form.full_name, username: form.username },
         })
-        const { error: profileError } = await supabase.from('profiles').upsert({
-          id: user?.id,
+        if (userError) { setError(userError.message); return }
+
+        const { error: profileError } = await upsertProfile(user?.id, {
           website: safe(form.website),
           avatar_url: safe(form.avatar_url),
           about: safe(form.about),
-          updated_at: new Date().toISOString(),
+          home_break: safe(form.home_break),
+          surf_level: safe(form.surf_level) as any,
         })
-        if (userError || profileError) {
-          setError(userError?.message || profileError?.message || 'Unknown error occurred')
-          return
-        }
+        if (profileError) { setError(profileError); return }
         setSuccess('Profile updated!')
         if (onSuccess) onSuccess()
       }
-    } catch (err) {
+    } catch {
       setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
     }
   }
 
-  // avatar upload handler/logic
   const handleAvatarUpload = (url: string) => {
-    setForm(f => ({ ...f, avatar_url: url}))
-    if (mode === "edit") {
-      // Immediately update the profile in the database
+    setForm(f => ({ ...f, avatar_url: url }))
+    if (mode === "edit" && user?.id) {
       supabase.from('profiles').upsert({
-        id: user?.id,
+        id: user.id,
         avatar_url: url,
         updated_at: new Date().toISOString(),
       })
     }
   }
 
-
   return (
-      <div className="flex justify-center items-center min-h-[80vh]">
-        <Card className="w-full max-w-xl">
-          <CardHeader>
-            <CardTitle className="text-2xl">{mode === "signup" ? "Sign Up" : "My Account"}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              {mode === "edit" && (
-                <div className="flex flex-col items-center gap-2">
-                  <Avatar
-                    uid={user?.id ?? null}
-                    url={form.avatar_url}
-                    size={100}
-                    onUpload={handleAvatarUpload}
-                  />
-                </div>
-            )}  
+    <div className="flex justify-center items-center min-h-[80vh]">
+      <Card className="w-full max-w-xl">
+        <CardHeader>
+          <CardTitle className="text-2xl">{mode === "signup" ? "Sign Up" : "My Account"}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {mode === "edit" && (
+              <div className="flex flex-col items-center gap-2">
+                <Avatar
+                  uid={user?.id ?? null}
+                  url={form.avatar_url}
+                  size={100}
+                  onUpload={handleAvatarUpload}
+                />
+              </div>
+            )}
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input 
+              <Input
                 id="email"
-                type="email" 
-                value={form.email} 
+                type="email"
+                value={form.email}
                 onChange={handleChange}
-                autoComplete="email" 
+                autoComplete="email"
                 required
                 disabled={mode === "edit"}
               />
             </div>
             <div>
               <Label htmlFor="full_name">Name</Label>
-              <Input 
+              <Input
                 id="full_name"
-                name="full_name" 
-                value={form.full_name} 
-                onChange={handleChange} 
-                autoComplete="name" 
-                required 
+                name="full_name"
+                value={form.full_name}
+                onChange={handleChange}
+                autoComplete="name"
+                required
               />
             </div>
             <div>
               <Label htmlFor="username">Username</Label>
-              <Input 
+              <Input
                 id="username"
-                name="username" 
-                value={form.username} 
-                onChange={handleChange} 
-                autoComplete="username" 
+                name="username"
+                value={form.username}
+                onChange={handleChange}
+                autoComplete="username"
                 required
               />
             </div>
             {mode === "signup" && (
               <div>
                 <Label htmlFor="password">Password</Label>
-                <Input 
+                <Input
                   id="password"
-                  name="password" 
+                  name="password"
                   type="password"
-                  value={form.password} 
-                  onChange={handleChange} 
+                  value={form.password}
+                  onChange={handleChange}
                   autoComplete="new-password"
-                  required 
+                  required
                 />
               </div>
-            )}  
+            )}
             {mode === "edit" && (
               <>
                 <div>
                   <Label htmlFor="about">About Me</Label>
-                  <Input 
+                  <Input
                     id="about"
-                    name="about" 
-                    value={form.about} 
-                    onChange={handleChange} 
-                    autoComplete="lay the deets"
+                    name="about"
+                    value={form.about}
+                    onChange={handleChange}
+                    autoComplete="off"
                   />
                 </div>
                 <div>
                   <Label htmlFor="website">Website</Label>
-                  <Input 
-                    id="website" 
+                  <Input
+                    id="website"
                     name="website"
-                    value={form.website} 
-                    onChange={handleChange} 
-                    autoComplete="url" 
+                    value={form.website}
+                    onChange={handleChange}
+                    autoComplete="url"
                   />
+                </div>
+                <div>
+                  <Label htmlFor="home_break">Home Break</Label>
+                  <Input
+                    id="home_break"
+                    name="home_break"
+                    value={form.home_break}
+                    onChange={handleChange}
+                    placeholder="e.g. La Gravière, Guadeloupe"
+                    autoComplete="off"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="surf_level">Surf Level</Label>
+                  <Select
+                    value={form.surf_level}
+                    onValueChange={(val) => setForm(f => ({ ...f, surf_level: val }))}
+                  >
+                    <SelectTrigger id="surf_level">
+                      <SelectValue placeholder="Select your level" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="beginner">Beginner</SelectItem>
+                      <SelectItem value="intermediate">Intermediate</SelectItem>
+                      <SelectItem value="advanced">Advanced</SelectItem>
+                      <SelectItem value="pro">Pro</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </>
             )}
             {error && <div className="text-red-500 text-center">{error}</div>}
             {success && <div className="text-foreground text-center">{success}</div>}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? (mode === "signup" ? "Signing Up..." : "Saving...") : (mode === "signup" ? "Sign Up" : "Save Changes")}
+              {loading
+                ? (mode === "signup" ? "Signing Up..." : "Saving...")
+                : (mode === "signup" ? "Sign Up" : "Save Changes")}
             </Button>
           </form>
         </CardContent>
